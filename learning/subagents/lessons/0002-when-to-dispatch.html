@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>第 2 课 · 什么时候该派子 agent</title>
+<style>
+  :root { --ink:#1a1a1a; --muted:#6b6b6b; --accent:#b8860b; --bg:#fdfcf8; --rule:#e5e2d8; }
+  * { box-sizing:border-box; }
+  body { font-family:Georgia,"Songti SC","Noto Serif SC",serif; background:var(--bg); color:var(--ink); line-height:1.7; margin:0; padding:2rem 1.25rem 5rem; }
+  .wrap { max-width:680px; margin:0 auto; }
+  .meta { font-family:-apple-system,"PingFang SC",sans-serif; font-size:0.8rem; color:var(--muted); letter-spacing:0.05em; text-transform:uppercase; }
+  h1 { font-size:1.9rem; line-height:1.25; margin:0.4rem 0 1.4rem; }
+  h2 { font-size:1.15rem; margin:2rem 0 0.5rem; font-family:-apple-system,"PingFang SC",sans-serif; }
+  p { margin:0.6rem 0; }
+  .lead { font-size:1.08rem; }
+  code { font-family:"SF Mono",Consolas,monospace; background:#f0ede2; padding:0.1em 0.35em; border-radius:3px; font-size:0.9em; }
+  strong { color:#000; }
+  ul { margin:0.4rem 0; padding-left:1.3rem; }
+  li { margin:0.35rem 0; }
+  .sig { border:1px solid var(--rule); border-radius:6px; padding:0.9rem 1.1rem; margin:1rem 0; background:#fff; }
+  .sig h3 { font-size:0.95rem; margin:0 0 0.4rem; font-family:-apple-system,"PingFang SC",sans-serif; }
+  .sig.good h3 { color:#3a6a3a; }
+  .sig.bad h3 { color:#9a3a3a; }
+  .case { border-left:3px solid var(--accent); padding:0.4rem 0 0.4rem 1.2rem; margin:1.4rem 0; background:#fff; border-radius:0 6px 6px 0; }
+  .case .tag { font-family:-apple-system,"PingFang SC",sans-serif; font-size:0.78rem; color:var(--muted); letter-spacing:0.05em; text-transform:uppercase; }
+  .checks { display:grid; grid-template-columns:1fr 1fr; gap:0.3rem 1.2rem; margin:0.6rem 0; font-size:0.94rem; }
+  .checks div { font-family:-apple-system,"PingFang SC",sans-serif; }
+  .y { color:#3a6a3a; } .n { color:#9a3a3a; }
+  .insight { background:#fff8e8; border:1px solid #ecd9a0; border-radius:6px; padding:0.9rem 1.1rem; margin:1.4rem 0; font-size:0.98rem; }
+  .insight strong { color:#8a6a00; }
+  .quiz { border-left:3px solid var(--accent); padding:0.3rem 0 0.3rem 1.2rem; margin:1.6rem 0; }
+  .quiz q { display:block; font-weight:bold; font-family:-apple-system,"PingFang SC",sans-serif; font-style:normal; }
+  .quiz .sc { font-size:0.88rem; color:var(--muted); margin:0.2rem 0 0.5rem; font-family:-apple-system,"PingFang SC",sans-serif; }
+  .opts { display:flex; gap:0.6rem; margin:0.5rem 0; flex-wrap:wrap; }
+  .opts button { font-family:-apple-system,"PingFang SC",sans-serif; font-size:0.95rem; padding:0.4rem 1.2rem; border:1px solid var(--rule); background:#fff; border-radius:999px; cursor:pointer; min-width:3.5rem; }
+  .opts button:hover { border-color:var(--accent); }
+  .opts button.right { background:#e7f0e0; border-color:#3a6a3a; color:#2a5a2a; }
+  .opts button.wrong { background:#f4e0e0; border-color:#9a3a3a; color:#7a2a2a; }
+  .fb { font-size:0.92rem; color:var(--ink); margin-top:0.4rem; min-height:1.2em; opacity:0; transition:opacity 0.2s; }
+  .fb.show { opacity:1; }
+  .ta { width:100%; min-height:64px; font-family:Georgia,serif; font-size:0.98rem; padding:0.6rem; border:1px solid var(--rule); border-radius:6px; resize:vertical; background:#fff; margin:0.3rem 0; }
+  .box { background:#fff; border:1px solid var(--rule); border-radius:6px; padding:0.9rem 1.1rem; margin:1.4rem 0; font-size:0.94rem; }
+  .box h3 { margin:0 0 0.4rem; font-size:0.82rem; font-family:-apple-system,"PingFang SC",sans-serif; color:var(--muted); letter-spacing:0.05em; text-transform:uppercase; }
+  a { color:var(--accent); }
+  .nav { margin-top:2.5rem; padding-top:1.2rem; border-top:1px solid var(--rule); font-size:0.9rem; font-family:-apple-system,"PingFang SC",sans-serif; color:var(--muted); }
+  @media (max-width:540px){ .checks{grid-template-columns:1fr;} }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="meta">第 2 课 · 子 agent 系列 · 0002</div>
+  <h1>什么时候该派子 agent</h1>
+
+  <p class="lead">上一课你给了一个真实场景——"读两个 PDF、总结内容并讲解"，我说它适合派。这节课讲清<strong>为什么</strong>：一套判断框架，让你以后自己能拍板。</p>
+
+  <h2>适合派的 5 个信号</h2>
+  <div class="sig good">
+    <h3>命中越多，越该派</h3>
+    <ul>
+      <li><strong>自包含</strong>——能给一份完整简报，不必回看主会话的历史</li>
+      <li><strong>耗上下文</strong>——要读大量文件 / 搜索，结果会塞满主上下文</li>
+      <li><strong>独立</strong>——和主会话正在做的事不紧耦合</li>
+      <li><strong>要结论</strong>——你要的是答案 / 总结，不是过程占用你的注意力</li>
+      <li><strong>可并行</strong>——多个这样的任务能同时跑（第 5 课展开）</li>
+    </ul>
+  </div>
+
+  <h2>不适合派的 4 个信号</h2>
+  <div class="sig bad">
+    <h3>命中任意一条，就要犹豫</h3>
+    <ul>
+      <li><strong>紧耦合</strong>——需要主会话实时状态、频繁来回交互</li>
+      <li><strong>需看全局</strong>——得理解整个系统才能动手</li>
+      <li><strong>太小</strong>——开销大于收益（改个拼写、查一个值）</li>
+      <li><strong>需你亲自判断</strong>——核心决策不该外包</li>
+    </ul>
+  </div>
+
+  <h2>案例：你的"读 PDF"场景</h2>
+  <div class="case">
+    <div class="tag">真实场景 · 逐条对照</div>
+    <p>"给 CC 两个 PDF，让它读完总结内容并讲解。"</p>
+    <div class="checks">
+      <div><span class="y">✓</span> 自包含：读文档+总结，简报能写全</div>
+      <div><span class="y">✓</span> 耗上下文：PDF 全文占大量上下文</div>
+      <div><span class="y">✓</span> 独立：和其他事无关</div>
+      <div><span class="y">✓</span> 要结论：要的是总结，不是过程</div>
+      <div><span class="y">✓</span> 可并行：多篇文档可分给多个 agent</div>
+    </div>
+    <p style="margin-top:0.6rem;">5/5 命中 → <strong>非常适合派</strong>。</p>
+  </div>
+
+  <div class="insight">
+    <strong>关键洞察：什么派出去、什么留下。</strong><br>
+    "读 + 总结"是耗上下文的脏活 → <strong>派出去</strong>；"讲解、追问、讨论"是要和你来回交互的部分 → <strong>留在主会话</strong>。子 agent 返回结构化总结，主会话只收总结，再和你聊。
+  </div>
+
+  <h2>练一练：该派还是不派？</h2>
+
+  <div class="quiz">
+    <q>场景 1：让子 agent 读 5 个源码文件，找出函数 <code>handleRequest</code> 定义在哪。</q>
+    <div class="opts" data-q="1" data-a="该派"><button>该派</button><button>不派</button></div>
+    <div class="fb" id="fb1"></div>
+  </div>
+
+  <div class="quiz">
+    <q>场景 2：和 CC 一起设计新功能，需要它随时理解整个代码库结构来给建议。</q>
+    <div class="opts" data-q="2" data-a="不派"><button>该派</button><button>不派</button></div>
+    <div class="fb" id="fb2"></div>
+  </div>
+
+  <div class="quiz">
+    <q>场景 3：三个不相关的 bug，分别在三个文件里。</q>
+    <div class="opts" data-q="3" data-a="该派"><button>该派</button><button>不派</button></div>
+    <div class="fb" id="fb3"></div>
+  </div>
+
+  <div class="quiz">
+    <q>场景 4：让 CC 把一行代码里的拼写错误改掉。</q>
+    <div class="opts" data-q="4" data-a="不派"><button>该派</button><button>不派</button></div>
+    <div class="fb" id="fb4"></div>
+  </div>
+
+  <h2>动手想两个</h2>
+  <p>再从你自己的工作里找：<strong>一个适合派的</strong>，和<strong>一个不适合派的</strong>，各写一句理由。</p>
+  <p style="font-family:-apple-system,'PingFang SC',sans-serif;font-size:0.9rem;color:var(--muted);">适合派的：</p>
+  <textarea class="ta" placeholder="场景……（理由：命中了 XX 信号）"></textarea>
+  <p style="font-family:-apple-system,'PingFang SC',sans-serif;font-size:0.9rem;color:var(--muted);">不适合派的：</p>
+  <textarea class="ta" placeholder="场景……（理由：命中了 XX 警戒信号）"></textarea>
+  <p style="font-family:-apple-system,'PingFang SC',sans-serif;font-size:0.88rem;color:var(--muted);border-left:2px solid var(--rule);padding-left:0.9rem;margin:1rem 0;">写完发给你的 agent 老师核对——判断有没有跑偏，它帮你校准。</p>
+
+  <div class="box">
+    <h3>推荐资源</h3>
+    <p>本课决策框架综合自 <code>superpowers:dispatching-parallel-agents</code>（独立任务、何时该/不该并行）与 <code>subagent-driven-development</code>（隔离上下文、自包含任务）。完整清单见 <a href="../RESOURCES.md">RESOURCES.md</a>。</p>
+  </div>
+
+  <div class="nav">
+    上一课：<a href="0001-what-is-a-subagent.html">子 agent 是什么</a>　·　下一课：<em>亲手派第一个子 agent（待生成）</em><br>
+    有任何不清楚的，<strong>直接问你的 agent 老师</strong>。
+  </div>
+</div>
+<script>
+  const explain = {
+    '1': '命中"耗上下文 + 自包含 + 要结论"。读 5 个文件找定义，结果留子 agent 那边，主会话只收"定义在第 X 行"。',
+    '2': '需看全局 + 紧耦合 + 要频繁交互——这种该留在主会话，不适合外包。',
+    '3': '独立 + 可并行——三个 bug 互不影响，正适合并行派发（第 5 课）。',
+    '4': '太小——改个拼写，派子 agent 的开销大于收益，直接在主会话改更快。'
+  };
+  document.querySelectorAll('.opts').forEach(opts => {
+    const q = opts.dataset.q, ans = opts.dataset.a, fb = document.getElementById('fb'+q);
+    opts.querySelectorAll('button').forEach(b => {
+      b.addEventListener('click', () => {
+        const correct = b.textContent.trim() === ans;
+        b.classList.add(correct ? 'right' : 'wrong');
+        fb.textContent = (correct ? '✓ 对。' : '✗ 再想想。') + explain[q];
+        fb.classList.add('show');
+      });
+    });
+  });
+</script>
+</body>
+</html>

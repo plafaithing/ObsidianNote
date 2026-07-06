@@ -1,0 +1,23 @@
+{
+  "id": "conv-1783045083952-k9s2jzbif",
+  "providerId": "claude",
+  "title": "Create new RAG course\n\n我来为您创建一个新的 RAG 课程。首先需要了解...",
+  "titleGenerationStatus": "success",
+  "createdAt": 1783045083953,
+  "updatedAt": 1783329193122,
+  "lastResponseAt": 1783329193122,
+  "sessionId": "f8546cc6-3064-4e93-8ae8-ba69d27d7cd9",
+  "providerState": {
+    "providerSessionId": "f8546cc6-3064-4e93-8ae8-ba69d27d7cd9"
+  },
+  "usage": {
+    "model": "haiku",
+    "inputTokens": 3904,
+    "cacheCreationInputTokens": 0,
+    "cacheReadInputTokens": 98496,
+    "contextWindow": 200000,
+    "contextTokens": 102400,
+    "percentage": 51,
+    "contextWindowIsAuthoritative": true
+  }
+}

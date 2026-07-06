@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>L04 · 元数据与结构化抽取</title>
+  <style>
+  :root {
+    --bg: #fafaf7; --ink: #1a1a1a; --ink-soft: #444; --ink-mute: #777;
+    --rule: #e4e3dc; --accent: #2b5a8c; --accent-soft: #e8f0f7;
+    --warn: #b06a00; --warn-soft: #fdf3e3; --key: #2f7d52; --key-soft: #e8f5ee;
+    --pit: #a23a3a; --pit-soft: #fbecec; --code-bg: #f3f3ee;
+    --serif: 'Source Serif Pro','Noto Serif SC',Georgia,'Songti SC',serif;
+    --sans: -apple-system,BlinkMacSystemFont,'Segoe UI','PingFang SC','Microsoft YaHei',sans-serif;
+    --mono: 'SF Mono','JetBrains Mono',Consolas,monospace;
+  }
+  *{box-sizing:border-box} html{scroll-behavior:smooth}
+  body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--sans);font-size:16px;line-height:1.78;-webkit-font-smoothing:antialiased}
+  .lesson{max-width:760px;margin:0 auto;padding:48px 28px 96px}
+  .lesson-header{margin-bottom:36px;border-bottom:1px solid var(--rule);padding-bottom:22px}
+  .course-label{font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--accent);font-weight:700}
+  .lesson-num{font-size:13px;color:var(--ink-mute);margin:8px 0 2px}
+  .lesson-title{font-family:var(--serif);font-size:34px;line-height:1.22;margin:2px 0 8px;font-weight:700}
+  .lesson-sub{color:var(--ink-soft);font-size:15px;margin:0}
+  .lesson-nav{display:flex;justify-content:space-between;margin:0 0 40px;font-size:14px}
+  .lesson-nav a{color:var(--accent);text-decoration:none} .lesson-nav a:hover{text-decoration:underline}
+  h2{font-family:var(--serif);font-size:24px;margin:44px 0 12px;font-weight:700}
+  h3{font-size:17px;margin:26px 0 8px;font-weight:600}
+  p{margin:12px 0} ul,ol{margin:12px 0;padding-left:24px} li{margin:6px 0}
+  strong{color:var(--ink);font-weight:600} em{color:var(--ink-soft)} a{color:var(--accent)}
+  code{font-family:var(--mono);background:var(--code-bg);padding:2px 6px;border-radius:4px;font-size:.9em}
+  pre{background:var(--code-bg);padding:16px;border-radius:8px;overflow-x:auto} pre code{background:none;padding:0}
+  .callout{margin:22px 0;padding:14px 18px;border-left:3px solid;border-radius:0 6px 6px 0}
+  .callout p:first-child{margin-top:0} .callout p:last-child{margin-bottom:0}
+  .callout-title{font-weight:700;font-size:13px;letter-spacing:.03em;margin-bottom:6px;display:block}
+  .callout.info{background:var(--accent-soft);border-color:var(--accent)}
+  .callout.warn{background:var(--warn-soft);border-color:var(--warn)}
+  .callout.key{background:var(--key-soft);border-color:var(--key)}
+  .callout.pit{background:var(--pit-soft);border-color:var(--pit)}
+  .callout.interview{background:var(--accent-soft);border-color:var(--accent)}
+  .callout.interview .callout-title::before{content:"🎤 "}
+  table{width:100%;border-collapse:collapse;margin:18px 0;font-size:14px}
+  th,td{text-align:left;padding:10px 12px;border-bottom:1px solid var(--rule);vertical-align:top}
+  th{font-weight:600;color:var(--ink-soft);background:var(--code-bg)}
+  .quiz{margin:30px 0;border:1px solid var(--rule);border-radius:12px;padding:24px 26px;background:#fff}
+  .quiz-q{font-weight:600;margin:0 0 6px;font-size:16px}
+  .quiz-scene{color:var(--ink-soft);font-size:14px;margin:0 0 16px;line-height:1.7}
+  .quiz-options{display:flex;flex-direction:column;gap:10px}
+  .quiz-opt{display:flex;align-items:center;gap:12px;padding:12px 16px;border:1.5px solid var(--rule);border-radius:10px;cursor:pointer;transition:all .15s;user-select:none}
+  .quiz-opt:hover{border-color:var(--accent);background:var(--accent-soft)}
+  .quiz-opt .mark{width:24px;height:24px;border-radius:50%;border:1.5px solid var(--ink-mute);display:inline-flex;align-items:center;justify-content:center;font-size:13px;color:transparent;flex-shrink:0}
+  .quiz-opt.reveal.correct{border-color:var(--key);background:var(--key-soft)}
+  .quiz-opt.reveal.correct .mark{background:var(--key);color:#fff;border-color:var(--key)}
+  .quiz-opt.reveal.wrong{border-color:var(--pit);background:var(--pit-soft)}
+  .quiz-opt.reveal.wrong .mark{background:var(--pit);color:#fff;border-color:var(--pit)}
+  .quiz-feedback{margin-top:16px;font-size:14px;line-height:1.72;display:none;padding:14px 16px;background:var(--code-bg);border-radius:8px}
+  .quiz-feedback.show{display:block}
+  .win{margin:36px 0 24px;padding:22px 24px;background:var(--key-soft);border-radius:12px;border:1px solid var(--key)}
+  .win h3{margin-top:0;color:var(--key)}
+  .sources{margin-top:32px;padding-top:22px;border-top:1px solid var(--rule);font-size:14px}
+  .sources h3{margin-top:0} .sources ul{padding-left:20px}
+  .ask-reminder{margin-top:20px;padding:16px 18px;background:var(--accent-soft);border-radius:10px;font-size:14px}
+  .cite{font-size:13px;color:var(--ink-mute)}
+  @media print{body{background:#fff}.lesson-nav,.quiz-opt{break-inside:avoid}a{color:var(--ink)}}
+  @media (max-width:600px){.lesson{padding:28px 18px 64px}.lesson-title{font-size:26px}}
+  </style>
+</head>
+<body>
+<article class="lesson">
+
+  <header class="lesson-header">
+    <div class="course-label">RAG 课程 · M2 数据侧</div>
+    <div class="lesson-num">第 04 节 / 共 12 节</div>
+    <h1 class="lesson-title">元数据与结构化抽取</h1>
+    <p class="lesson-sub">给 chunk 贴标签——用结构化字段补向量检索的盲点</p>
+  </header>
+
+  <nav class="lesson-nav">
+    <a href="0003-chunking-strategies.html">← 上一节：切分策略</a>
+    <a href="0005-embedding-selection.html">下一节：Embedding 选型 →</a>
+  </nav>
+
+  <h2>纯向量检索的盲点</h2>
+  <p>L03 把 chunk 切对了，但检索还是会出一种「语义对、但不对版」的错。看个运维场景：</p>
+  <div class="callout pit">
+    <span class="callout-title">痛点场景</span>
+    <p>知识库里 <strong>GaussDB</strong> 和 <strong>PostgreSQL</strong> 两套手册都有「慢 SQL 诊断」。用户问「GaussDB 慢 SQL 怎么诊断」，<strong>纯向量检索 Top-3 返回了 2 个 PostgreSQL 的文档</strong>——因为两边「慢 SQL」的语义实在太像了，embedding 分不开。</p>
+  </div>
+  <p>问题不在 embedding 弱，也不在切分坏，而在<strong>纯向量检索只看语义相似度，看不到「这个 chunk 属于哪个产品」</strong>。向量检索是「找最像的」，但运维场景往往要先「找对的范围」再「找最像的」。这个「范围」就是元数据（metadata）。</p>
+  <p>类似盲点还有：检索出<strong>过期版本</strong>的参数说明、检索出用户<strong>没权限</strong>看的敏感处理流程、检索出<strong>故障排查</strong>章节里的部署内容。这些都是语义相似但「属性不对」。</p>
+
+  <h2>元数据是什么</h2>
+  <p>元数据是<strong>chunk 级的结构化标签</strong>，和向量一起存进向量库。检索时不只比对向量，还能按这些字段过滤。</p>
+  <div class="callout info">
+    <span class="callout-title">关系库类比（你有数据库背景，这块好懂）</span>
+    <p>向量库里的一个 chunk ≈ 一行记录：<strong>向量是「全文索引」</strong>（语义相似度检索），<strong>元数据是「字段索引」</strong>（精确等值/范围过滤），<strong>metadata 过滤就是 <code>WHERE</code> 条件</strong>。RAG 检索 = 「<code>WHERE product='GaussDB'</code> + 全文相似度 <code>ORDER BY</code>」组合查询。</p>
+  </div>
+  <p>pgvector / Milvus / Qdrant 都原生支持 metadata 过滤——存向量时把元数据放进 payload 字段，检索时带过滤条件<a href="https://milvus.io/docs/boolean.md" target="_blank">[2]</a>。</p>
+
+  <h2>metadata 过滤：pre vs post</h2>
+  <p>过滤和向量检索的<strong>先后顺序</strong>很关键，分两种：</p>
+  <table>
+    <thead><tr><th></th><th>pre-filtering（先过滤再检索）</th><th>post-filtering（先检索再过滤）</th></tr></thead>
+    <tbody>
+      <tr><td>做法</td><td>先 <code>WHERE</code> 圈出候选集，再在候选集里向量检索</td><td>先向量检索 Top-K，再 <code>WHERE</code> 筛掉不合格的</td></tr>
+      <tr><td>运维类比</td><td>先 <code>WHERE product='GaussDB'</code> 再全文搜</td><td>先全文搜 Top-20 再 <code>WHERE</code> 筛</td></tr>
+      <tr><td>风险</td><td>候选集太小时召回不足</td><td>Top-K 不够 → 过滤后结果太少甚至空</td></tr>
+      <tr><td>推荐</td><td>⭐ 推荐（候选集够大时）</td><td>候选集很小时才考虑</td></tr>
+    </tbody>
+  </table>
+  <div class="callout warn">
+    <span class="callout-title">post-filtering 的坑</span>
+    <p>假设 Top-20 里有 15 个是 PostgreSQL 的，post-filter <code>product=GaussDB</code> 后只剩 5 个 GaussDB chunk——结果太少。更糟的是若 Top-20 全是 PG，过滤后<strong>直接空</strong>，用户以为知识库没有答案。pre-filtering 先把范围缩到 GaussDB，再在里面找最相似的，不会有这问题。</p>
+  </div>
+
+  <h2>结构化抽取：元数据从哪来</h2>
+  <p>元数据不是凭空有的，得从文档里抽。两种方式：</p>
+  <h3>① 规则抽取（优先用）</h3>
+  <p>从文档自带的<strong>结构信息</strong>直接读，成本低、稳定、不抽错：</p>
+  <ul>
+    <li><strong>文件路径</strong>：<code>/docs/gaussdb/v8.0/慢SQL诊断.md</code> → product=GaussDB, version=v8.0, section=慢SQL诊断</li>
+    <li><strong>标题层级</strong>：Markdown 的 <code>#</code> / <code>##</code> → section 字段</li>
+    <li><strong>frontmatter</strong>：文档顶部的 YAML <code>product: GaussDB</code> → 直接读</li>
+    <li><strong>文件名 / 目录约定</strong>：<code>install-guide.md</code> → doc_type=安装手册</li>
+  </ul>
+  <h3>② LLM 抽取（兜底）</h3>
+  <p>文档没有结构信息（扫描件、纯文本导出）时，让 LLM 读 chunk 内容抽出产品/版本/类型。<strong>贵且可能抽错</strong>，非结构化文档才用。可加校验（规则校验 LLM 抽出的产品名是否在白名单内）。</p>
+  <div class="callout key">
+    <span class="callout-title">抽取原则</span>
+    <p><strong>能用规则就用规则</strong>——路径、标题、frontmatter 是免费且零误差的元数据源。LLM 抽取只在规则拿不到时兜底。POC 阶段先把规则抽取跑通，覆盖 80% 场景，再考虑 LLM 补剩余。</p>
+  </div>
+
+  <h2>运维知识库的元数据字段设计</h2>
+  <p>这是你最需要的实操。运维知识库该抽哪些字段：</p>
+  <table>
+    <thead><tr><th>字段</th><th>值示例</th><th>来源</th><th>过滤作用</th></tr></thead>
+    <tbody>
+      <tr><td><code>product</code></td><td>GaussDB / PostgreSQL / MySQL</td><td>路径 / 标题</td><td>防跨产品误召回（痛点场景）</td></tr>
+      <tr><td><code>version</code></td><td>v8.0 / v9.0</td><td>路径 / 标题</td><td>防过期文档</td></tr>
+      <tr><td><code>doc_type</code></td><td>安装手册 / 故障排查 / 参数说明</td><td>标题 / LLM</td><td>按需检索（只查故障库）</td></tr>
+      <tr><td><code>section</code></td><td>慢SQL诊断 / 会话分析</td><td>标题层级</td><td>精确定位章节</td></tr>
+      <tr><td><code>effective_date</code></td><td>2024-06-01</td><td>文档元信息</td><td>时效过滤（只要最新）</td></tr>
+      <tr><td><code>permission</code></td><td>public / dba_only</td><td>文档分类</td><td>权限控制（不返回越权内容）</td></tr>
+      <tr><td><code>source_url</code></td><td>https://...</td><td>文档来源</td><td>引用追溯（生成答案时附链接）</td></tr>
+    </tbody>
+  </table>
+  <div class="callout info">
+    <span class="callout-title">售前视角</span>
+    <p>元数据字段设计是<strong>售前方案里的「数据治理」环节</strong>，客户最爱问「你们怎么保证不返回过期/越权内容」。能讲清 metadata 过滤 + permission 字段，是方案成熟度的体现。</p>
+  </div>
+
+  <div class="callout interview">
+    <span class="callout-title">面试视角</span>
+    <p><strong>Q：metadata 过滤为什么优先 pre-filtering？</strong> post-filtering 可能因 Top-K 不够导致过滤后结果太少甚至空；pre-filtering 先把范围缩到合规候选集，再向量检索，保证召回质量。类比关系库：先 <code>WHERE</code> 再 <code>ORDER BY</code> 全文相似度。</p>
+    <p><strong>Q：元数据抽取用规则还是 LLM？</strong> 能用规则就用规则（路径/标题/frontmatter），成本低、稳定、零误差；非结构化文档才用 LLM 兜底，贵且可能抽错。POC 先规则覆盖 80%。</p>
+    <p><strong>Q：metadata 过滤和混合检索（L06）什么关系？</strong> 两者正交、可叠加。混合检索解决<strong>「用什么方式召回」</strong>（向量+BM25），metadata 过滤解决<strong>「在哪个范围里召回」</strong>（产品/版本/权限）。一个完整检索 = metadata 过滤圈范围 + 混合检索召回 + rerank 精排。</p>
+  </div>
+
+  <h2>小测验</h2>
+  <div class="quiz" id="quiz">
+    <p class="quiz-q">场景</p>
+    <p class="quiz-scene">知识库含 GaussDB 和 PostgreSQL 两套手册。用户问「GaussDB 慢 SQL 怎么诊断」，<strong>纯向量检索 Top-3 返回了 2 个 PostgreSQL 的慢 SQL 文档</strong>（语义太相似）。最佳改进是？</p>
+    <div class="quiz-options">
+      <label class="quiz-opt" data-correct="true"><span class="mark">✓</span><span>给每个 chunk 加 <code>product</code> 元数据，检索时 pre-filter <code>product=GaussDB</code></span></label>
+      <label class="quiz-opt" data-correct="false"><span class="mark">✗</span><span>换更强的 embedding 模型，让向量能区分两个产品</span></label>
+      <label class="quiz-opt" data-correct="false"><span class="mark">✗</span><span>增大 Top-K 到 10，让更多 GaussDB 文档进候选</span></label>
+      <label class="quiz-opt" data-correct="false"><span class="mark">✗</span><span>加 rerank 重排，把 PostgreSQL 文档排到后面</span></label>
+    </div>
+    <div class="quiz-feedback" id="quiz-feedback">
+      <strong>✓ 加 <code>product</code> 元数据 + pre-filter。</strong> 根因是纯向量检索看不到「产品」这个结构化属性。GaussDB 和 PostgreSQL 的慢 SQL 语义本就极相似，靠 embedding 硬分不开也没必要——用 metadata 过滤把范围先缩到 GaussDB，又准又稳，还省算力。<br><br>
+      <em>为什么不是「换更强 embedding」</em>：语义确实相似，强行让 embedding 把同主题不同产品的文档拉开，反而会损害「跨产品类比检索」的能力（有时用户就是想看 PG 的做法借鉴）。而且这是结构化属性，用结构化过滤比用向量硬区分更可靠。<br>
+      <em>为什么不是「增大 Top-K」</em>：候选里 GaussDB 还是少数，增大 K 只是多塞几个 PG 文档，没解决产品边界，还增 rerank 成本。<br>
+      <em>为什么不是「加 rerank」</em>：rerank 能把 PG 文档降权，但治标不治本——PG 文档还是占着 Top-K 名额，挤掉本该进来的 GaussDB 文档。pre-filter 直接把 PG 挡在候选外。<br><br>
+      <strong>口诀</strong>：结构化属性（产品/版本/权限）用 metadata 过滤，语义相似度用向量——别让向量干它不擅长的事。
+    </div>
+  </div>
+  <script>
+    document.querySelectorAll('#quiz .quiz-opt').forEach(opt => {
+      opt.addEventListener('click', () => {
+        document.querySelectorAll('#quiz .quiz-opt').forEach(o => {
+          o.classList.remove('correct','wrong');
+          o.classList.add('reveal');
+          if (o.dataset.correct === 'true') o.classList.add('correct');
+          else if (o === opt) o.classList.add('wrong');
+        });
+        document.getElementById('quiz-feedback').classList.add('show');
+      });
+    });
+  </script>
+
+  <div class="win">
+    <h3>✓ 本节胜利</h3>
+    <p>你现在掌握了：</p>
+    <ol>
+      <li><strong>纯向量检索的盲点</strong>——语义相似但「属性不对」（产品/版本/权限/时效）。</li>
+      <li><strong>metadata 过滤 = WHERE 条件</strong>，pre-filtering 优先，post-filtering 有坑。</li>
+      <li><strong>抽取原则</strong>——规则优先（路径/标题/frontmatter），LLM 兜底非结构化文档。</li>
+      <li><strong>运维元数据字段设计</strong>——7 个字段表，售前能讲「数据治理」。</li>
+      <li><strong>完整检索的三层</strong>——metadata 过滤圈范围 + 混合检索召回 + rerank 精排（为 L06/L07 铺路）。</li>
+    </ol>
+  </div>
+
+  <div class="sources">
+    <h3>本节取材与推荐阅读</h3>
+    <ul>
+      <li><a href="https://wiki.hugogu.cn/zh/ai/tech/rag" target="_blank">[1] HugoGu · RAG wiki</a> — 元数据过滤、结构化抽取实践。</li>
+      <li><a href="https://milvus.io/docs/boolean.md" target="_blank">[2] Milvus · 标量字段过滤</a> — metadata 过滤的工程实现（pre/post filtering 机制）。</li>
+      <li><a href="https://zilliz.com.cn/blog" target="_blank">[3] Zilliz Blog</a> — 向量库 metadata 过滤最佳实践。</li>
+    </ul>
+    <p class="cite">完整资源清单见 <code>learning/rag/RESOURCES.md</code>。</p>
+  </div>
+
+  <div class="ask-reminder">
+    💡 <strong>有不清楚的？直接问。</strong>比如：「我们的文档是 Confluence 导出的，路径没有产品信息，怎么抽 product？」「metadata 过滤会不会让召回率下降？」也可以直接说「继续 L05」进 Embedding 选型。
+  </div>
+
+  <nav class="lesson-nav" style="margin-top:40px;">
+    <a href="0003-chunking-strategies.html">← 上一节：切分策略</a>
+    <a href="0005-embedding-selection.html">下一节：Embedding 选型 →</a>
+  </nav>
+
+</article>
+</body>
+</html>

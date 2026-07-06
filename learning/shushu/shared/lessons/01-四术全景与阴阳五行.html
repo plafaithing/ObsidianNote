@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>术数 · 共享基础 第1课 — 四术全景与阴阳五行</title>
+<style>
+  :root {
+    --bg: #f7f5f0; --card: #ffffff; --ink: #2b2b2b; --muted: #6b6b6b;
+    --line: #e4e0d6; --accent: #8b5e3c;
+    --wood: #4CAF50; --fire: #E53935; --earth: #F9A825; --metal: #9E9E9E; --water: #1E88E5;
+    --ok: #2e7d32; --no: #c62828;
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; padding: 32px 16px; font-family: -apple-system, "PingFang SC", "Microsoft YaHei", sans-serif; background: var(--bg); color: var(--ink); line-height: 1.75; }
+  .wrap { max-width: 780px; margin: 0 auto; }
+  header { text-align: center; margin-bottom: 28px; }
+  .crumb { color: var(--muted); font-size: 14px; letter-spacing: 1px; }
+  h1 { font-size: 28px; margin: 8px 0 4px; }
+  .subtitle { color: var(--muted); }
+  .win { background: linear-gradient(135deg, #fff8ec, #fdf3e2); border: 1px solid #f0e0c4; border-radius: 14px; padding: 16px 20px; margin: 20px 0; }
+  .win b { color: var(--accent); }
+  section { background: var(--card); border: 1px solid var(--line); border-radius: 14px; padding: 24px; margin: 18px 0; }
+  h2 { font-size: 20px; margin-top: 0; border-left: 4px solid var(--accent); padding-left: 10px; }
+  table { width: 100%; border-collapse: collapse; margin: 12px 0; font-size: 14px; }
+  th, td { border: 1px solid var(--line); padding: 8px 10px; text-align: center; }
+  th { background: #faf6ee; }
+  .dot { display: inline-block; width: 14px; height: 14px; border-radius: 50%; vertical-align: middle; margin-right: 4px; }
+  .flow { display: grid; grid-template-columns: 1fr; gap: 10px; margin: 14px 0; }
+  .stage { background: #faf6ee; border: 1px solid var(--line); border-radius: 10px; padding: 12px 14px; }
+  .stage h4 { margin: 0 0 4px; font-size: 15px; color: var(--accent); }
+  .stage p { margin: 0; font-size: 14px; }
+  .stage .tag { display: inline-block; background: var(--accent); color: #fff; font-size: 12px; padding: 1px 8px; border-radius: 10px; margin-left: 6px; }
+  .yy { display: flex; gap: 14px; margin: 14px 0; }
+  .yy div { flex: 1; border-radius: 10px; padding: 16px; text-align: center; color: #fff; }
+  .yang { background: #2b2b2b; }
+  .yin { background: #d9d4c8; color: #2b2b2b; }
+  .cycle { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; align-items: center; margin: 14px 0; }
+  .chip { padding: 6px 12px; border-radius: 20px; color: #fff; font-size: 14px; }
+  .arrow { color: var(--muted); font-size: 13px; }
+  .q-card { background: #faf6ee; border: 1px solid var(--line); border-radius: 12px; padding: 16px; margin: 14px 0; }
+  .opts { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 10px; }
+  @media (max-width: 500px) { .opts { grid-template-columns: 1fr; } }
+  .opt { background: #fff; border: 1px solid var(--line); border-radius: 8px; padding: 10px; cursor: pointer; text-align: center; transition: all .15s; }
+  .opt:hover { border-color: var(--accent); }
+  .opt.correct { background: #e8f5e9; border-color: var(--ok); color: var(--ok); }
+  .opt.wrong { background: #ffebee; border-color: var(--no); color: var(--no); }
+  .feedback { margin-top: 10px; font-size: 14px; min-height: 20px; }
+  .score { text-align: center; font-size: 15px; color: var(--accent); margin-top: 10px; }
+  .next { background: #f0e6d8; border-radius: 10px; padding: 14px 18px; margin-top: 10px; }
+  .tagb { display: inline-block; background: var(--accent); color: #fff; font-size: 12px; padding: 2px 8px; border-radius: 10px; }
+  code { background: #f0ece2; padding: 1px 6px; border-radius: 4px; font-size: 13px; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="crumb">术数 · 共享基础 第 1 / 4 节</div>
+    <h1>四术全景与阴阳五行</h1>
+    <div class="subtitle">先看清四门术数的全貌，再从底层符号开始</div>
+  </header>
+
+  <div class="win">
+    🎯 本课小胜利：<b>①</b> 能说出四门术数（六爻 / 梅花 / 六壬 / 奇门）各自的核心模型与流程<br>
+    <b>②</b> 能判断任意两个五行之间是「生」还是「克」
+  </div>
+
+  <section>
+    <h2>一、术数四门全景</h2>
+    <p>你要学的四门术数，<b>底层共通</b>：都建立在「共时性」原理上——你起卦 / 起盘的瞬间，宇宙的信息就映射在卦盘里。它们共享同一套符号（阴阳五行、天干地支、八卦），区别在<b>起卦方式</b>与<b>断法模型</b>。</p>
+    <table>
+      <tr><th>术数</th><th>核心模型</th><th>难度</th><th>特色</th></tr>
+      <tr><td><b>六爻</b><br>（纳甲法）</td><td>干支 + 六亲 + 世应 + 日辰月建</td><td>中</td><td>实战性强，体系成熟</td></tr>
+      <tr><td><b>梅花易数</b></td><td>体用生克 + 万物类象</td><td>轻</td><td>起卦灵活，重意象</td></tr>
+      <tr><td><b>大六壬</b></td><td>四课三传 + 十二天将 + 神煞</td><td>重</td><td>占人事最精，「来人不用问」</td></tr>
+      <tr><td><b>奇门遁甲</b></td><td>九宫 + 八门 + 九星 + 八神 + 三奇六仪</td><td>重</td><td>择时择方谋事，「帝王之学」</td></tr>
+    </table>
+    <p>四门各自的流程一句话：</p>
+    <div class="flow">
+      <div class="stage"><h4>六爻 <span class="tag">周易占卜</span></h4><p>摇三硬币得六爻 → 装干支六亲 → 看日辰月建断吉凶</p></div>
+      <div class="stage"><h4>梅花易数 <span class="tag">周易占卜</span></h4><p>以时间 / 数字 / 外应起卦 → 定体用 → 看体用生克断吉凶</p></div>
+      <div class="stage"><h4>大六壬 <span class="tag">三式</span></h4><p>以月将加占时排天地盘 → 推四课三传 → 看天将课体断吉凶</p></div>
+      <div class="stage"><h4>奇门遁甲 <span class="tag">三式</span></h4><p>以节气定局排盘 → 布八门九星八神三奇六仪 → 看格局主客断吉凶</p></div>
+    </div>
+    <p style="font-size:14px;color:var(--muted)">📌 现在记不住没关系，先有个全景印象。每门后面都有独立模块细讲。</p>
+  </section>
+
+  <section>
+    <h2>二、共享基础地图</h2>
+    <p>既然四门共用一套符号，我们先打<b>共享基础</b>（4 节），再分门深入。这样避免每门重复讲，也让你 later 学哪门都能回这里查。</p>
+    <div class="flow">
+      <div class="stage"><h4>① 本课</h4><p>四术全景 + 阴阳五行生克</p></div>
+      <div class="stage"><h4>② 第 2 节</h4><p>天干地支 + 地支六冲六合（三合三会）</p></div>
+      <div class="stage"><h4>③ 第 3 节</h4><p>八卦与六十四卦 + 万物类象</p></div>
+      <div class="stage"><h4>④ 第 4 节</h4><p>干支历法（月建日辰、节气、旬空）</p></div>
+    </div>
+    <p style="font-size:14px;color:var(--muted)">📦 配套查阅文档：<code>reference/glossary.md</code>（术语表）、<code>reference/cheatsheet.md</code>（速查表），随课程持续扩充。</p>
+  </section>
+
+  <section>
+    <h2>三、阴阳</h2>
+    <p>万物分阴阳，这是四门术数最底层的二分法。</p>
+    <div class="yy">
+      <div class="yang"><b>阳</b><br>动 · 热 · 明 · 刚 · 奇数<br>男 · 太阳 · 白天</div>
+      <div class="yin"><b>阴</b><br>静 · 冷 · 暗 · 柔 · 偶数<br>女 · 月亮 · 黑夜</div>
+    </div>
+    <p>阴阳在四门里的体现（六爻为例，其他门同理）：</p>
+    <ul>
+      <li>阳爻 <code>⚊</code>（一条实线）/ 阴爻 <code>⚋</code>（断开）</li>
+      <li>硬币：背为<b>阳</b>（数 3），字为<b>阴</b>（数 2）</li>
+      <li>摇卦得数：<b>7、9 为阳</b>（奇），<b>6、8 为阴</b>（偶）<br>其中 <b>7 少阳、8 少阴为静爻</b>（不变）；<b>9 老阳、6 老阴为动爻</b>（物极必反，将变）</li>
+    </ul>
+  </section>
+
+  <section>
+    <h2>四、五行</h2>
+    <p>金、木、水、火、土是<b>五种能量状态</b>，不是五种物质。四门断卦几乎全靠五行之间的生克关系。</p>
+    <table>
+      <tr><th>五行</th><th>方位</th><th>季节</th><th>颜色</th><th>特性</th></tr>
+      <tr><td><span class="dot" style="background:var(--wood)"></span>木</td><td>东</td><td>春</td><td>青</td><td>生长、升发</td></tr>
+      <tr><td><span class="dot" style="background:var(--fire)"></span>火</td><td>南</td><td>夏</td><td>赤</td><td>炎热、向上</td></tr>
+      <tr><td><span class="dot" style="background:var(--earth)"></span>土</td><td>中</td><td>四季末</td><td>黄</td><td>承载、化育</td></tr>
+      <tr><td><span class="dot" style="background:var(--metal)"></span>金</td><td>西</td><td>秋</td><td>白</td><td>肃杀、收敛</td></tr>
+      <tr><td><span class="dot" style="background:var(--water)"></span>水</td><td>北</td><td>冬</td><td>黑</td><td>滋润、向下</td></tr>
+    </table>
+  </section>
+
+  <section>
+    <h2>五、五行相生（谁养谁）</h2>
+    <p>相生 = 互相滋养、促成。</p>
+    <div class="cycle">
+      <span class="chip" style="background:var(--wood)">木</span><span class="arrow">→生→</span>
+      <span class="chip" style="background:var(--fire)">火</span><span class="arrow">→生→</span>
+      <span class="chip" style="background:var(--earth)">土</span><span class="arrow">→生→</span>
+      <span class="chip" style="background:var(--metal)">金</span><span class="arrow">→生→</span>
+      <span class="chip" style="background:var(--water)">水</span><span class="arrow">→生→</span>
+      <span class="chip" style="background:var(--wood)">木</span>
+    </div>
+    <p style="font-size:14px;color:var(--muted)">🧠 记忆：烧<b>木</b>生<b>火</b> → 火尽成灰（<b>土</b>）→ 土中藏<b>金</b> → 金熔化成<b>水</b> → 水润<b>木</b>长。</p>
+  </section>
+
+  <section>
+    <h2>六、五行相克（谁制谁）</h2>
+    <p>相克 = 互相制约、克制。</p>
+    <div class="cycle">
+      <span class="chip" style="background:var(--wood)">木</span><span class="arrow">→克→</span>
+      <span class="chip" style="background:var(--earth)">土</span><span class="arrow">→克→</span>
+      <span class="chip" style="background:var(--water)">水</span><span class="arrow">→克→</span>
+      <span class="chip" style="background:var(--fire)">火</span><span class="arrow">→克→</span>
+      <span class="chip" style="background:var(--metal)">金</span><span class="arrow">→克→</span>
+      <span class="chip" style="background:var(--wood)">木</span>
+    </div>
+    <p style="font-size:14px;color:var(--muted)">🧠 记忆：树根破<b>土</b> → 土筑堤挡<b>水</b> → 水<b>灭</b>火 → 火<b>熔</b>金 → 金斧砍<b>木</b>。</p>
+    <p style="font-size:14px"><b>注意</b>：相生与相克是两套独立循环，别混。木既生火又克土；火既生土又克金。</p>
+  </section>
+
+  <section>
+    <h2>七、练一练：判断生克</h2>
+    <p>下面给出两个五行，选出它们的关系。共 6 题。</p>
+    <div id="quiz"></div>
+    <div class="score" id="score"></div>
+  </section>
+
+  <section>
+    <h2>八、小结与预告</h2>
+    <p>✅ 本课你掌握了：</p>
+    <ul>
+      <li>四门术数全景：六爻 / 梅花 / 六壬 / 奇门，各自模型与流程</li>
+      <li>共享基础 4 节的路线图</li>
+      <li>阴阳的基本划分 + 在术数里的体现</li>
+      <li>五行及其<b>相生</b>（木火土金水）和<b>相克</b>（木土水火金）</li>
+    </ul>
+    <div class="next">
+      <span class="tagb">下节预告</span>
+      <b>第 2 课：天干地支 + 地支六冲六合</b><br>
+      四门断卦时，具体生克是在「地支」之间发生的——六爻爻上装地支、六壬天地盘全是地支、奇门九宫也用地支。下节学十天干、十二地支，以及地支的「冲」和「合」，这是判断爻与爻、宫与宫关系的核心。
+    </div>
+    <p style="font-size:14px;color:var(--muted)">📝 课后小任务：用身边事物练阴阳（这是阳还是阴？），再默写五行相生、相克顺序，直到不假思索。然后翻一下 <code>reference/cheatsheet.md</code>，先扫一眼后面要用的速查表。</p>
+  </section>
+</div>
+
+<script>
+const W = {木:'var(--wood)',火:'var(--fire)',土:'var(--earth)',金:'var(--metal)',水:'var(--water)'};
+const questions = [
+  {a:'木', b:'火', ans:'A生B', why:'木生火（烧木生火）'},
+  {a:'土', b:'水', ans:'A克B', why:'土克水（堤坝挡水）'},
+  {a:'水', b:'金', ans:'B生A', why:'金生水，即 B(金)生 A(水)'},
+  {a:'金', b:'火', ans:'B克A', why:'火克金，即 B(火)克 A(金)'},
+  {a:'木', b:'水', ans:'B生A', why:'水生木，即 B(水)生 A(木)'},
+  {a:'木', b:'土', ans:'A克B', why:'木克土（树根破土）'},
+];
+let idx = 0, score = 0;
+const quiz = document.getElementById('quiz');
+const scoreEl = document.getElementById('score');
+function render() {
+  if (idx >= questions.length) {
+    quiz.innerHTML = `<div class="q-card" style="text-align:center">🎉 全部完成！<br>得分：<b>${score} / ${questions.length}</b><br>${score===questions.length?'满分，五行生克已拿握 🟢':'再过一遍相生相克口诀，重做一次更稳'}</div>`;
+    scoreEl.textContent = '';
+    return;
+  }
+  const q = questions[idx];
+  const opts = ['A生B','A克B','B生A','B克A'];
+  quiz.innerHTML = `
+    <div class="q-card">
+      <div style="font-size:15px">第 ${idx+1} 题：下面两个五行是什么关系？</div>
+      <div style="text-align:center;margin:12px 0">
+        <span class="chip" style="background:${W[q.a]}">A = ${q.a}</span>
+        <span class="arrow" style="margin:0 10px">vs</span>
+        <span class="chip" style="background:${W[q.b]}">B = ${q.b}</span>
+      </div>
+      <div class="opts" id="opts"></div>
+      <div class="feedback" id="fb"></div>
+    </div>`;
+  const optsEl = document.getElementById('opts');
+  opts.forEach(o => {
+    const b = document.createElement('div');
+    b.className = 'opt'; b.textContent = o;
+    b.onclick = () => answer(o, q, b);
+    optsEl.appendChild(b);
+  });
+  scoreEl.textContent = `进度：${idx} / ${questions.length}　得分：${score}`;
+}
+function answer(o, q, btn) {
+  document.querySelectorAll('.opt').forEach(x => x.onclick = null);
+  const fb = document.getElementById('fb');
+  if (o === q.ans) {
+    btn.classList.add('correct'); score++;
+    fb.innerHTML = `✅ 对！${q.why}`;
+  } else {
+    btn.classList.add('wrong');
+    document.querySelectorAll('.opt').forEach(x => { if (x.textContent === q.ans) x.classList.add('correct'); });
+    fb.innerHTML = `❌ 错。正确答案是「${q.ans}」——${q.why}`;
+  }
+  setTimeout(() => { idx++; render(); }, 1500);
+}
+render();
+</script>
+</body>
+</html>

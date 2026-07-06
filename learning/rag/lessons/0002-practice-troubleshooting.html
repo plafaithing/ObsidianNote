@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>L02 配套 · 故障排查场景判断</title>
+  <style>
+  :root {
+    --bg: #fafaf7; --ink: #1a1a1a; --ink-soft: #444; --ink-mute: #777;
+    --rule: #e4e3dc; --accent: #2b5a8c; --accent-soft: #e8f0f7;
+    --warn: #b06a00; --warn-soft: #fdf3e3; --key: #2f7d52; --key-soft: #e8f5ee;
+    --pit: #a23a3a; --pit-soft: #fbecec; --code-bg: #f3f3ee;
+    --serif: 'Source Serif Pro','Noto Serif SC',Georgia,'Songti SC',serif;
+    --sans: -apple-system,BlinkMacSystemFont,'Segoe UI','PingFang SC','Microsoft YaHei',sans-serif;
+    --mono: 'SF Mono','JetBrains Mono',Consolas,monospace;
+  }
+  *{box-sizing:border-box} html{scroll-behavior:smooth}
+  body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--sans);font-size:16px;line-height:1.78;-webkit-font-smoothing:antialiased}
+  .lesson{max-width:760px;margin:0 auto;padding:48px 28px 96px}
+  .lesson-header{margin-bottom:36px;border-bottom:1px solid var(--rule);padding-bottom:22px}
+  .course-label{font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--accent);font-weight:700}
+  .lesson-num{font-size:13px;color:var(--ink-mute);margin:8px 0 2px}
+  .lesson-title{font-family:var(--serif);font-size:32px;line-height:1.22;margin:2px 0 8px;font-weight:700}
+  .lesson-sub{color:var(--ink-soft);font-size:15px;margin:0}
+  .lesson-nav{display:flex;justify-content:space-between;margin:0 0 40px;font-size:14px}
+  .lesson-nav a{color:var(--accent);text-decoration:none} .lesson-nav a:hover{text-decoration:underline}
+  h2{font-family:var(--serif);font-size:23px;margin:40px 0 12px;font-weight:700}
+  h3{font-size:17px;margin:24px 0 8px;font-weight:600}
+  p{margin:12px 0} ul,ol{margin:12px 0;padding-left:24px} li{margin:6px 0}
+  strong{color:var(--ink);font-weight:600} em{color:var(--ink-soft)} a{color:var(--accent)}
+  code{font-family:var(--mono);background:var(--code-bg);padding:2px 6px;border-radius:4px;font-size:.9em}
+  .callout{margin:22px 0;padding:14px 18px;border-left:3px solid;border-radius:0 6px 6px 0}
+  .callout p:first-child{margin-top:0} .callout p:last-child{margin-bottom:0}
+  .callout-title{font-weight:700;font-size:13px;letter-spacing:.03em;margin-bottom:6px;display:block}
+  .callout.info{background:var(--accent-soft);border-color:var(--accent)}
+  .callout.key{background:var(--key-soft);border-color:var(--key)}
+  .callout.warn{background:var(--warn-soft);border-color:var(--warn)}
+  .callout.pit{background:var(--pit-soft);border-color:var(--pit)}
+  .quiz{margin:26px 0;border:1px solid var(--rule);border-radius:12px;padding:22px 24px;background:#fff}
+  .quiz-q{font-weight:600;margin:0 0 6px;font-size:15px}
+  .quiz-scene{color:var(--ink-soft);font-size:14px;margin:0 0 14px;line-height:1.7}
+  .quiz-options{display:flex;flex-direction:column;gap:9px}
+  .quiz-opt{display:flex;align-items:center;gap:12px;padding:11px 16px;border:1.5px solid var(--rule);border-radius:10px;cursor:pointer;transition:all .15s;user-select:none}
+  .quiz-opt:hover{border-color:var(--accent);background:var(--accent-soft)}
+  .quiz-opt .mark{width:24px;height:24px;border-radius:50%;border:1.5px solid var(--ink-mute);display:inline-flex;align-items:center;justify-content:center;font-size:13px;color:transparent;flex-shrink:0}
+  .quiz-opt.reveal.correct{border-color:var(--key);background:var(--key-soft)}
+  .quiz-opt.reveal.correct .mark{background:var(--key);color:#fff;border-color:var(--key)}
+  .quiz-opt.reveal.wrong{border-color:var(--pit);background:var(--pit-soft)}
+  .quiz-opt.reveal.wrong .mark{background:var(--pit);color:#fff;border-color:var(--pit)}
+  .quiz-feedback{margin-top:14px;font-size:14px;line-height:1.72;display:none;padding:14px 16px;background:var(--code-bg);border-radius:8px}
+  .quiz-feedback.show{display:block}
+  .quiz-feedback strong{color:var(--ink)}
+  .win{margin:36px 0 24px;padding:22px 24px;background:var(--key-soft);border-radius:12px;border:1px solid var(--key)}
+  .win h3{margin-top:0;color:var(--key)}
+  .scoreboard{position:sticky;top:0;background:var(--bg);padding:10px 0;border-bottom:1px solid var(--rule);margin-bottom:10px;font-size:14px;color:var(--ink-mute);z-index:10}
+  .scoreboard b{color:var(--key)}
+  @media (max-width:600px){.lesson{padding:28px 18px 64px}.lesson-title{font-size:24px}}
+  </style>
+</head>
+<body>
+<article class="lesson">
+
+  <header class="lesson-header">
+    <div class="course-label">L02 配套练习</div>
+    <div class="lesson-num">故障排查 · 场景判断</div>
+    <h1 class="lesson-title">RAG 出问题了，根因在哪一步？</h1>
+    <p class="lesson-sub">6 个真实症状，练「症状 → 根因环节」的排查直觉</p>
+  </header>
+
+  <nav class="lesson-nav">
+    <a href="0002-rag-pipeline.html">← 回 L02 课程</a>
+    <a href="0003-chunking-strategies.html">下一节：切分策略 →</a>
+  </nav>
+
+  <div class="scoreboard" id="scoreboard">已答 <b id="done">0</b> / 6 · 正确 <b id="right">0</b></div>
+
+  <div class="callout info">
+    <span class="callout-title">怎么做</span>
+    <p>每题给一个 RAG 故障症状，判断根因最可能在 9 个环节的哪一步。点击选项后看详细解释——<strong>重点看为什么不是其他环节</strong>，那是建立直觉的关键。症状和根因常常不在同一环节，这正是排查最难的地方。</p>
+  </div>
+
+  <!-- 题 1：切分 -->
+  <div class="quiz">
+    <p class="quiz-q">场景 1</p>
+    <p class="quiz-scene">DBA Copilot 上线后，用户问「慢 SQL 怎么处理」，系统召回了「慢 SQL 的现象描述」片段，但回答里<strong>完全没有处理步骤</strong>。你检查发现召回率指标正常，相关文档确实在库里。</p>
+    <div class="quiz-options">
+      <label class="quiz-opt" data-correct="true"><span class="mark">✓</span><span>文档切分</span></label>
+      <label class="quiz-opt" data-correct="false"><span class="mark">✗</span><span>向量检索</span></label>
+      <label class="quiz-opt" data-correct="false"><span class="mark">✗</span><span>重排模型</span></label>
+      <label class="quiz-opt" data-correct="false"><span class="mark">✗</span><span>生成环节</span></label>
+    </div>
+    <div class="quiz-feedback">
+      <strong>✓ 文档切分。</strong> 手册的「现象 / 原因 / 处理步骤」被切到了不同 chunk。问处理步骤时，只召回到「现象」片段——它确实和"慢 SQL"相关，所以召回率"正常"，但处理步骤在另一个 chunk 里没被召回。<br><br>
+      <em>为什么不是检索</em>：召回率正常说明检索没漏（在切分给定的片段边界内它尽力了）。<em>为什么不是生成</em>：LLM 拿不到处理步骤的上下文，巧妇难为无米之炊，不是它的问题。<br><br>
+      <strong>口诀</strong>：召回率正常但答案残缺，先怀疑切分割裂了语义完整单元。
+    </div>
+  </div>
+
+  <!-- 题 2：解析 -->
+  <div class="quiz">
+    <p class="quiz-q">场景 2</p>
+    <p class="quiz-scene">RAG 回答参数类问题总是出错或编造。你查知识库发现：运维手册里关键参数说明在<strong>表格</strong>里（参数名 / 默认值 / 含义），但这些表格在库里变成了断断续续的乱码碎片。</p>
+    <div class="quiz-options">
+      <label class="quiz-opt" data-correct="true"><span class="mark">✓</span><span>文档解析</span></label>
+      <label class="quiz-opt" data-correct="false"><span class="mark">✗</span><span>文档切分</span></label>
+      <label class="quiz-opt" data-correct="false"><span class="mark">✗</span><span>向量化</span></label>
+      <label class="quiz-opt" data-correct="false"><span class="mark">✗</span><span>向量检索</span></label>
+    </div>
+    <div class="quiz-feedback">
+      <strong>✓ 文档解析（环节①，最靠前）。</strong> PDF/HTML 里的表格在解析时结构丢失，变成散落文本。切分拿到的是残缺碎片，后面全错。<br><br>
+      <em>为什么不是切分</em>：切分基于解析后的文本，解析就错了，切分再聪明也没用——这是"上游污染下游"。<em>为什么不是向量化</em>：embedding 编码的就是残缺碎片，再好的模型也救不回丢失的表格结构。<br><br>
+      <strong>口诀</strong>：表格/公式/图片类内容出错，先查解析（①），它比切分更上游。运维手册表格多，这块尤其要盯。
+    </div>
+  </div>
+
+  <!-- 题 3：embedding -->
+  <div class="quiz">
+    <p class="quiz-q">场景 3</p>
+    <p class="quiz-scene">团队用了一个<strong>通用英文 embedding 模型</strong>处理中文运维语料。用户问「会话 inactive 怎么排查」，库里明明有「会话状态分析」文档，但 Top5 全是不相关内容，相关文档排到 50 名外。</p>
+    <div class="quiz-options">
+      <label class="quiz-opt" data-correct="false"><span class="mark">✗</span><span>文档切分</span></label>
+      <label class="quiz-opt" data-correct="false"><span class="mark">✗</span><span>向量检索</span></label>
+      <label class="quiz-opt" data-correct="true"><span class="mark">✓</span><span>向量化</span></label>
+      <label class="quiz-opt" data-correct="false"><span class="mark">✗</span><span>重排模型</span></label>
+    </div>
+    <div class="quiz-feedback">
+      <strong>✓ 向量化（embedding 选型）。</strong> 中文运维语料用英文通用模型，语义空间不对——「会话 inactive」和「会话状态分析」在人看来是同主题，但在英文模型的向量空间里距离很远。模型把文本映射到了错误的空间。<br><br>
+      <em>为什么不是检索</em>：检索只是按向量距离取近邻，向量本身算错了，检索无能为力（它不会"纠正"向量）。<em>为什么不是切分</em>：文档完整、切分合理，问题在把文本变成向量这一步。<br><br>
+      <strong>口诀</strong>：召回大面积跑偏（不是个别漏），且语种/领域特殊，先查 embedding 选型。中文运维场景选 BGE-m3 / GTE-Qwen2 这类中文强的模型。
+    </div>
+  </div>
+
+  <!-- 题 4：检索 K -->
+  <div class="quiz">
+    <p class="quiz-q">场景 4</p>
+    <p class="quiz-scene">相关知识分散在 8 个 chunk 里。系统检索只取 <strong>Top3</strong>，总有相关 chunk 没进上下文，答案老是缺这缺那。改成 Top10 后答案明显变全。</p>
+    <div class="quiz-options">
+      <label class="quiz-opt" data-correct="false"><span class="mark">✗</span><span>文档切分</span></label>
+      <label class="quiz-opt" data-correct="true"><span class="mark">✓</span><span>向量检索</span></label>
+      <label class="quiz-opt" data-correct="false"><span class="mark">✗</span><span>重排模型</span></label>
+      <label class="quiz-opt" data-correct="false"><span class="mark">✗</span><span>上下文组装</span></label>
+    </div>
+    <div class="quiz-feedback">
+      <strong>✓ 向量检索（K 设置太小）。</strong> Top3 的候选池太小，相关 chunk 根本没机会进入。增大 K 让候选变全，问题缓解。<br><br>
+      <em>为什么不是 rerank</em>：rerank 是对已召回的候选精排，候选都不够（只召回 3 个），rerank 没素材可排。<em>为什么不是上下文组装</em>：组装基于检索给的结果，检索给的不够，组装也补不出来。<br><br>
+      <strong>注意</strong>：增大 K 会引入更多噪声 chunk，所以通常配合 rerank 精排——先广召回（大 K），再精排序（rerank 选 Top-N）。这是 ⑤⑥ 协作的典型模式。
+    </div>
+  </div>
+
+  <!-- 题 5：缺 rerank -->
+  <div class="quiz">
+    <p class="quiz-q">场景 5</p>
+    <p class="quiz-scene">检索 Top10 里第 1、3、8 个 chunk 是相关的，但 LLM 主要参考了前几个，<strong>第 8 个相关 chunk 没被有效利用</strong>，答案漏了关键点。你查了召回率，其实够用。</p>
+    <div class="quiz-options">
+      <label class="quiz-opt" data-correct="false"><span class="mark">✗</span><span>向量检索</span></label>
+      <label class="quiz-opt" data-correct="true"><span class="mark">✓</span><span>重排模型</span></label>
+      <label class="quiz-opt" data-correct="false"><span class="mark">✗</span><span>文档切分</span></label>
+      <label class="quiz-opt" data-correct="false"><span class="mark">✗</span><span>生成环节</span></label>
+    </div>
+    <div class="quiz-feedback">
+      <strong>✓ 重排模型（缺 rerank）。</strong> 相关 chunk 在 Top10 里但排第 8，LLM 受「Lost in the Middle」影响没重视它。加 rerank（Cross-encoder）把相关 chunk 精排到前 2-3 名。这就是 rerank 让 Top3 命中率从 68%→89% 的意义——把"召回到但排后"的拽到前面。<br><br>
+      <em>为什么不是检索</em>：召回没问题（相关 chunk 在 Top10 里），是排序质量问题。<em>为什么不是生成</em>：LLM 没有"自动重排上下文"的能力，它倾向关注首尾，排第 8 就是容易被忽略。<br><br>
+      <strong>口诀</strong>：召回够、排得差、答案漏关键点 → 上 rerank。
+    </div>
+  </div>
+
+  <!-- 题 6：生成 prompt -->
+  <div class="quiz">
+    <p class="quiz-q">场景 6</p>
+    <p class="quiz-scene">检索召回了正确文档、也排在前面，但 LLM 回答时<strong>不引用文档</strong>，还混入了训练数据里的过时信息（比如旧版本的参数名）。</p>
+    <div class="quiz-options">
+      <label class="quiz-opt" data-correct="false"><span class="mark">✗</span><span>重排模型</span></label>
+      <label class="quiz-opt" data-correct="false"><span class="mark">✗</span><span>上下文组装</span></label>
+      <label class="quiz-opt" data-correct="false"><span class="mark">✗</span><span>向量检索</span></label>
+      <label class="quiz-opt" data-correct="true"><span class="mark">✓</span><span>生成环节</span></label>
+    </div>
+    <div class="quiz-feedback">
+      <strong>✓ 生成环节（prompt 工程）。</strong> 检索给对了，但 prompt 没约束 LLM「只能基于上下文回答 + 必须引用来源 + 不知道就说不知道」，LLM 就自由发挥，混入训练记忆里的旧知识。<br><br>
+      <em>为什么不是上下文组装</em>：上下文给的是对的（正确文档排前面）。<em>为什么不是 rerank</em>：排序没问题。<br><br>
+      <strong>解法</strong>：prompt 加引用约束 + 结构化输出（如 JSON）+ 「若上下文无依据则回答"文档未提及"」。这是 L08 Prompt 工程的重点。<br><br>
+      <strong>口诀</strong>：召回排前都对，但答案跑偏/不引用/混旧知识 → 生成环节的 prompt 没约束好。
+    </div>
+  </div>
+
+  <h2>排查口诀（带走这个）</h2>
+  <div class="callout key">
+    <span class="callout-title">症状 → 环节 速查</span>
+    <ol>
+      <li><strong>召回不到</strong>（相关文档没进 Top-K）→ 切分 / 解析 / embedding / 检索 K</li>
+      <li><strong>召回率正常但答案残缺</strong> → 切分割裂了语义（场景 1）</li>
+      <li><strong>表格/公式类内容错乱</strong> → 解析（①，最上游）（场景 2）</li>
+      <li><strong>大面积召回跑偏 + 语种/领域特殊</strong> → embedding 选型（场景 3）</li>
+      <li><strong>召回够、排得差、漏关键点</strong> → 上 rerank（场景 5）</li>
+      <li><strong>召回排前都对，但答案跑偏/不引用/混旧知识</strong> → 生成 prompt（场景 6）</li>
+      <li><strong>说不清哪坏</strong> → 评估先行，分环节量化定位（别上来换模型）</li>
+    </ol>
+  </div>
+  <p>核心心法：<strong>症状在 ⑧（生成），根因常在 ②（切分）</strong>。先沿流水线从上游往下游排查，而不是反向。</p>
+
+  <div class="win">
+    <h3 id="win-title">✓ 做完 6 题</h3>
+    <p id="win-body">不管对了几题，关键是把"为什么不是其他环节"想通了。排查直觉就是从这种反向排除里长出来的。错题比对的更有价值——回头看对应场景的反馈解释。</p>
+  </div>
+
+  <div class="callout info">
+    <span class="callout-title">还不够？</span>
+    <p>想再来一组、或想就某个场景深聊（比如「我的运维文档切分该怎么做」），直接跟我说。也可以回到 <a href="0002-rag-pipeline.html">L02 课程</a> 重看九环节总表。</p>
+  </div>
+
+  <nav class="lesson-nav" style="margin-top:40px;">
+    <a href="0002-rag-pipeline.html">← 回 L02 课程</a>
+    <a href="0003-chunking-strategies.html">下一节：切分策略 →</a>
+  </nav>
+
+<script>
+  let done = 0, right = 0;
+  const doneEl = document.getElementById('done');
+  const rightEl = document.getElementById('right');
+  document.querySelectorAll('.quiz').forEach(quiz => {
+    const opts = quiz.querySelectorAll('.quiz-opt');
+    const fb = quiz.querySelector('.quiz-feedback');
+    let answered = false;
+    opts.forEach(opt => {
+      opt.addEventListener('click', () => {
+        if (answered) return;
+        answered = true;
+        const isCorrect = opt.dataset.correct === 'true';
+        opts.forEach(o => {
+          o.classList.remove('correct','wrong');
+          o.classList.add('reveal');
+          if (o.dataset.correct === 'true') o.classList.add('correct');
+          else if (o === opt) o.classList.add('wrong');
+        });
+        fb.classList.add('show');
+        done++; if (isCorrect) right++;
+        doneEl.textContent = done; rightEl.textContent = right;
+        if (done === 6) {
+          const title = document.getElementById('win-title');
+          const body = document.getElementById('win-body');
+          if (right === 6) { title.textContent = '✓ 6/6 全对！'; body.innerHTML = '排查直觉已经在线了。面试遇到「RAG 效果不好怎么排查」你不仅能答，还能举具体场景。可以放心进 L03 切分策略。'; }
+          else if (right >= 4) { title.textContent = '✓ ' + right + '/6，基本掌握'; body.innerHTML = '主流症状能定位了。错的几题回头看反馈，重点看「为什么不是其他环节」。也可以进 L03，边学边回来验证。'; }
+          else { title.textContent = '✓ ' + right + '/6，再练一轮'; body.innerHTML = '别灰心——这块迷糊说明流水线的环节职责还没完全分清。建议回 <a href="0002-rag-pipeline.html">L02</a> 重看九环节总表，尤其每个环节的"输入→输出"，再回来重做。'; }
+        }
+      });
+    });
+  });
+</script>
+
+</article>
+</body>
+</html>

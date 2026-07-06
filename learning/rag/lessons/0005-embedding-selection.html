@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>L05 · Embedding 选型</title>
+  <style>
+  :root {
+    --bg: #fafaf7; --ink: #1a1a1a; --ink-soft: #444; --ink-mute: #777;
+    --rule: #e4e3dc; --accent: #2b5a8c; --accent-soft: #e8f0f7;
+    --warn: #b06a00; --warn-soft: #fdf3e3; --key: #2f7d52; --key-soft: #e8f5ee;
+    --pit: #a23a3a; --pit-soft: #fbecec; --code-bg: #f3f3ee;
+    --serif: 'Source Serif Pro','Noto Serif SC',Georgia,'Songti SC',serif;
+    --sans: -apple-system,BlinkMacSystemFont,'Segoe UI','PingFang SC','Microsoft YaHei',sans-serif;
+    --mono: 'SF Mono','JetBrains Mono',Consolas,monospace;
+  }
+  *{box-sizing:border-box} html{scroll-behavior:smooth}
+  body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--sans);font-size:16px;line-height:1.78;-webkit-font-smoothing:antialiased}
+  .lesson{max-width:760px;margin:0 auto;padding:48px 28px 96px}
+  .lesson-header{margin-bottom:36px;border-bottom:1px solid var(--rule);padding-bottom:22px}
+  .course-label{font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--accent);font-weight:700}
+  .lesson-num{font-size:13px;color:var(--ink-mute);margin:8px 0 2px}
+  .lesson-title{font-family:var(--serif);font-size:34px;line-height:1.22;margin:2px 0 8px;font-weight:700}
+  .lesson-sub{color:var(--ink-soft);font-size:15px;margin:0}
+  .lesson-nav{display:flex;justify-content:space-between;margin:0 0 40px;font-size:14px}
+  .lesson-nav a{color:var(--accent);text-decoration:none} .lesson-nav a:hover{text-decoration:underline}
+  h2{font-family:var(--serif);font-size:24px;margin:44px 0 12px;font-weight:700}
+  h3{font-size:17px;margin:26px 0 8px;font-weight:600}
+  p{margin:12px 0} ul,ol{margin:12px 0;padding-left:24px} li{margin:6px 0}
+  strong{color:var(--ink);font-weight:600} em{color:var(--ink-soft)} a{color:var(--accent)}
+  code{font-family:var(--mono);background:var(--code-bg);padding:2px 6px;border-radius:4px;font-size:.9em}
+  pre{background:var(--code-bg);padding:16px;border-radius:8px;overflow-x:auto} pre code{background:none;padding:0}
+  .callout{margin:22px 0;padding:14px 18px;border-left:3px solid;border-radius:0 6px 6px 0}
+  .callout p:first-child{margin-top:0} .callout p:last-child{margin-bottom:0}
+  .callout-title{font-weight:700;font-size:13px;letter-spacing:.03em;margin-bottom:6px;display:block}
+  .callout.info{background:var(--accent-soft);border-color:var(--accent)}
+  .callout.warn{background:var(--warn-soft);border-color:var(--warn)}
+  .callout.key{background:var(--key-soft);border-color:var(--key)}
+  .callout.pit{background:var(--pit-soft);border-color:var(--pit)}
+  .callout.interview{background:var(--accent-soft);border-color:var(--accent)}
+  .callout.interview .callout-title::before{content:"🎤 "}
+  table{width:100%;border-collapse:collapse;margin:18px 0;font-size:14px}
+  th,td{text-align:left;padding:10px 12px;border-bottom:1px solid var(--rule);vertical-align:top}
+  th{font-weight:600;color:var(--ink-soft);background:var(--code-bg)}
+  .quiz{margin:30px 0;border:1px solid var(--rule);border-radius:12px;padding:24px 26px;background:#fff}
+  .quiz-q{font-weight:600;margin:0 0 6px;font-size:16px}
+  .quiz-scene{color:var(--ink-soft);font-size:14px;margin:0 0 16px;line-height:1.7}
+  .quiz-options{display:flex;flex-direction:column;gap:10px}
+  .quiz-opt{display:flex;align-items:center;gap:12px;padding:12px 16px;border:1.5px solid var(--rule);border-radius:10px;cursor:pointer;transition:all .15s;user-select:none}
+  .quiz-opt:hover{border-color:var(--accent);background:var(--accent-soft)}
+  .quiz-opt .mark{width:24px;height:24px;border-radius:50%;border:1.5px solid var(--ink-mute);display:inline-flex;align-items:center;justify-content:center;font-size:13px;color:transparent;flex-shrink:0}
+  .quiz-opt.reveal.correct{border-color:var(--key);background:var(--key-soft)}
+  .quiz-opt.reveal.correct .mark{background:var(--key);color:#fff;border-color:var(--key)}
+  .quiz-opt.reveal.wrong{border-color:var(--pit);background:var(--pit-soft)}
+  .quiz-opt.reveal.wrong .mark{background:var(--pit);color:#fff;border-color:var(--pit)}
+  .quiz-feedback{margin-top:16px;font-size:14px;line-height:1.72;display:none;padding:14px 16px;background:var(--code-bg);border-radius:8px}
+  .quiz-feedback.show{display:block}
+  .win{margin:36px 0 24px;padding:22px 24px;background:var(--key-soft);border-radius:12px;border:1px solid var(--key)}
+  .win h3{margin-top:0;color:var(--key)}
+  .sources{margin-top:32px;padding-top:22px;border-top:1px solid var(--rule);font-size:14px}
+  .sources h3{margin-top:0} .sources ul{padding-left:20px}
+  .ask-reminder{margin-top:20px;padding:16px 18px;background:var(--accent-soft);border-radius:10px;font-size:14px}
+  .cite{font-size:13px;color:var(--ink-mute)}
+  @media print{body{background:#fff}.lesson-nav,.quiz-opt{break-inside:avoid}a{color:var(--ink)}}
+  @media (max-width:600px){.lesson{padding:28px 18px 64px}.lesson-title{font-size:26px}}
+  </style>
+</head>
+<body>
+<article class="lesson">
+
+  <header class="lesson-header">
+    <div class="course-label">RAG 课程 · M3 检索侧</div>
+    <div class="lesson-num">第 05 节 / 共 12 节</div>
+    <h1 class="lesson-title">Embedding 选型：命中的关键</h1>
+    <p class="lesson-sub">把文本变成向量——选对模型，检索才有意义</p>
+  </header>
+
+  <nav class="lesson-nav">
+    <a href="0004-metadata-extraction.html">← 上一节：元数据与结构化抽取</a>
+    <a href="0006-hybrid-retrieval.html">下一节：向量+BM25 混合检索 →</a>
+  </nav>
+
+  <h2>Embedding 是什么</h2>
+  <p>Embedding 就是<strong>把文本映射成一串数字（高维向量）</strong>。语义相近的文本，向量在空间里也相近——这就是向量检索的基础（Q&A 0001 里说的「画地图」）。</p>
+  <pre><code>"慢SQL诊断"  →  [0.12, -0.45, 0.88, ..., 0.03]   # 1024 维向量
+"SQL性能排查" →  [0.11, -0.43, 0.85, ..., 0.05]   # 语义相近，向量也相近
+"备份恢复"    →  [-0.67, 0.21, -0.12, ..., 0.91]  # 语义无关，向量相差大</code></pre>
+  <p>检索时，把用户问题也变成向量，算它和库里所有 chunk 向量的相似度（通常用 cosine），取最相似的 Top-K。</p>
+
+  <div class="callout info">
+    <span class="callout-title">和数据库索引的本质区别（你有 DB 背景，这步关键）</span>
+    <p><strong>DB 索引是人定义的规则</strong>（B-tree / Hash），做<strong>精确匹配</strong>——你查 <code>WHERE id=123</code>，索引精确找到 123。<br>
+    <strong>Embedding 是模型从数据里学出来的语义空间</strong>，做<strong>相似度匹配</strong>——你问「慢SQL」，它能找到「SQL性能排查」，即使没有共同关键词。<br>
+    代价：embedding 是「近似」（会漏、会混），不像 DB 索引那么精确。所以才有 L04 元数据过滤补结构化属性、L06 混合检索补精确匹配、L07 rerank 补排序。</p>
+  </div>
+
+  <h2>选型四个维度</h2>
+  <table>
+    <thead><tr><th>维度</th><th>要点</th><th>运维场景考量</th></tr></thead>
+    <tbody>
+      <tr><td><strong>语言适配</strong></td><td>中文语料必须选中文优化的模型</td><td>运维文档是中文，别用纯英文模型</td></tr>
+      <tr><td><strong>维度</strong></td><td>768 / 1024 / 1536 / 3072</td><td>高维表达力强但成本高</td></tr>
+      <tr><td><strong>效率</strong></td><td>编码速度（ingest）、检索延迟</td><td>10 万文档 ingest 要算时间</td></tr>
+      <tr><td><strong>效果</strong></td><td>C-MTEB 榜单 + 自测</td><td>别盲信榜单，要在自己语料评测</td></tr>
+    </tbody>
+  </table>
+
+  <h2>中文 Embedding 模型对比</h2>
+  <table>
+    <thead><tr><th>模型</th><th>维度</th><th>部署</th><th>特点</th></tr></thead>
+    <tbody>
+      <tr><td><strong>BGE-M3</strong>（智源）</td><td>1024</td><td>本地</td><td>⭐ 中文 RAG 首选。<strong>三合一</strong>（稠密+稀疏+多向量），8192 tokens 长文本，100+ 语言</td></tr>
+      <tr><td><strong>GTE-Qwen2 / Qwen3-Embedding</strong>（阿里）</td><td>较高</td><td>本地</td><td>C-MTEB 检索子榜优异，多语言强</td></tr>
+      <tr><td><strong>bge-large-zh</strong>（智源）</td><td>1024</td><td>本地</td><td>经典中文模型，轻量，POC 够用</td></tr>
+      <tr><td><strong>OpenAI text-embedding-3</strong></td><td>1536/3072</td><td>API</td><td>英文强中文一般，贵，需外网</td></tr>
+      <tr><td><strong>Conan / stella</strong></td><td>各异</td><td>本地</td><td>国产新秀，部分子任务亮眼</td></tr>
+    </tbody>
+  </table>
+  <div class="callout key">
+    <span class="callout-title">运维场景推荐</span>
+    <p><strong>BGE-M3</strong>——本地部署（数据不出域）、中文强、1024 维平衡、支持 8192 tokens 长文档。最关键的是它的<strong>稀疏向量功能</strong>：一个模型就能同时出稠密向量（语义）+ 稀疏向量（关键词，类似 BM25），一站式做混合检索（L06 会讲）。运维文档标识符多，这个特性正合适。</p>
+  </div>
+
+  <h2>维度 vs 成本权衡</h2>
+  <p>维度越高，表达力越强，但存储和计算成本线性上涨：</p>
+  <table>
+    <thead><tr><th>维度</th><th>表达力</th><th>存储/百万向量*</th><th>检索延迟</th><th>适用</th></tr></thead>
+    <tbody>
+      <tr><td>768</td><td>够用</td><td>~3 GB</td><td>快</td><td>POC / 小规模</td></tr>
+      <tr><td><strong>1024</strong></td><td>好</td><td>~4 GB</td><td>中</td><td>⭐ 推荐，平衡点</td></tr>
+      <tr><td>1536</td><td>强</td><td>~6 GB</td><td>较慢</td><td>高精度需求</td></tr>
+      <tr><td>3072</td><td>最强</td><td>~12 GB</td><td>慢</td><td>极高精度 / 英文</td></tr>
+    </tbody>
+  </table>
+  <p class="cite">*存储 = 维度 × 4 字节（float32）× 向量数。100 万 × 1024 × 4B ≈ 4 GB。HNSW 索引还要额外 1.5-2 倍。</p>
+  <div class="callout warn">
+    <span class="callout-title">别盲目追高维度</span>
+    <p>3072 维不一定比 1024 维效果好多少（边际递减），但存储和检索成本翻 3 倍。中文运维场景 1024 维是甜点。<strong>评测驱动</strong>：搭测试集跑 Recall@5，1024 够用就别上 1536。</p>
+  </div>
+
+  <h2>运维场景的特殊性</h2>
+  <p>运维文档有个特点：大量<strong>无语义的标识符</strong>——视图名（<code>PGXC_STAT_ACTIVITY</code>）、错误码（<code>ORA-01555</code>）、参数名（<code>shared_buffers</code>）。</p>
+  <p>这些标识符对 embedding 是难题：它们是「无语义」的字符串，embedding 模型理解不了 <code>ORA-01555</code> 和「快照太旧」的关联（除非训练语料里见过）。结果就是<strong>纯向量检索对精确标识符弱</strong>——这正是 Q&A 0001 里讲的「精确匹配弱」症状。</p>
+  <div class="callout pit">
+    <span class="callout-title">这不是 embedding 的锅，是它的边界</span>
+    <p>embedding 擅长<strong>语义相似</strong>（慢SQL ↔ SQL性能），不擅长<strong>精确匹配</strong>（ORA-01555 这个具体错误码）。解法不是换更强 embedding，而是<strong>混合检索</strong>（L06）——用 BM25 补精确匹配。BGE-M3 的稀疏向量功能正好一站搞定。</p>
+  </div>
+
+  <h2>C-MTEB 榜单怎么用</h2>
+  <p><strong>C-MTEB</strong>（Chinese Massive Text Embedding Benchmark）是中文嵌入模型最权威的综合榜单，覆盖分类、聚类、检索、相似度等任务<a href="https://c-mteb.github.io/" target="_blank">[1]</a>。</p>
+  <ul>
+    <li>看 <strong>Retrieval（检索）子榜</strong>——和 RAG 最相关，其他子榜（分类/聚类）参考意义小</li>
+    <li>榜单是<strong>通用语料</strong>测的，你的运维语料可能不一样——<strong>别盲信，要自测</strong></li>
+    <li>自测方法：搭 50 题运维测试集，跑 Recall@5 对比几个候选模型</li>
+  </ul>
+
+  <div class="callout interview">
+    <span class="callout-title">面试视角</span>
+    <p><strong>Q：中文 RAG 选什么 embedding？</strong> BGE-M3 或 GTE-Qwen2——中文优化、可本地部署、C-MTEB 检索子榜高分。OpenAI text-embedding-3 中文一般、贵、数据出境（运维场景敏感）。BGE-M3 还支持稀疏向量，一站式做混合检索。</p>
+    <p><strong>Q：维度怎么选？</strong> 1024 是平衡点。高维表达力强但存储/检索成本线性涨，边际递减。POC 用 768/1024 够，评测驱动，别盲目追高维度。</p>
+    <p><strong>Q：换 embedding 要注意什么？</strong> ①要<strong>重新向量化整个知识库</strong>（成本高，10 万文档要算时间）；②维度变了要<strong>重建向量索引</strong>；③所以 L02 说换模型放 POC 优化最后——先治切分/检索/评估这些廉价环节。</p>
+    <p><strong>Q：embedding 和 BM25 什么关系？</strong> embedding 是<strong>稠密向量</strong>（语义相似），BM25 是<strong>稀疏关键词</strong>（精确匹配）。运维场景标识符多，纯 embedding 弱，需混合（L06）。</p>
+  </div>
+
+  <h2>小测验</h2>
+  <div class="quiz" id="quiz">
+    <p class="quiz-q">场景</p>
+    <p class="quiz-scene">团队用 <strong>OpenAI text-embedding-3</strong> 搭运维 RAG，效果不好，召回率低。运维文档是<strong>中文</strong>，含大量错误码（<code>ORA-01555</code>）和视图名（<code>PGXC_STAT_ACTIVITY</code>）。以下改进<strong>最合理</strong>的是？</p>
+    <div class="quiz-options">
+      <label class="quiz-opt" data-correct="true"><span class="mark">✓</span><span>换 BGE-M3（中文优化）+ 加 BM25 混合检索（补精确标识符匹配）</span></label>
+      <label class="quiz-opt" data-correct="false"><span class="mark">✗</span><span>换 3072 维的更强 OpenAI 模型</span></label>
+      <label class="quiz-opt" data-correct="false"><span class="mark">✗</span><span>在 OpenAI embedding 模型上做运维领域微调</span></label>
+      <label class="quiz-opt" data-correct="false"><span class="mark">✗</span><span>增大检索 Top-K</span></label>
+    </div>
+    <div class="quiz-feedback" id="quiz-feedback">
+      <strong>✓ 换 BGE-M3 + 加 BM25 混合检索。</strong> 两个问题分开治：<br>
+      ① <strong>中文适配差</strong>→ 换 BGE-M3（中文优化、C-MTEB 高分、本地部署）。<br>
+      ② <strong>标识符检索弱</strong>→ 加 BM25 混合检索（embedding 救不了 ORA-01555 这种精确标识符，BM25 补）。<br>
+      BGE-M3 自带稀疏向量功能，一个模型就能做混合检索。<br><br>
+      <em>为什么不是「换 3072 维更强模型」</em>：维度高不解决中文适配（OpenAI 中文仍一般），也不解决标识符精确匹配。成本翻 3 倍却没治根因——盲信维度是选型反模式。<br>
+      <em>为什么不是「在 OpenAI 上微调」</em>：OpenAI 不支持私域微调 embedding 模型；即便能微调，POC 阶段成本太高，应先评测通用模型。<br>
+      <em>为什么不是「增大 K」</em>：K 大只是多召回，不解决中文理解差和标识符弱的根因，还增噪声和 rerank 成本。<br><br>
+      <strong>口诀</strong>：语言不适配换中文模型，精确匹配弱上混合检索——对症下药，别靠「更大」。
+    </div>
+  </div>
+  <script>
+    document.querySelectorAll('#quiz .quiz-opt').forEach(opt => {
+      opt.addEventListener('click', () => {
+        document.querySelectorAll('#quiz .quiz-opt').forEach(o => {
+          o.classList.remove('correct','wrong');
+          o.classList.add('reveal');
+          if (o.dataset.correct === 'true') o.classList.add('correct');
+          else if (o === opt) o.classList.add('wrong');
+        });
+        document.getElementById('quiz-feedback').classList.add('show');
+      });
+    });
+  </script>
+
+  <div class="win">
+    <h3>✓ 本节胜利</h3>
+    <p>你现在掌握了：</p>
+    <ol>
+      <li><strong>Embedding 本质</strong>——把文本变成向量做相似度匹配，和 DB 索引（精确匹配）是两套思路。</li>
+      <li><strong>选型四维度</strong>——语言适配、维度、效率、效果，评测驱动。</li>
+      <li><strong>中文推荐</strong>——BGE-M3（三合一、1024 维、本地部署）是运维场景首选。</li>
+      <li><strong>维度权衡</strong>——1024 是平衡点，别盲目追高维（边际递减、成本翻倍）。</li>
+      <li><strong>embedding 的边界</strong>——擅长语义相似，不擅长精确标识符 → L06 混合检索的动机。</li>
+    </ol>
+  </div>
+
+  <div class="sources">
+    <h3>本节取材与推荐阅读</h3>
+    <ul>
+      <li><a href="https://c-mteb.github.io/" target="_blank">[1] C-MTEB 中文嵌入榜单</a> — 选型权威参考，看 Retrieval 子榜。</li>
+      <li><a href="https://github.com/FlagOpen/FlagEmbedding" target="_blank">[2] BGE-M3（FlagEmbedding）</a> — 智源官方仓库，三合一检索文档。</li>
+      <li><a href="https://wiki.hugogu.cn/zh/ai/tech/rag" target="_blank">[3] HugoGu · RAG wiki</a> — embedding 选型实践。</li>
+      <li><a href="https://huggingface.co/Alibaba-NLP/gte-Qwen2-7B-instruct" target="_blank">[4] GTE-Qwen2（阿里）</a> — C-MTEB 高分模型。</li>
+    </ul>
+    <p class="cite">完整资源清单见 <code>learning/rag/RESOURCES.md</code>。</p>
+  </div>
+
+  <div class="ask-reminder">
+    💡 <strong>有不清楚的？直接问。</strong>比如：「BGE-M3 的三合一检索具体怎么用？」「我们文档量不大，bge-small 够不够？」「embedding 维度和向量库 HNSW 参数什么关系？」也可以直接说「继续 L06」进混合检索。
+  </div>
+
+  <nav class="lesson-nav" style="margin-top:40px;">
+    <a href="0004-metadata-extraction.html">← 上一节：元数据与结构化抽取</a>
+    <a href="0006-hybrid-retrieval.html">下一节：向量+BM25 混合检索 →</a>
+  </nav>
+
+</article>
+</body>
+</html>

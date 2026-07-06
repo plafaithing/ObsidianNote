@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>第 3 课 · 亲手派第一个子 agent</title>
+<style>
+  :root { --ink:#1a1a1a; --muted:#6b6b6b; --accent:#b8860b; --bg:#fdfcf8; --rule:#e5e2d8; }
+  * { box-sizing:border-box; }
+  body { font-family:Georgia,"Songti SC","Noto Serif SC",serif; background:var(--bg); color:var(--ink); line-height:1.7; margin:0; padding:2rem 1.25rem 5rem; }
+  .wrap { max-width:700px; margin:0 auto; }
+  .meta { font-family:-apple-system,"PingFang SC",sans-serif; font-size:0.8rem; color:var(--muted); letter-spacing:0.05em; text-transform:uppercase; }
+  h1 { font-size:1.9rem; line-height:1.25; margin:0.4rem 0 1.4rem; }
+  h2 { font-size:1.15rem; margin:2rem 0 0.5rem; font-family:-apple-system,"PingFang SC",sans-serif; }
+  p { margin:0.6rem 0; }
+  .lead { font-size:1.08rem; }
+  code { font-family:"SF Mono",Consolas,monospace; background:#f0ede2; padding:0.1em 0.35em; border-radius:3px; font-size:0.9em; }
+  strong { color:#000; }
+  pre { background:#1f1d18; color:#f3efe2; padding:0.9rem 1.1rem; border-radius:6px; overflow-x:auto; font-size:0.85rem; line-height:1.5; }
+  pre code { background:none; padding:0; color:inherit; }
+  .compare { display:grid; grid-template-columns:1fr 1fr; gap:1rem; margin:1.2rem 0; }
+  .compare div { border:1px solid var(--rule); border-radius:6px; padding:0.9rem 1rem; background:#fff; }
+  .compare h3 { font-size:0.92rem; margin:0 0 0.4rem; font-family:-apple-system,"PingFang SC",sans-serif; }
+  .compare .bad h3 { color:#9a3a3a; } .compare .good h3 { color:#3a6a3a; }
+  .compare p { font-size:0.93rem; margin:0.3rem 0; }
+  .result { border:1px solid var(--rule); border-left:3px solid var(--accent); border-radius:0 6px 6px 0; padding:0.7rem 1.1rem; margin:1rem 0; background:#fff; font-size:0.93rem; }
+  .result .tag { font-family:-apple-system,"PingFang SC",sans-serif; font-size:0.76rem; color:var(--muted); letter-spacing:0.05em; text-transform:uppercase; }
+  .elems { display:grid; grid-template-columns:repeat(2,1fr); gap:0.6rem; margin:1rem 0; }
+  .elems div { border:1px solid var(--rule); border-radius:6px; padding:0.7rem 0.9rem; background:#fff; font-size:0.92rem; }
+  .elems b { font-family:-apple-system,"PingFang SC",sans-serif; color:var(--accent); }
+  .quiz { border-left:3px solid var(--accent); padding:0.3rem 0 0.3rem 1.2rem; margin:1.6rem 0; }
+  .quiz q { display:block; font-weight:bold; font-family:-apple-system,"PingFang SC",sans-serif; font-style:normal; }
+  .opts { display:flex; gap:0.6rem; margin:0.5rem 0; flex-wrap:wrap; }
+  .opts button { font-family:-apple-system,"PingFang SC",sans-serif; font-size:0.95rem; padding:0.4rem 1.2rem; border:1px solid var(--rule); background:#fff; border-radius:999px; cursor:pointer; min-width:3.5rem; }
+  .opts button:hover { border-color:var(--accent); }
+  .opts button.right { background:#e7f0e0; border-color:#3a6a3a; color:#2a5a2a; }
+  .opts button.wrong { background:#f4e0e0; border-color:#9a3a3a; color:#7a2a2a; }
+  .fb { font-size:0.92rem; color:var(--ink); margin-top:0.4rem; min-height:1.2em; opacity:0; transition:opacity 0.2s; }
+  .fb.show { opacity:1; }
+  .ta { width:100%; min-height:90px; font-family:"SF Mono",Consolas,monospace; font-size:0.88rem; padding:0.6rem; border:1px solid var(--rule); border-radius:6px; resize:vertical; background:#fff; }
+  .box { background:#fff; border:1px solid var(--rule); border-radius:6px; padding:0.9rem 1.1rem; margin:1.4rem 0; font-size:0.94rem; }
+  .box h3 { margin:0 0 0.4rem; font-size:0.82rem; font-family:-apple-system,"PingFang SC",sans-serif; color:var(--muted); letter-spacing:0.05em; text-transform:uppercase; }
+  a { color:var(--accent); }
+  .nav { margin-top:2.5rem; padding-top:1.2rem; border-top:1px solid var(--rule); font-size:0.9rem; font-family:-apple-system,"PingFang SC",sans-serif; color:var(--muted); }
+  @media (max-width:540px){ .compare,.elems{grid-template-columns:1fr;} }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="meta">第 3 课 · 子 agent 系列 · 0003</div>
+  <h1>亲手派第一个子 agent</h1>
+
+  <p class="lead">前两课讲了"是什么""何时派"。这课真的派一个出去，看全过程。</p>
+
+  <h2>Agent 工具怎么用</h2>
+  <p>派子 agent 只需两个必备输入：</p>
+  <ul>
+    <li><strong>subagent_type</strong>——派哪种（如 <code>Explore</code> 搜索、<code>Plan</code> 规划、<code>general-purpose</code> 通用）</li>
+    <li><strong>prompt</strong>——给它什么任务（自包含的指令）</li>
+  </ul>
+  <pre><code>Agent(
+  subagent_type: "Explore",
+  prompt: "扫描 D:\\workplace\\code\\test 的代码结构，
+           返回文件清单、依赖关系、入口。
+           只读，不贴大段源码。"
+)</code></pre>
+
+  <h2>实战：派 Explore 扫一个项目</h2>
+  <p>我给它的 prompt（注意四要素）：</p>
+  <pre><code>广度：medium。
+扫描 D:\workplace\code\test 这个前端项目的代码结构。
+具体查：1.有哪些文件各自干什么 2.依赖关系 3.整体什么项目
+约束：只读、不修改；聚焦结构，不贴大段源码。
+输出：项目概览 / 文件清单 / 依赖关系 / 入口</code></pre>
+
+  <div class="result">
+    <div class="tag">子 agent 返回（节选）</div>
+    <p><strong>项目概览</strong>：Three.js + MediaPipe 的 3D 粒子手势 demo——摄像头识别手张开程度，粒子随开合扩散/收缩，可切球形/爱心/土星。</p>
+    <p><strong>文件清单</strong>：<code>index.html</code>（骨架）/ <code>style.css</code>（样式）/ <code>models.js</code>（几何生成）/ <code>particle-system.js</code>（粒子系统类）/ <code>gesture-detector.js</code>（手势识别类）/ <code>main.js</code>（主逻辑胶水）</p>
+    <p><strong>依赖</strong>：main.js 驱动 particle-system + gesture-detector；particle-system 依赖 models.js。无循环依赖。</p>
+    <p><strong>入口</strong>：<code>index.html</code>，<code>main.js</code> 在 DOMContentLoaded 时启动。</p>
+  </div>
+
+  <h2>关键对比：单线程读 vs 派子 agent</h2>
+  <div class="compare">
+    <div class="bad">
+      <h3>单线程自己读</h3>
+      <p>7 个文件全文全部进主会话上下文，几千 token 占掉工作记忆。后面想干别的就"喘不过气"。</p>
+    </div>
+    <div class="good">
+      <h3>派 Explore</h3>
+      <p>子 agent 独立读完所有文件，主会话只收到一份总结。源码一行没进主上下文——上下文隔离。</p>
+    </div>
+  </div>
+
+  <h2>给 prompt 的四要素（第四课深入）</h2>
+  <div class="elems">
+    <div><b>任务</b><br>要它干什么</div>
+    <div><b>具体问题</b><br>查哪些点</div>
+    <div><b>约束</b><br>只读 / 不贴源码 / 不改其他</div>
+    <div><b>输出格式</b><br>要什么结构的结果</div>
+  </div>
+  <p style="font-size:0.92rem;color:var(--muted);">自包含、目标明确、有约束、指定输出——子 agent 拿到就能独立跑，不用回来问你。</p>
+
+  <h2>练一练</h2>
+  <div class="quiz">
+    <q>测验 1：派 Explore 扫描 7 个文件后，这 7 个文件的全文会进入主会话上下文。</q>
+    <div class="opts" data-q="1" data-a="错"><button>对</button><button>错</button></div>
+    <div class="fb" id="fb1"></div>
+  </div>
+  <div class="quiz">
+    <q>测验 2：给子 agent 的 prompt 应自包含——它不用回看主会话历史就能干活。</q>
+    <div class="opts" data-q="2" data-a="对"><button>对</button><button>错</button></div>
+    <div class="fb" id="fb2"></div>
+  </div>
+  <div class="quiz">
+    <q>测验 3：调用 Agent 工具，至少要指定"派哪种子 agent"和"给它什么任务"。</q>
+    <div class="opts" data-q="3" data-a="对"><button>对</button><button>错</button></div>
+    <div class="fb" id="fb3"></div>
+  </div>
+
+  <h2>动手写一个</h2>
+  <p>想一个你会派 <code>Explore</code> 去做的任务，按四要素写一份 prompt：</p>
+  <textarea class="ta" placeholder="任务：…
+具体问题：…
+约束：…
+输出：…"></textarea>
+  <p style="font-family:-apple-system,'PingFang SC',sans-serif;font-size:0.88rem;color:var(--muted);border-left:2px solid var(--rule);padding-left:0.9rem;margin:1rem 0;">写完发给你的 agent 老师核对——甚至可以让它真的派出去跑一遍，看返回对不对。</p>
+
+  <div class="box">
+    <h3>推荐资源</h3>
+    <p>本课实操依据：<code>superpowers:subagent-driven-development</code>（隔离上下文、自包含任务）+ 系统自带 <code>Agent</code> 工具文档。完整清单见 <a href="../RESOURCES.md">RESOURCES.md</a>，术语见 <a href="../reference/术语表.md">术语表</a>。</p>
+  </div>
+
+  <div class="nav">
+    上一课：<a href="0002-when-to-dispatch.html">什么时候该派子 agent</a>　·　下一课：<a href="0004-how-to-instruct-a-subagent.html">怎么给子 agent 一份好指令</a><br>
+    有任何不清楚的，<strong>直接问你的 agent 老师</strong>。
+  </div>
+</div>
+<script>
+  const explain = {
+    '1': '上下文隔离——子 agent 读的文件留在它那边，主会话只收结论。',
+    '2': '自包含是给子 agent 指令的核心：它看不到你的历史，简报要写全。',
+    '3': 'subagent_type + prompt 是两个必备输入，缺一不可。'
+  };
+  document.querySelectorAll('.opts').forEach(opts => {
+    const q = opts.dataset.q, ans = opts.dataset.a, fb = document.getElementById('fb'+q);
+    opts.querySelectorAll('button').forEach(b => {
+      b.addEventListener('click', () => {
+        const correct = b.textContent.trim() === ans;
+        b.classList.add(correct ? 'right' : 'wrong');
+        fb.textContent = (correct ? '✓ 对。' : '✗ 再想想。') + explain[q];
+        fb.classList.add('show');
+      });
+    });
+  });
+</script>
+</body>
+</html>

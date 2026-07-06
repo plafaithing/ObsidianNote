@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>L03 · 切分策略</title>
+  <style>
+  :root {
+    --bg: #fafaf7; --ink: #1a1a1a; --ink-soft: #444; --ink-mute: #777;
+    --rule: #e4e3dc; --accent: #2b5a8c; --accent-soft: #e8f0f7;
+    --warn: #b06a00; --warn-soft: #fdf3e3; --key: #2f7d52; --key-soft: #e8f5ee;
+    --pit: #a23a3a; --pit-soft: #fbecec; --code-bg: #f3f3ee;
+    --serif: 'Source Serif Pro','Noto Serif SC',Georgia,'Songti SC',serif;
+    --sans: -apple-system,BlinkMacSystemFont,'Segoe UI','PingFang SC','Microsoft YaHei',sans-serif;
+    --mono: 'SF Mono','JetBrains Mono',Consolas,monospace;
+  }
+  *{box-sizing:border-box} html{scroll-behavior:smooth}
+  body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--sans);font-size:16px;line-height:1.78;-webkit-font-smoothing:antialiased}
+  .lesson{max-width:760px;margin:0 auto;padding:48px 28px 96px}
+  .lesson-header{margin-bottom:36px;border-bottom:1px solid var(--rule);padding-bottom:22px}
+  .course-label{font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--accent);font-weight:700}
+  .lesson-num{font-size:13px;color:var(--ink-mute);margin:8px 0 2px}
+  .lesson-title{font-family:var(--serif);font-size:34px;line-height:1.22;margin:2px 0 8px;font-weight:700}
+  .lesson-sub{color:var(--ink-soft);font-size:15px;margin:0}
+  .lesson-nav{display:flex;justify-content:space-between;margin:0 0 40px;font-size:14px}
+  .lesson-nav a{color:var(--accent);text-decoration:none} .lesson-nav a:hover{text-decoration:underline}
+  .lesson-nav .disabled{color:var(--ink-mute);opacity:.4;pointer-events:none}
+  h2{font-family:var(--serif);font-size:24px;margin:44px 0 12px;font-weight:700}
+  h3{font-size:17px;margin:26px 0 8px;font-weight:600}
+  p{margin:12px 0} ul,ol{margin:12px 0;padding-left:24px} li{margin:6px 0}
+  strong{color:var(--ink);font-weight:600} em{color:var(--ink-soft)} a{color:var(--accent)}
+  code{font-family:var(--mono);background:var(--code-bg);padding:2px 6px;border-radius:4px;font-size:.9em}
+  pre{background:var(--code-bg);padding:16px;border-radius:8px;overflow-x:auto} pre code{background:none;padding:0}
+  .callout{margin:22px 0;padding:14px 18px;border-left:3px solid;border-radius:0 6px 6px 0}
+  .callout p:first-child{margin-top:0} .callout p:last-child{margin-bottom:0}
+  .callout-title{font-weight:700;font-size:13px;letter-spacing:.03em;margin-bottom:6px;display:block}
+  .callout.info{background:var(--accent-soft);border-color:var(--accent)}
+  .callout.warn{background:var(--warn-soft);border-color:var(--warn)}
+  .callout.key{background:var(--key-soft);border-color:var(--key)}
+  .callout.pit{background:var(--pit-soft);border-color:var(--pit)}
+  .callout.interview{background:var(--accent-soft);border-color:var(--accent)}
+  .callout.interview .callout-title::before{content:"🎤 "}
+  table{width:100%;border-collapse:collapse;margin:18px 0;font-size:14px}
+  th,td{text-align:left;padding:10px 12px;border-bottom:1px solid var(--rule);vertical-align:top}
+  th{font-weight:600;color:var(--ink-soft);background:var(--code-bg)}
+  .quiz{margin:30px 0;border:1px solid var(--rule);border-radius:12px;padding:24px 26px;background:#fff}
+  .quiz-q{font-weight:600;margin:0 0 6px;font-size:16px}
+  .quiz-scene{color:var(--ink-soft);font-size:14px;margin:0 0 16px;line-height:1.7}
+  .quiz-options{display:flex;flex-direction:column;gap:10px}
+  .quiz-opt{display:flex;align-items:center;gap:12px;padding:12px 16px;border:1.5px solid var(--rule);border-radius:10px;cursor:pointer;transition:all .15s;user-select:none}
+  .quiz-opt:hover{border-color:var(--accent);background:var(--accent-soft)}
+  .quiz-opt .mark{width:24px;height:24px;border-radius:50%;border:1.5px solid var(--ink-mute);display:inline-flex;align-items:center;justify-content:center;font-size:13px;color:transparent;flex-shrink:0}
+  .quiz-opt.reveal.correct{border-color:var(--key);background:var(--key-soft)}
+  .quiz-opt.reveal.correct .mark{background:var(--key);color:#fff;border-color:var(--key)}
+  .quiz-opt.reveal.wrong{border-color:var(--pit);background:var(--pit-soft)}
+  .quiz-opt.reveal.wrong .mark{background:var(--pit);color:#fff;border-color:var(--pit)}
+  .quiz-feedback{margin-top:16px;font-size:14px;line-height:1.72;display:none;padding:14px 16px;background:var(--code-bg);border-radius:8px}
+  .quiz-feedback.show{display:block}
+  .win{margin:36px 0 24px;padding:22px 24px;background:var(--key-soft);border-radius:12px;border:1px solid var(--key)}
+  .win h3{margin-top:0;color:var(--key)}
+  .sources{margin-top:32px;padding-top:22px;border-top:1px solid var(--rule);font-size:14px}
+  .sources h3{margin-top:0} .sources ul{padding-left:20px}
+  .ask-reminder{margin-top:20px;padding:16px 18px;background:var(--accent-soft);border-radius:10px;font-size:14px}
+  .cite{font-size:13px;color:var(--ink-mute)}
+  @media print{body{background:#fff}.lesson-nav,.quiz-opt{break-inside:avoid}a{color:var(--ink)}}
+  @media (max-width:600px){.lesson{padding:28px 18px 64px}.lesson-title{font-size:26px}}
+  </style>
+</head>
+<body>
+<article class="lesson">
+
+  <header class="lesson-header">
+    <div class="course-label">RAG 课程 · M2 数据侧</div>
+    <div class="lesson-num">第 03 节 / 共 12 节</div>
+    <h1 class="lesson-title">切分策略：决定 RAG 的上限</h1>
+    <p class="lesson-sub">五种策略、两个参数、一个铁律——切分必须适配文档类型</p>
+  </header>
+
+  <nav class="lesson-nav">
+    <a href="0002-rag-pipeline.html">← 上一节：全流程地图</a>
+    <a href="0004-metadata-extraction.html">下一节：元数据与结构化抽取 →</a>
+  </nav>
+
+  <h2>为什么切分是「决定上限」的环节</h2>
+  <p>前面排查练习里，场景 1（现象/处理步骤被切到不同 chunk）和场景 2（表格被切坏）的根因都在切分。切分是 RAG 流水线里<em>最易被忽视、却决定天花板</em>的一步：</p>
+  <div class="callout pit">
+    <span class="callout-title">真实踩坑（HugoGu）</span>
+    <p>企业文档检索，固定 512 token 切分导致<strong>表格被截断</strong>，召回率从 <strong>85% 掉到 32%</strong>。改用按段落分割 + 200 token overlap 后恢复到 78%<a href="https://wiki.hugogu.cn/zh/ai/tech/rag" target="_blank">[1]</a>。切分一变，召回率天差地别。</p>
+  </div>
+  <p>原因：切分决定了每个 chunk 的<strong>语义完整性</strong>。chunk 残缺，embedding 编码的就是残缺语义，检索再准也只找到残缺，rerank 再强也排不出完整信息，LLM 拿到的上下文就是残缺的。<strong>下游所有环节都在切分给定的片段边界内工作</strong>——这就是「决定上限」的含义。</p>
+
+  <h2>核心权衡：chunk 大小的两难</h2>
+  <p>所有切分策略都在同一个权衡上做选择：<strong>召回精确度 vs 上下文完整性</strong>。</p>
+  <table>
+    <thead><tr><th></th><th>chunk 太大</th><th>chunk 太小</th></tr></thead>
+    <tbody>
+      <tr><td>召回</td><td>一个 chunk 含多个主题，向量被「稀释」，召回精确度下降</td><td>语义不完整（一句话切断），召回虽精确但信息零碎</td></tr>
+      <tr><td>上下文</td><td>完整，但占窗口、增成本</td><td>残缺，答案容易缺这缺那</td></tr>
+      <tr><td>典型症状</td><td>搜到了但夹带不相关内容</td><td>搜到了片段但答不全（场景 1）</td></tr>
+    </tbody>
+  </table>
+  <p>没有「正确」的大小，只有「适配文档类型」的大小。下面五种策略就是不同的折中方式。</p>
+
+  <h2>五种切分策略</h2>
+  <table>
+    <thead><tr><th>策略</th><th>怎么做</th><th>适用</th><th>优缺点</th></tr></thead>
+    <tbody>
+      <tr><td><strong>固定大小</strong></td><td>按字符/token 数切</td><td>简单纯文本</td><td>简单；可能截断语义（表格、句子切两半）</td></tr>
+      <tr><td><strong>递归分割</strong></td><td>按段落→句子→字符逐级切</td><td>通用</td><td>LangChain 默认，最常用；仍可能割裂跨段语义</td></tr>
+      <tr><td><strong>语义分割</strong></td><td>按相邻句 embedding 相似度骤降处切</td><td>叙述性长文</td><td>语义边界准；计算开销大</td></tr>
+      <tr><td><strong>结构化分割</strong></td><td>按标题/章节切</td><td>Markdown / HTML 手册</td><td>保留文档逻辑 ⭐ 运维首选</td></tr>
+      <tr><td><strong>页面级</strong></td><td>按页切</td><td>PDF / 扫描件</td><td>NVIDIA 评估最稳<a href="https://developer.nvidia.cn/blog/finding-the-best-chunking-strategy-for-accurate-ai-responses/" target="_blank">[4]</a>；粒度粗</td></tr>
+    </tbody>
+  </table>
+  <div class="callout info">
+    <span class="callout-title">进阶：Late Chunking</span>
+    <p>先对整篇长文本编码、再切分——让每个 chunk 保留全局上下文信息，避免「切完就丢失上下文」。适合长文档，是较新的技术<a href="https://wiki.hugogu.cn/zh/ai/tech/rag" target="_blank">[1]</a>。POC 阶段先用前五种，够用。</p>
+  </div>
+
+  <h2>两个关键参数</h2>
+  <h3>① Chunk 大小</h3>
+  <p>实践经验值：<strong>500–1500 tokens</strong>（取决于检索粒度）<a href="https://wiki.hugogu.cn/zh/ai/tech/rag" target="_blank">[1]</a>。但这是参考值，不是教条——运维手册按章节切可能一个 chunk 就 2000 token，对话日志可能 200 token 就够。<strong>评测驱动</strong>：搭个 50 题测试集，不同大小跑 Recall@5，选最优。</p>
+  <h3>② Overlap（重叠）</h3>
+  <p>相邻 chunk 之间重叠一部分文本，避免边界信息被切断。<strong>10–20% 的 chunk 大小</strong><a href="https://wiki.hugogu.cn/zh/ai/tech/rag" target="_blank">[1]</a>。比如 chunk 1000 token，overlap 100–200 token。</p>
+  <div class="callout warn">
+    <span class="callout-title">overlap 不是越大越好</span>
+    <p>overlap 大能保边界信息，但<strong>冗余增加</strong>（同一段内容存多份）、存储和检索成本上升、还可能让重复内容多次进 Top-K 挤掉其他相关 chunk。10–20% 是平衡点。</p>
+  </div>
+
+  <h2>运维文档怎么切（实操）</h2>
+  <p>这是你最需要的部分。运维知识库有三类典型内容，切法不同：</p>
+  <h3>① 运维手册（Markdown / Confluence / HTML）</h3>
+  <p><strong>用结构化分割，按标题层级切</strong>。一条「慢 SQL 诊断」章节（含现象/原因/处理步骤）整体作为一个 chunk，不要按固定 token 切断。</p>
+  <pre><code>## 慢 SQL 诊断          ← 切分边界
+### 现象               ← 和下面一起，不切
+### 原因
+### 处理步骤
+  1. 查 PGXC_STAT_ACTIVITY
+  2. 看执行计划...
+## 会话分析            ← 下一个 chunk</code></pre>
+  <p>这样用户问「慢 SQL 怎么处理」，召回的 chunk 完整含「现象+原因+处理」，不会出现场景 1 那种残缺。</p>
+  <h3>② 表格（参数说明表、错误码表）</h3>
+  <p><strong>整表保留为独立 chunk，绝不切断</strong>。或把表格转成结构化文本（「参数名: 值: 含义」逐行），让 embedding 能编码表格语义。这是场景 2 踩坑的解法——固定 token 切分会把表格切乱。</p>
+  <h3>③ 代码块（SQL 示例、命令）</h3>
+  <p><strong>完整保留，附在所属章节 chunk 里</strong>。一段 SQL 切两半毫无意义，检索到半个 SQL 没用。</p>
+  <div class="callout key">
+    <span class="callout-title">运维切分铁律</span>
+    <p>保证「<strong>现象 / 原因 / 处理步骤</strong>」在同一个 chunk，不割裂；表格、代码块整块保留。这一条做对，切分环节的上限就稳了。</p>
+  </div>
+
+  <div class="callout interview">
+    <span class="callout-title">面试视角</span>
+    <p><strong>Q：chunk 大小怎么定？</strong> 不是定值，取决于文档类型和检索粒度。手册类按结构切（500–1500 token），对话类按语义切。关键是<strong>评测驱动</strong>——搭测试集跑 Recall@K 选最优，而不是拍脑袋。</p>
+    <p><strong>Q：overlap 的作用？多大合适？</strong> 避免边界信息丢失，10–20%。太大冗余增成本、重复内容挤掉其他相关 chunk。</p>
+    <p><strong>Q：切分和 embedding 哪个更重要？</strong> 切分<strong>决定上限</strong>，embedding 决定在这个上限内的匹配质量。先保证切分别拖后腿（场景 1、2 都是切分拖后腿），再优化 embedding。这个回答能体现系统观。</p>
+  </div>
+
+  <h2>小测验</h2>
+  <div class="quiz" id="quiz">
+    <p class="quiz-q">场景</p>
+    <p class="quiz-scene">运维手册里「慢 SQL 诊断」章节结构是「现象 / 原因 / 处理步骤 / 相关参数表」。团队用<strong>固定 256 token</strong> 切分后，用户问「慢 SQL 怎么处理」，检索召回了一个只含「现象 + 半个原因」的 chunk，答案严重残缺。最佳改进是？</p>
+    <div class="quiz-options">
+      <label class="quiz-opt" data-correct="true"><span class="mark">✓</span><span>改用结构化分割，按章节标题切，保证现象/原因/处理同 chunk</span></label>
+      <label class="quiz-opt" data-correct="false"><span class="mark">✗</span><span>增大 chunk 到 1024 token</span></label>
+      <label class="quiz-opt" data-correct="false"><span class="mark">✗</span><span>换更强的 embedding 模型</span></label>
+      <label class="quiz-opt" data-correct="false"><span class="mark">✗</span><span>加 rerank 重排</span></label>
+    </div>
+    <div class="quiz-feedback" id="quiz-feedback">
+      <strong>✓ 改用结构化分割，按章节标题切。</strong> 根因是固定 256 token 把「现象/原因/处理」切散了。结构化分割按 <code>## 慢 SQL 诊断</code> 标题切，整节为一个 chunk，语义完整。<br><br>
+      <em>为什么不是「增大到 1024 token」</em>：能缓解（把更多内容塞进一个 chunk），但<strong>没解决根因</strong>——固定大小仍可能切在章节中间，且会夹带相邻章节噪声。结构化分割才对准了文档的逻辑边界。<br>
+      <em>为什么不是换 embedding</em>：切分问题，embedding 救不了残缺片段。<br>
+      <em>为什么不是加 rerank</em>：召回的 chunk 本身残缺，rerank 排序也排不出不存在的信息。<br><br>
+      <strong>口诀</strong>：文档有结构（标题/章节）→ 结构化分割；固定大小只适合无结构纯文本。
+    </div>
+  </div>
+  <script>
+    document.querySelectorAll('#quiz .quiz-opt').forEach(opt => {
+      opt.addEventListener('click', () => {
+        document.querySelectorAll('#quiz .quiz-opt').forEach(o => {
+          o.classList.remove('correct','wrong');
+          o.classList.add('reveal');
+          if (o.dataset.correct === 'true') o.classList.add('correct');
+          else if (o === opt) o.classList.add('wrong');
+        });
+        document.getElementById('quiz-feedback').classList.add('show');
+      });
+    });
+  </script>
+
+  <div class="win">
+    <h3>✓ 本节胜利</h3>
+    <p>你现在掌握了：</p>
+    <ol>
+      <li><strong>为什么切分决定上限</strong>——下游都在切分给定的片段边界内工作，切分残缺全链路救不回。</li>
+      <li><strong>五种策略的取舍</strong>——运维手册首选结构化分割，表格/代码块整块保留。</li>
+      <li><strong>两个参数</strong>——chunk 500–1500 token、overlap 10–20%，评测驱动定值。</li>
+      <li><strong>面试能讲</strong>切分 vs embedding 的优先级（切分决定上限）。</li>
+    </ol>
+  </div>
+
+  <div class="sources">
+    <h3>本节取材与推荐阅读</h3>
+    <ul>
+      <li><a href="https://wiki.hugogu.cn/zh/ai/tech/rag" target="_blank">[1] HugoGu · RAG wiki</a> — 五种策略对比、实践参数、512 token 踩坑案例。本节主源。</li>
+      <li><a href="https://zilliz.com.cn/blog/guide-to-chunking-sreategies-for-rag" target="_blank">[2] Zilliz · 分块策略指南</a> — Milvus 官方，策略详解。</li>
+      <li><a href="https://gitcode.csdn.net/6a277cc910ee7a33f279963f.html" target="_blank">[3] 20 个 RAG 核心概念</a> — 切分相关概念补遗。</li>
+      <li><a href="https://developer.nvidia.cn/blog/finding-the-best-chunking-strategy-for-accurate-ai-responses/" target="_blank">[4] NVIDIA · 最优分块策略</a> — 页面级分块评估数据。</li>
+    </ul>
+    <p class="cite">完整资源清单见 <code>learning/rag/RESOURCES.md</code>。</p>
+  </div>
+
+  <div class="ask-reminder">
+    💡 <strong>有不清楚的？直接问。</strong>比如：「我们的 GaussDB 手册是 PDF，怎么按结构切？」「切分后要不要给每个 chunk 加元数据？」（下节 L04 就是讲元数据，但可以先聊）
+  </div>
+
+  <nav class="lesson-nav" style="margin-top:40px;">
+    <a href="0002-rag-pipeline.html">← 上一节：全流程地图</a>
+    <a href="0004-metadata-extraction.html">下一节：元数据与结构化抽取 →</a>
+  </nav>
+
+</article>
+</body>
+</html>

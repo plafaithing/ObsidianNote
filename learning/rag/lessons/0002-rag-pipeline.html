@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>L02 · RAG 全流程地图</title>
+  <style>
+  /* RAG 课程样式 — Tufte 风格，内联以保证 Obsidian 渲染兼容 */
+  :root {
+    --bg: #fafaf7; --ink: #1a1a1a; --ink-soft: #444; --ink-mute: #777;
+    --rule: #e4e3dc; --accent: #2b5a8c; --accent-soft: #e8f0f7;
+    --warn: #b06a00; --warn-soft: #fdf3e3; --key: #2f7d52; --key-soft: #e8f5ee;
+    --pit: #a23a3a; --pit-soft: #fbecec; --code-bg: #f3f3ee;
+    --serif: 'Source Serif Pro','Noto Serif SC',Georgia,'Songti SC',serif;
+    --sans: -apple-system,BlinkMacSystemFont,'Segoe UI','PingFang SC','Microsoft YaHei',sans-serif;
+    --mono: 'SF Mono','JetBrains Mono',Consolas,monospace;
+  }
+  *{box-sizing:border-box} html{scroll-behavior:smooth}
+  body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--sans);font-size:16px;line-height:1.78;-webkit-font-smoothing:antialiased}
+  .lesson{max-width:760px;margin:0 auto;padding:48px 28px 96px}
+  .lesson-header{margin-bottom:36px;border-bottom:1px solid var(--rule);padding-bottom:22px}
+  .course-label{font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--accent);font-weight:700}
+  .lesson-num{font-size:13px;color:var(--ink-mute);margin:8px 0 2px}
+  .lesson-title{font-family:var(--serif);font-size:34px;line-height:1.22;margin:2px 0 8px;font-weight:700}
+  .lesson-sub{color:var(--ink-soft);font-size:15px;margin:0}
+  .lesson-nav{display:flex;justify-content:space-between;margin:0 0 40px;font-size:14px}
+  .lesson-nav a{color:var(--accent);text-decoration:none} .lesson-nav a:hover{text-decoration:underline}
+  .lesson-nav .disabled{color:var(--ink-mute);opacity:.4;pointer-events:none}
+  h2{font-family:var(--serif);font-size:24px;margin:44px 0 12px;font-weight:700}
+  h3{font-size:17px;margin:26px 0 8px;font-weight:600}
+  p{margin:12px 0} ul,ol{margin:12px 0;padding-left:24px} li{margin:6px 0}
+  strong{color:var(--ink);font-weight:600} em{color:var(--ink-soft)} a{color:var(--accent)}
+  code{font-family:var(--mono);background:var(--code-bg);padding:2px 6px;border-radius:4px;font-size:.9em}
+  pre{background:var(--code-bg);padding:16px;border-radius:8px;overflow-x:auto} pre code{background:none;padding:0}
+  .callout{margin:22px 0;padding:14px 18px;border-left:3px solid;border-radius:0 6px 6px 0}
+  .callout p:first-child{margin-top:0} .callout p:last-child{margin-bottom:0}
+  .callout-title{font-weight:700;font-size:13px;letter-spacing:.03em;margin-bottom:6px;display:block}
+  .callout.info{background:var(--accent-soft);border-color:var(--accent)}
+  .callout.warn{background:var(--warn-soft);border-color:var(--warn)}
+  .callout.key{background:var(--key-soft);border-color:var(--key)}
+  .callout.pit{background:var(--pit-soft);border-color:var(--pit)}
+  .callout.interview{background:var(--accent-soft);border-color:var(--accent)}
+  .callout.interview .callout-title::before{content:"🎤 "}
+  table{width:100%;border-collapse:collapse;margin:18px 0;font-size:14px}
+  th,td{text-align:left;padding:10px 12px;border-bottom:1px solid var(--rule);vertical-align:top}
+  th{font-weight:600;color:var(--ink-soft);background:var(--code-bg)}
+  .pipeline{display:flex;flex-wrap:wrap;align-items:center;gap:6px;margin:20px 0;font-size:13px}
+  .pipeline .stage{background:#fff;border:1px solid var(--rule);border-radius:6px;padding:8px 12px;white-space:nowrap}
+  .pipeline .stage.index{border-color:var(--accent);color:var(--accent)}
+  .pipeline .stage.query{border-color:var(--key);color:var(--key)}
+  .pipeline .arrow{color:var(--ink-mute)}
+  .pipeline .group-label{font-size:11px;color:var(--ink-mute);width:100%;margin-top:8px;letter-spacing:.05em}
+  .quiz{margin:30px 0;border:1px solid var(--rule);border-radius:12px;padding:24px 26px;background:#fff}
+  .quiz-q{font-weight:600;margin:0 0 16px;font-size:16px}
+  .quiz-options{display:flex;flex-direction:column;gap:10px}
+  .quiz-opt{display:flex;align-items:center;gap:12px;padding:12px 16px;border:1.5px solid var(--rule);border-radius:10px;cursor:pointer;transition:all .15s;user-select:none}
+  .quiz-opt:hover{border-color:var(--accent);background:var(--accent-soft)}
+  .quiz-opt .mark{width:24px;height:24px;border-radius:50%;border:1.5px solid var(--ink-mute);display:inline-flex;align-items:center;justify-content:center;font-size:13px;color:transparent;flex-shrink:0}
+  .quiz-opt.reveal.correct{border-color:var(--key);background:var(--key-soft)}
+  .quiz-opt.reveal.correct .mark{background:var(--key);color:#fff;border-color:var(--key)}
+  .quiz-opt.reveal.wrong{border-color:var(--pit);background:var(--pit-soft)}
+  .quiz-opt.reveal.wrong .mark{background:var(--pit);color:#fff;border-color:var(--pit)}
+  .quiz-feedback{margin-top:16px;font-size:14px;line-height:1.7;display:none;padding:14px 16px;background:var(--code-bg);border-radius:8px}
+  .quiz-feedback.show{display:block}
+  .win{margin:36px 0 24px;padding:22px 24px;background:var(--key-soft);border-radius:12px;border:1px solid var(--key)}
+  .win h3{margin-top:0;color:var(--key)}
+  .sources{margin-top:32px;padding-top:22px;border-top:1px solid var(--rule);font-size:14px}
+  .sources h3{margin-top:0} .sources ul{padding-left:20px}
+  .ask-reminder{margin-top:20px;padding:16px 18px;background:var(--accent-soft);border-radius:10px;font-size:14px}
+  .cite{font-size:13px;color:var(--ink-mute)}
+  @media print{body{background:#fff}.lesson-nav,.quiz-opt{break-inside:avoid}a{color:var(--ink)}}
+  @media (max-width:600px){.lesson{padding:28px 18px 64px}.lesson-title{font-size:26px}.pipeline{font-size:11px}}
+  </style>
+</head>
+<body>
+<article class="lesson">
+
+  <header class="lesson-header">
+    <div class="course-label">RAG 课程 · 检索增强生成</div>
+    <div class="lesson-num">第 02 节 / 共 12 节</div>
+    <h1 class="lesson-title">RAG 全流程地图</h1>
+    <p class="lesson-sub">九个环节、两条流水线、一个木桶效应——后续所有课的导航图</p>
+  </header>
+
+  <nav class="lesson-nav">
+    <a href="0001-what-is-rag.html">← 上一节：RAG 是什么</a>
+    <a href="0003-chunking-strategies.html">下一节：切分策略 →</a>
+  </nav>
+
+  <h2>一句话先立住系统观</h2>
+  <p>第一节我们看了那张 7 环节的流程图。今天要建立的最重要认知是：</p>
+  <div class="callout key">
+    <span class="callout-title">系统观</span>
+    <p>RAG 本质上是<strong>数据、切分、索引、召回、重排、上下文、生成、评估</strong>共同组成的<strong>系统工程</strong>，不是单点调参<a href="https://github.com/Snailclimb/JavaGuide/blob/main/docs/ai/rag/rag-optimization.md" target="_blank">[2]</a>。它的质量上限由<strong>最弱的环节</strong>决定，而不是由最强的环节撑起来。</p>
+  </div>
+  <p>这句话是整门课的「宪法」。售前沟通时，能把 RAG 当系统工程来谈（而不是「接个大模型 + 向量库就完了」），你就比多数候选人专业一档。</p>
+
+  <h2>两条流水线：建图书馆 vs 读者查书</h2>
+  <p>RAG 分两条流水线，时间维度完全不同：</p>
+  <ul>
+    <li><strong>索引流水线（离线）</strong>：提前把知识准备好。好比<em>建图书馆、给每本书编目录卡</em>。</li>
+    <li><strong>查询流水线（在线）</strong>：用户每次提问时实时跑。好比<em>读者来查书，图书管理员按目录找出来递给他</em>。</li>
+  </ul>
+  <div class="callout info">
+    <span class="callout-title">DBA 视角类比（你的迁移优势）</span>
+    <p>索引流水线 ≈ <strong>ETL + 建索引</strong>：原始文档 → 清洗/切分 → 向量化 → 写入向量库（就像数据落表 + 建 B-tree/Hash 索引）。</p>
+    <p>查询流水线 ≈ <strong>解析 + 执行计划 + 返回结果</strong>：query 向量化 → ANN 检索（走索引）→ rerank（排序优化）→ 组装上下文 → LLM 生成。</p>
+    <p>关键差异：关系库索引精确匹配，向量库做<em>近似</em>最近邻（ANN）——「近似」二字是 RAG 很多问题的源头，第 05 节会讲。</p>
+  </div>
+
+  <h2>九环节总表（后续课的导航图）</h2>
+  <p>把流程拆成 9 个环节。这张表是整门课的目录——后面 L03-L09 逐个深挖。现在不用记细节，先建立「每个环节都有取舍」的全景。</p>
+  <table>
+    <thead><tr><th>#</th><th>环节</th><th>输入 → 输出</th><th>核心取舍</th><th>杠杆点 / 常见坑</th></tr></thead>
+    <tbody>
+      <tr><td>①</td><td><strong>解析</strong></td><td>PDF/HTML/MD → 文本+结构</td><td>保真度 vs 通用性</td><td>表格/公式/图片解析丢失</td></tr>
+      <tr><td>②</td><td><strong>切分</strong> Chunking</td><td>长文本 → chunk[]</td><td>大小（召回 vs 精确）· overlap</td><td><strong>决定上限</strong>，最易被忽视</td></tr>
+      <tr><td>③</td><td><strong>向量化</strong> Embedding</td><td>chunk → vector</td><td>模型选型 · 维度</td><td>中文/领域适配；索引与查询必须同模型</td></tr>
+      <tr><td>④</td><td><strong>存储</strong> 向量库</td><td>vector+原文+meta → 索引</td><td>HNSW 参数 · 精确 vs 近似</td><td>召回率 vs 延迟</td></tr>
+      <tr><td>⑤</td><td><strong>检索</strong> Retrieve</td><td>query 向量 → Top-K</td><td>K 大小 · ANN 损失</td><td>单向量不够 → 混合检索补精确匹配</td></tr>
+      <tr><td>⑥</td><td><strong>重排</strong> Rerank</td><td>Top-K → Top-N</td><td>质量提升 vs +延迟</td><td>Cross-encoder 精排，68%→89%</td></tr>
+      <tr><td>⑦</td><td><strong>组装</strong> Context</td><td>片段 → prompt</td><td>长度 · 位置 · 去冗余</td><td>相关性优先放前；30-50% 窗口</td></tr>
+      <tr><td>⑧</td><td><strong>生成</strong> Generate</td><td>context+query → answer</td><td>防幻觉 · 引用 · 结构化</td><td>prompt 工程；再好 prompt 救不了错上下文</td></tr>
+      <tr><td>⑨</td><td><strong>评估</strong> Evaluate</td><td>各环节 → 指标</td><td>检索指标 vs 生成指标</td><td>贯穿全程；量化驱动迭代</td></tr>
+    </tbody>
+  </table>
+  <p class="cite">环节划分参考<a href="https://wiki.hugogu.cn/zh/ai/tech/rag" target="_blank">[1]</a>，系统工程视角参考<a href="https://github.com/Snailclimb/JavaGuide/blob/main/docs/ai/rag/rag-optimization.md" target="_blank">[2]</a>。</p>
+
+  <h2>木桶效应：故障是链式的</h2>
+  <p>理解 RAG 最重要的一件事：<strong>故障表现的地方，往往不是根因所在。</strong></p>
+  <div class="callout pit">
+    <span class="callout-title">教学示例：一个运维 RAG 的链式故障</span>
+    <p>某团队 DBA Copilot 上线后，用户反馈「答非所问、答案残缺」。他们依次试了：换更大的 LLM → 换更强的 Embedding → 加更长上下文——<em>都没用</em>。</p>
+    <p>最后定位到根因：切分时把每条运维手册的「<strong>现象 / 原因 / 处理步骤</strong>」切到了不同 chunk。用户问「慢 SQL 怎么处理」，检索只命中了「现象」片段，LLM 拿不到「处理步骤」，自然答不全。</p>
+    <p><strong>根因在切分（②），但表面看像「模型不行」（⑧）。</strong>团队一开始优化 ⑧、③、⑦ 全是错位——因为这些不是瓶颈。</p>
+  </div>
+  <div class="callout warn">
+    <span class="callout-title">真实数据点</span>
+    <p>HugoGu 记录过一次企业文档检索：固定 512 token 切分导致<em>表格被截断</em>，召回率从 <strong>85% 掉到 32%</strong>。改用按段落分割 + 200 token overlap 后恢复到 78%<a href="https://wiki.hugogu.cn/zh/ai/tech/rag" target="_blank">[1]</a>。切分一变，召回率天差地别——这就是「决定上限」的含义。</p>
+  </div>
+  <p>推论：RAG 出问题，<strong>分环节量化定位</strong>远比「上来就换模型」有效。这正是环节⑨评估存在的意义，也是下面方法论的核心。</p>
+
+  <h2>售前 POC 视角：优化优先级</h2>
+  <p>客户做 POC 时资源有限，先优化哪个？这是售前最能体现专业度的问题。优先级（性价比从高到低）：</p>
+  <ol>
+    <li><strong>先把切分（②）调对</strong>——花时间理解客户文档类型。这是上限，错了后面全白费。<a href="https://wiki.hugogu.cn/zh/ai/tech/rag" target="_blank">[1]</a></li>
+    <li><strong>上混合检索（⑤）+ Rerank（⑥）</strong>——性价比最高的优化，实现简单、效果显著<a href="https://wiki.hugogu.cn/zh/ai/tech/rag" target="_blank">[1]</a>。Rerank 实测能让 Top3 命中率从 68%→89%<a href="https://zhuanlan.zhihu.com/p/2008281994912609286" target="_blank">[5]</a>。</li>
+    <li><strong>建立评估指标（⑨）</strong>——没有量化就没有方向，POC 报告里也拿不出「效果提升了多少」。</li>
+    <li><strong>最后才考虑换模型/换框架</strong>——多数情况下不是模型问题。</li>
+  </ol>
+  <div class="callout info">
+    <span class="callout-title">迭代路径（wiki 总结）</span>
+    <p>MVP（Naive RAG：Embedding + 向量检索 + LLM）→ 优化（Chunking + 混合检索 + Rerank）→ 完善（HyDE / CRAG）→ 生产（评估 + 监控 + 缓存）→ 进阶（Agentic RAG / GraphRAG）<a href="https://wiki.hugogu.cn/zh/ai/tech/rag" target="_blank">[1]</a>。</p>
+    <p>POC 阶段做到「优化」这一档就够讲了，能给客户演示明显效果提升。</p>
+  </div>
+
+  <h2>评估先行：先量化，再优化</h2>
+  <p>环节⑨为什么单独列出且贯穿全程？因为<strong>没法度量的东西就没法优化</strong><a href="https://zhuanlan.zhihu.com/p/2008281994912609286" target="_blank">[5]</a>。RAG 评估分两层（L09 详讲）：</p>
+  <ul>
+    <li><strong>检索质量</strong>：Recall@K（相关文档有没有被召回）、MRR（相关结果排第几）。</li>
+    <li><strong>生成质量</strong>：Faithfulness（回答是否忠于检索文档）、Answer Relevancy（是否回答了问题）。</li>
+  </ul>
+  <p>排查 RAG 故障的标准动作：先看检索指标——召回率低，问题在 ②③④⑤；召回正常但答案有幻觉，问题在 ⑦⑧。一刀切开「是不是模型不行」是最常见的外行反应。</p>
+
+  <div class="callout interview">
+    <span class="callout-title">面试视角</span>
+    <p><strong>Q：RAG 效果不好，怎么排查？</strong></p>
+    <p>不要答「换大模型」。标准答法：<strong>分环节量化定位</strong>。先看检索召回率——低则问题在切分/embedding/检索；召回正常但答案有幻觉则问题在上下文组装或生成。补一句口诀：「<em>检索质量优先于生成技巧——再好的 prompt 也救不了错误的上下文</em>」<a href="https://wiki.hugogu.cn/zh/ai/tech/rag" target="_blank">[1]</a>。这个回答能筛掉一半只会说「RAG 就是检索+生成」的候选人。</p>
+    <p><strong>Q：流水线里哪个环节最重要？</strong> 答：切分<strong>决定上限</strong>（最易被忽视），检索+rerank<strong>决定下限</strong>（最显眼但可调）。两者都要，但先保证切分别拖后腿。</p>
+  </div>
+
+  <h2>运维场景代入：DBA Copilot 的九环节</h2>
+  <table>
+    <thead><tr><th>环节</th><th>DBA Copilot 里具体是什么</th></tr></thead>
+    <tbody>
+      <tr><td>① 解析</td><td>GaussDB 运维手册（PDF/Confluence/HTML）→ 纯文本 + 章节结构</td></tr>
+      <tr><td>② 切分</td><td>按「慢SQL诊断」「会话分析」「SQL限流」等章节切，保留「现象/原因/处理」完整不割裂</td></tr>
+      <tr><td>③ 向量化</td><td>每个 chunk 用中文 embedding 模型编码</td></tr>
+      <tr><td>④ 存储</td><td>向量 + 原文 + 元数据（产品版本/文档类型/SQL类别）写入 Milvus 或 pgvector</td></tr>
+      <tr><td>⑤ 检索</td><td>用户问「慢SQL怎么定位」→ 向量（语义匹配诊断方法）+ BM25（精确匹配视图名如 PGXC_STAT_ACTIVITY）混合</td></tr>
+      <tr><td>⑥ 重排</td><td>把「慢SQL诊断」章节片段排到「会话分析」前面</td></tr>
+      <tr><td>⑦ 组装</td><td>Top 片段 + 用户问题 + 「请引用文档章节」指令 → prompt</td></tr>
+      <tr><td>⑧ 生成</td><td>「根据[运维手册 §慢SQL]，可通过 PGXC_STAT_ACTIVITY 定位活跃会话…」带引用</td></tr>
+      <tr><td>⑨ 评估</td><td>构造 50 个常见运维问题 + 标准答案，跑 Recall@5 和 Faithfulness</td></tr>
+    </tbody>
+  </table>
+  <p>后续每节课都在给这张表的一行加深度。第 10 节用 Dify 把它端到端跑通。</p>
+
+  <h2>小测验</h2>
+  <div class="quiz" id="quiz">
+    <p class="quiz-q">A、B 两团队都换了更强的 Embedding 模型，A 的召回率提升明显，B 几乎没变。B 的瓶颈最可能在？</p>
+    <div class="quiz-options">
+      <label class="quiz-opt" data-correct="true">
+        <span class="mark">✓</span><span>文档切分</span>
+      </label>
+      <label class="quiz-opt" data-correct="false">
+        <span class="mark">✗</span><span>向量检索</span>
+      </label>
+      <label class="quiz-opt" data-correct="false">
+        <span class="mark">✗</span><span>重排模型</span>
+      </label>
+    </div>
+    <div class="quiz-feedback" id="quiz-feedback">
+      <strong>✓ 文档切分。</strong> Embedding 只能在<em>切分给定的片段边界内</em>编码语义。切分若把语义截断（表格切一半、现象与处理步骤分到不同 chunk），再强的 embedding 也只编码了残缺信息，召回率自然上不去。<br><br>
+      A 团队切分本来就合理，换好 embedding 是<em>锦上添花</em>；B 团队瓶颈在切分，换 embedding 是<em>错位优化</em>——这正是「木桶效应」：优化非瓶颈环节无效。<br><br>
+      <em>向量检索</em>和<em>重排模型</em>都在切分之后工作，切分残缺的片段传到它们手里，再调也补不回丢失的语义。所以排查 B 的问题，先查切分，而不是换 embedding/检索/rerank。
+    </div>
+  </div>
+  <script>
+    document.querySelectorAll('#quiz .quiz-opt').forEach(opt => {
+      opt.addEventListener('click', () => {
+        document.querySelectorAll('#quiz .quiz-opt').forEach(o => {
+          o.classList.remove('correct', 'wrong');
+          o.classList.add('reveal');
+          if (o.dataset.correct === 'true') o.classList.add('correct');
+          else if (o === opt) o.classList.add('wrong');
+        });
+        document.getElementById('quiz-feedback').classList.add('show');
+      });
+    });
+  </script>
+
+  <div class="callout info">
+    <span class="callout-title">配套练习</span>
+    <p>觉得排查判断还有点迷糊？做一组场景题练手感：<a href="0002-practice-troubleshooting.html">故障排查场景判断（6 题）→</a></p>
+  </div>
+
+  <div class="win">
+    <h3>✓ 本节胜利</h3>
+    <p>你现在掌握了三件售前/面试能直接用的东西：</p>
+    <ol>
+      <li><strong>系统观</strong>：RAG 是 9 环节系统工程，质量由最弱环节决定，不是「接个模型+向量库」。</li>
+      <li><strong>排查方法论</strong>：效果不好时分环节量化定位，先查检索召回，再查生成，而不是上来换模型。</li>
+      <li><strong>POC 优化优先级</strong>：切分 → 混合检索+rerank → 评估 → 最后才换模型。这套排序能在客户面前体现专业判断。</li>
+    </ol>
+  </div>
+
+  <div class="sources">
+    <h3>本节取材与推荐阅读</h3>
+    <ul>
+      <li><a href="https://wiki.hugogu.cn/zh/ai/tech/rag" target="_blank">[1] HugoGu · RAG 检索增强生成 wiki</a> — 九环节划分、迭代路径、踩坑数据、排查口诀的主源。</li>
+      <li><a href="https://github.com/Snailclimb/JavaGuide/blob/main/docs/ai/rag/rag-optimization.md" target="_blank">[2] JavaGuide · RAG 优化</a> — 「系统工程不是单点调参」的提法。</li>
+      <li><a href="https://juejin.cn/post/7641142853817974835" target="_blank">[3] 掘金 · 28 个 RAG 问题全解析</a> — 面试排查题的取材。</li>
+      <li><a href="https://developer.aliyun.com/article/1707263" target="_blank">[4] 阿里云 · 10 万文档 RAG 落地实战</a> — 真实排查与痛点（L11 深用）。</li>
+      <li><a href="https://zhuanlan.zhihu.com/p/2008281994912609286" target="_blank">[5] 知乎 · 深入 RAG 架构工程实现</a> — rerank 68%→89% 实测数据。</li>
+    </ul>
+    <p class="cite">完整资源清单见 <code>learning/rag/RESOURCES.md</code>。</p>
+  </div>
+
+  <div class="ask-reminder">
+    💡 <strong>有不清楚的地方？直接问老师。</strong>比如：「ANN 近似检索为什么会有损失？」「我们公司文档量小，要不要一开始就上混合检索？」任何环节的取舍、场景疑问都可以提。
+  </div>
+
+  <nav class="lesson-nav" style="margin-top:40px;">
+    <a href="0001-what-is-rag.html">← 上一节：RAG 是什么</a>
+    <a href="0003-chunking-strategies.html">下一节：切分策略 →</a>
+  </nav>
+
+</article>
+</body>
+</html>

@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>第 1 课 · 子 agent 是什么</title>
+<style>
+  :root {
+    --ink: #1a1a1a;
+    --muted: #6b6b6b;
+    --accent: #b8860b;
+    --bg: #fdfcf8;
+    --rule: #e5e2d8;
+  }
+  * { box-sizing: border-box; }
+  body {
+    font-family: Georgia, "Songti SC", "Noto Serif SC", serif;
+    background: var(--bg); color: var(--ink); line-height: 1.7;
+    margin: 0; padding: 2rem 1.25rem 5rem;
+  }
+  .wrap { max-width: 660px; margin: 0 auto; }
+  .meta { font-family: -apple-system, "PingFang SC", sans-serif; font-size: 0.8rem; color: var(--muted); letter-spacing: 0.05em; text-transform: uppercase; }
+  h1 { font-size: 1.9rem; line-height: 1.25; margin: 0.4rem 0 1.4rem; }
+  h2 { font-size: 1.15rem; margin: 2rem 0 0.5rem; font-family: -apple-system, "PingFang SC", sans-serif; }
+  p { margin: 0.6rem 0; }
+  .lead { font-size: 1.08rem; }
+  code { font-family: "SF Mono", Consolas, monospace; background: #f0ede2; padding: 0.1em 0.35em; border-radius: 3px; font-size: 0.9em; }
+  strong { color: #000; }
+  .compare { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin: 1.2rem 0; }
+  .compare div { border: 1px solid var(--rule); border-radius: 6px; padding: 0.9rem 1rem; background: #fff; }
+  .compare h3 { font-size: 0.92rem; margin: 0 0 0.4rem; font-family: -apple-system, "PingFang SC", sans-serif; }
+  .compare .bad h3 { color: #9a3a3a; }
+  .compare .good h3 { color: #3a6a3a; }
+  .compare p { font-size: 0.94rem; margin: 0.3rem 0; }
+  .quiz { border-left: 3px solid var(--accent); padding: 0.3rem 0 0.3rem 1.2rem; margin: 1.8rem 0; }
+  .quiz q { display: block; font-weight: bold; font-family: -apple-system, "PingFang SC", sans-serif; font-style: normal; }
+  .opts { display: flex; gap: 0.6rem; margin: 0.7rem 0; flex-wrap: wrap; }
+  .opts button { font-family: -apple-system, "PingFang SC", sans-serif; font-size: 0.95rem; padding: 0.4rem 1.2rem; border: 1px solid var(--rule); background: #fff; border-radius: 999px; cursor: pointer; min-width: 3.5rem; }
+  .opts button:hover { border-color: var(--accent); }
+  .opts button.right { background: #e7f0e0; border-color: #3a6a3a; color: #2a5a2a; }
+  .opts button.wrong { background: #f4e0e0; border-color: #9a3a3a; color: #7a2a2a; }
+  .fb { font-size: 0.92rem; color: var(--ink); margin-top: 0.4rem; min-height: 1.2em; opacity: 0; transition: opacity 0.2s; }
+  .fb.show { opacity: 1; }
+  .ta { width: 100%; min-height: 72px; font-family: Georgia, serif; font-size: 0.98rem; padding: 0.6rem; border: 1px solid var(--rule); border-radius: 6px; resize: vertical; background: #fff; }
+  .box { background: #fff; border: 1px solid var(--rule); border-radius: 6px; padding: 0.9rem 1.1rem; margin: 1.4rem 0; font-size: 0.94rem; }
+  .box h3 { margin: 0 0 0.4rem; font-size: 0.82rem; font-family: -apple-system, "PingFang SC", sans-serif; color: var(--muted); letter-spacing: 0.05em; text-transform: uppercase; }
+  a { color: var(--accent); }
+  .note { font-family: -apple-system, "PingFang SC", sans-serif; font-size: 0.88rem; color: var(--muted); border-left: 2px solid var(--rule); padding-left: 0.9rem; margin: 1rem 0; }
+  .nav { margin-top: 2.5rem; padding-top: 1.2rem; border-top: 1px solid var(--rule); font-size: 0.9rem; font-family: -apple-system, "PingFang SC", sans-serif; color: var(--muted); }
+  @media (max-width: 540px) { .compare { grid-template-columns: 1fr; } }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="meta">第 1 课 · 子 agent 系列 · 0001</div>
+  <h1>子 agent 是什么</h1>
+
+  <p class="lead">子 agent（subagent）就是主会话派出去的一个<strong>独立上下文的 Claude 实例</strong>。你给它一份精心构造的任务简报，它干完活，把结果交还给你。</p>
+
+  <p>关键在"独立上下文"四个字——它<strong>不继承</strong>你和 CC 之前的对话历史。它能看到什么，完全由你这一次给它的指令决定。</p>
+
+  <h2>一个类比</h2>
+  <p>你是项目经理，子 agent 是你派出去的专员。你不会把过去三个月所有会议记录都倒给他，而是递一份简报："去查 X，回来告诉我 Y。"他带着简报独立跑一趟，回来只交结论。</p>
+
+  <h2>为什么要用它</h2>
+  <p>两个好处，都和"上下文"有关：</p>
+  <p><strong>1. 专注。</strong>子 agent 只看到任务相关的东西，不会被你会话里一堆无关内容干扰，更不容易跑偏。</p>
+  <p><strong>2. 保护你的上下文。</strong>它读的文件、中间过程，都不塞进你的会话。你的"工作记忆"留给做决策、做协调，而不是被一堆搜索结果占满。</p>
+
+  <h2>和"单线程"的区别</h2>
+  <div class="compare">
+    <div class="bad">
+      <h3>单线程（你现在的用法）</h3>
+      <p>CC 自己读文件、改代码，所有东西堆进同一个上下文。活儿一多，上下文塞满，CC 开始"忘事"、变慢。</p>
+    </div>
+    <div class="good">
+      <h3>派子 agent</h3>
+      <p>把"读一堆文件""排查某个问题"派出去，主上下文保持清爽。你像调度员，而不是亲自下场干每一件事。</p>
+    </div>
+  </div>
+
+  <div class="quiz">
+    <q>小测验 1：子 agent 会自动继承主会话之前的全部对话历史。</q>
+    <div class="opts" data-q="1" data-a="错">
+      <button>对</button><button>错</button>
+    </div>
+    <div class="fb" id="fb1"></div>
+  </div>
+
+  <div class="quiz">
+    <q>小测验 2：派子 agent 去搜索 10 个文件，能保护主会话的上下文不被这 10 个文件的内容塞满。</q>
+    <div class="opts" data-q="2" data-a="对">
+      <button>对</button><button>错</button>
+    </div>
+    <div class="fb" id="fb2"></div>
+  </div>
+
+  <div class="quiz">
+    <q>小测验 3：子 agent 适合处理和主会话正在做的事紧密相关、需要随时看全局状态的活儿。</q>
+    <div class="opts" data-q="3" data-a="错">
+      <button>对</button><button>错</button>
+    </div>
+    <div class="fb" id="fb3"></div>
+  </div>
+
+  <h2>动手想一个</h2>
+  <p>结合你平时的用法：想一个"CC 干得慢、或上下文不够用"的场景，写下来——那个场景，很可能就是该派子 agent 的地方。</p>
+  <textarea class="ta" placeholder="例如：让 CC 改我的前端项目，它每次要把 6 个 js 文件都读一遍才能动手……"></textarea>
+  <p class="note">写完不用自己判断对错——把它发给你的 agent 老师（就是带你学习的这个 Claude），一起讨论这个场景适不适合派子 agent。这其实就是你的第一次"判断该不该派"练习。</p>
+
+  <div class="box">
+    <h3>推荐资源</h3>
+    <p>本课论据来自本地一手资料：<code>superpowers:subagent-driven-development</code>（子 agent 哲学）与 <code>superpowers:dispatching-parallel-agents</code>（并行派发）。完整清单见 <a href="../RESOURCES.md">RESOURCES.md</a>。</p>
+    <p>外部可参考 Claude Code 官方文档 subagents 章节：<a href="https://docs.claude.com/en/docs/claude-code/sub-agents" target="_blank">docs.claude.com</a>（未经本环境在线核实，以官方实际内容为准）。</p>
+  </div>
+
+  <div class="nav">
+    第 1 课 / 共 N 课　·　下一课：<em>什么时候该派子 agent（待生成）</em><br>
+    有任何不清楚的，<strong>直接问你的 agent 老师</strong>——它是为你而存在的。
+  </div>
+</div>
+<script>
+  const explain = {
+    '1': '子 agent 不继承会话历史，只看你这次给的指令——所以给它的简报要自包含。',
+    '2': '搜索结果留在子 agent 的上下文里，主会话只收到结论。这正是它的核心价值。',
+    '3': '子 agent 适合独立、自包含的任务；紧密相关、需看全局的活儿留在主会话更合适。'
+  };
+  document.querySelectorAll('.opts').forEach(opts => {
+    const q = opts.dataset.q, ans = opts.dataset.a, fb = document.getElementById('fb' + q);
+    opts.querySelectorAll('button').forEach(b => {
+      b.addEventListener('click', () => {
+        const correct = b.textContent.trim() === ans;
+        b.classList.add(correct ? 'right' : 'wrong');
+        fb.textContent = (correct ? '✓ 答对了。' : '✗ 再想想。') + explain[q];
+        fb.classList.add('show');
+      });
+    });
+  });
+</script>
+</body>
+</html>

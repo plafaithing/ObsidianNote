@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>第 4 课 · 怎么给子 agent 一份好指令</title>
+<style>
+  :root { --ink:#1a1a1a; --muted:#6b6b6b; --accent:#b8860b; --bg:#fdfcf8; --rule:#e5e2d8; }
+  * { box-sizing:border-box; }
+  body { font-family:Georgia,"Songti SC","Noto Serif SC",serif; background:var(--bg); color:var(--ink); line-height:1.7; margin:0; padding:2rem 1.25rem 5rem; }
+  .wrap { max-width:700px; margin:0 auto; }
+  .meta { font-family:-apple-system,"PingFang SC",sans-serif; font-size:0.8rem; color:var(--muted); letter-spacing:0.05em; text-transform:uppercase; }
+  h1 { font-size:1.9rem; line-height:1.25; margin:0.4rem 0 1.4rem; }
+  h2 { font-size:1.15rem; margin:2rem 0 0.5rem; font-family:-apple-system,"PingFang SC",sans-serif; }
+  p { margin:0.6rem 0; }
+  .lead { font-size:1.08rem; }
+  code { font-family:"SF Mono",Consolas,monospace; background:#f0ede2; padding:0.1em 0.35em; border-radius:3px; font-size:0.9em; }
+  strong { color:#000; }
+  pre { background:#1f1d18; color:#f3efe2; padding:0.9rem 1.1rem; border-radius:6px; overflow-x:auto; font-size:0.85rem; line-height:1.5; }
+  pre code { background:none; padding:0; color:inherit; }
+  .compare { display:grid; grid-template-columns:1fr 1fr; gap:1rem; margin:1.2rem 0; }
+  .compare div { border:1px solid var(--rule); border-radius:6px; padding:0.9rem 1rem; background:#fff; }
+  .compare h3 { font-size:0.92rem; margin:0 0 0.4rem; font-family:-apple-system,"PingFang SC",sans-serif; }
+  .compare .bad h3 { color:#9a3a3a; } .compare .good h3 { color:#3a6a3a; }
+  .compare p { font-size:0.93rem; margin:0.3rem 0; }
+  .result { border:1px solid var(--rule); border-left:3px solid var(--accent); border-radius:0 6px 6px 0; padding:0.7rem 1.1rem; margin:1rem 0; background:#fff; font-size:0.93rem; }
+  .result .tag { font-family:-apple-system,"PingFang SC",sans-serif; font-size:0.76rem; color:var(--muted); letter-spacing:0.05em; text-transform:uppercase; }
+  .result ul { margin:0.3rem 0; padding-left:1.2rem; } .result li { margin:0.2rem 0; }
+  .elems { display:grid; grid-template-columns:repeat(2,1fr); gap:0.6rem; margin:1rem 0; }
+  .elems div { border:1px solid var(--rule); border-radius:6px; padding:0.7rem 0.9rem; background:#fff; font-size:0.92rem; }
+  .elems b { font-family:-apple-system,"PingFang SC",sans-serif; color:var(--accent); }
+  .quiz { border-left:3px solid var(--accent); padding:0.3rem 0 0.3rem 1.2rem; margin:1.6rem 0; }
+  .quiz q { display:block; font-weight:bold; font-family:-apple-system,"PingFang SC",sans-serif; font-style:normal; }
+  .opts { display:flex; gap:0.6rem; margin:0.5rem 0; flex-wrap:wrap; }
+  .opts button { font-family:-apple-system,"PingFang SC",sans-serif; font-size:0.95rem; padding:0.4rem 1.2rem; border:1px solid var(--rule); background:#fff; border-radius:999px; cursor:pointer; min-width:3.5rem; }
+  .opts button:hover { border-color:var(--accent); }
+  .opts button.right { background:#e7f0e0; border-color:#3a6a3a; color:#2a5a2a; }
+  .opts button.wrong { background:#f4e0e0; border-color:#9a3a3a; color:#7a2a2a; }
+  .fb { font-size:0.92rem; color:var(--ink); margin-top:0.4rem; min-height:1.2em; opacity:0; transition:opacity 0.2s; }
+  .fb.show { opacity:1; }
+  .ta { width:100%; min-height:90px; font-family:"SF Mono",Consolas,monospace; font-size:0.88rem; padding:0.6rem; border:1px solid var(--rule); border-radius:6px; resize:vertical; background:#fff; }
+  .box { background:#fff; border:1px solid var(--rule); border-radius:6px; padding:0.9rem 1.1rem; margin:1.4rem 0; font-size:0.94rem; }
+  .box h3 { margin:0 0 0.4rem; font-size:0.82rem; font-family:-apple-system,"PingFang SC",sans-serif; color:var(--muted); letter-spacing:0.05em; text-transform:uppercase; }
+  ul.tight { padding-left:1.2rem; } ul.tight li { margin:0.25rem 0; }
+  a { color:var(--accent); }
+  .nav { margin-top:2.5rem; padding-top:1.2rem; border-top:1px solid var(--rule); font-size:0.9rem; font-family:-apple-system,"PingFang SC",sans-serif; color:var(--muted); }
+  @media (max-width:540px){ .compare,.elems{grid-template-columns:1fr;} }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="meta">第 4 课 · 子 agent 系列 · 0004</div>
+  <h1>怎么给子 agent 一份好指令</h1>
+
+  <p class="lead">上一课你亲手派了一个子 agent。这课把"指令本身"拆开——为什么有些 prompt 派出去要来回返工，有些一次到位。</p>
+
+  <h2>先记住：子 agent 是"失忆"的</h2>
+  <p>上下文隔离意味着——它<strong>看不到</strong>你和主会话之前聊过的任何东西，只看得到你这次塞进 prompt 的内容。</p>
+  <p>所以指令必须"自包含"：像给一个刚入职、什么都不知道的新人写任务单。</p>
+  <div class="compare">
+    <div class="bad">
+      <h3>单线程时可以含糊</h3>
+      <p>"就那个文件，改一下上次说的"——你们共享上下文，听得懂。</p>
+    </div>
+    <div class="good">
+      <h3>派子 agent 不行</h3>
+      <p>它不知道"那个文件"是哪个、"上次说的"是什么。每个词都得写明白。</p>
+    </div>
+  </div>
+
+  <h2>自包含 prompt 的四要素</h2>
+  <div class="elems">
+    <div><b>任务 Task</b><br>要它干什么（单一、明确、可判定完成）</div>
+    <div><b>约束 Constraints</b><br>边界（只读/可写、范围、不贴源码、广度）</div>
+    <div><b>输出格式 Output</b><br>要什么（结构、长度、是否落盘）</div>
+    <div><b>上下文 Context</b><br>背景（路径、前情、术语）</div>
+  </div>
+  <p style="font-size:0.92rem;color:var(--muted);">四个都齐，子 agent 拿到就能独立跑完，不用回来问你。</p>
+
+  <h2>① 任务——一句话能说清</h2>
+  <p>单一目标、动词开头、能判定"做完了"。</p>
+  <div class="compare">
+    <div class="bad"><h3>含糊</h3><p>"看看这个项目"——看什么？看完算完？</p></div>
+    <div class="good"><h3>明确</h3><p>"分析 raft1 项目的代码结构与核心功能"——目标清晰。</p></div>
+  </div>
+
+  <h2>② 约束——画好边界</h2>
+  <p>约束既是<strong>安全栏</strong>（别改我文件），也是 <strong>token 闸</strong>（别读太多）。</p>
+  <div class="compare">
+    <div class="bad"><h3>无约束</h3><p>可能改文件、可能 <code>very thorough</code> 读爆 token、可能跑偏看无关东西。</p></div>
+    <div class="good"><h3>有约束</h3><p>"只读不改；不贴大段源码；广度 medium；聚焦 src/ 不看 test/"。</p></div>
+  </div>
+
+  <h2>③ 输出格式——先说要什么</h2>
+  <p>要什么结构的结果，先讲清；而且要和"任务里问的点"<strong>一一对应</strong>。</p>
+  <div class="compare">
+    <div class="bad"><h3>没格式</h3><p>"随便看看告诉我"——返回一坨散文，不好用。</p></div>
+    <div class="good"><h3>结构化</h3><p>"项目概览 / 文件清单 / 启动方式 / 功能伪代码 / 问题清单"——和查询对齐。</p></div>
+  </div>
+  <p style="font-size:0.9rem;color:var(--muted);">要落盘？写明"写入 X 文件"并选可写 agent（如 <code>general-purpose</code>）——<code>Explore</code> 写不了。</p>
+
+  <h2>④ 上下文——补足它看不到的</h2>
+  <p>它不知道路径、不知道前情、不懂你的缩写术语。</p>
+  <div class="compare">
+    <div class="bad"><h3>假设它知道</h3><p>"看那个目录""刚才说的那个 bug"。</p></div>
+    <div class="good"><h3>写明白</h3><p>"分析 D:\workplace\code\java\raft1（一个 Raft 共识算法的 Java 实现）"。</p></div>
+  </div>
+
+  <h2>实战拆解：你写的 raft1 prompt</h2>
+  <p>第 3 课后你写的这份，其实四要素都齐了，是好 prompt。但有三处可优化：</p>
+  <pre><code>任务：读取 D:\workplace\code\java\raft1 目录代码
+具体查询：1. 当前项目具体是做什么的
+          2. 核心功能有哪些，如何实现的
+          3. 存在哪些问题
+约束：项目只读，不做修改，不贴源代码，必要是可有伪代码
+输出格式：项目概览 / 文件清单 / 启动方式 / 功能清单及其实现伪代码</code></pre>
+
+  <div class="result">
+    <div class="tag">三处可优化</div>
+    <ul>
+      <li>① 没写<strong>广度</strong> → token 不可控 <span style="color:var(--muted);">（约束要素）</span></li>
+      <li>② 查询问了"存在问题"，但输出格式没列"问题清单" → <strong>输出与查询不对齐</strong> <span style="color:var(--muted);">（输出格式要素）</span></li>
+      <li>③ "存在哪些问题"太宽 → 子 agent 不知从何下手 <span style="color:var(--muted);">（任务要素）</span></li>
+    </ul>
+  </div>
+
+  <pre><code>广度：medium
+任务：分析 D:\workplace\code\java\raft1 目录的代码
+具体查询：
+  1. 项目是做什么的（一句话 + 关键技术栈）
+  2. 核心功能有哪些，各自如何实现（用伪代码）
+  3. 存在哪些问题与风险（潜在 bug、并发/一致性、设计缺陷）
+约束：只读，不改任何文件；不贴大段源码，必要时用伪代码
+输出格式：项目概览 / 文件清单 / 启动方式 / 功能清单(含伪代码) / 问题与风险清单</code></pre>
+  <p>三个优化正好分别落在<strong>约束、输出格式、任务</strong>三个要素上——四要素不是死记，是检查清单。</p>
+
+  <h2>反模式（别这样写）</h2>
+  <ul class="tight">
+    <li><strong>太含糊</strong>："帮我看看代码"</li>
+    <li><strong>漏约束</strong>：没说只读 → 万一派到可写 agent，文件可能被改</li>
+    <li><strong>输出没格式</strong>：返回一坨，没法直接用</li>
+    <li><strong>假设它知道</strong>：用"那个文件""上次说的"</li>
+    <li><strong>多目标混杂</strong>：一个 prompt 塞"读代码+写文档+跑测试" → 拆成多个子 agent</li>
+  </ul>
+
+  <h2>练一练</h2>
+  <div class="quiz">
+    <q>测验 1：子 agent 能看到你和主会话之前讨论的内容。</q>
+    <div class="opts" data-q="1" data-a="错"><button>对</button><button>错</button></div>
+    <div class="fb" id="fb1"></div>
+  </div>
+  <div class="quiz">
+    <q>测验 2：查询里问了"存在问题"但输出格式没列问题清单——这是输出格式没和任务对齐。</q>
+    <div class="opts" data-q="2" data-a="对"><button>对</button><button>错</button></div>
+    <div class="fb" id="fb2"></div>
+  </div>
+  <div class="quiz">
+    <q>测验 3：一个 prompt 塞了"读代码+写文档+跑测试"三件独立的事，更好的做法是拆成多个子 agent。</q>
+    <div class="opts" data-q="3" data-a="对"><button>对</button><button>错</button></div>
+    <div class="fb" id="fb3"></div>
+  </div>
+
+  <h2>动手写一个</h2>
+  <p>想一个你会派子 agent 的真实任务，按四要素写一份 prompt：</p>
+  <textarea class="ta" placeholder="任务：…
+约束：…
+输出格式：…
+上下文：…"></textarea>
+  <p style="font-family:-apple-system,'PingFang SC',sans-serif;font-size:0.88rem;color:var(--muted);border-left:2px solid var(--rule);padding-left:0.9rem;margin:1rem 0;">写完发给你的 agent 老师核对——甚至可以让它真的派出去跑一遍，看返回对不对。</p>
+
+  <div class="box">
+    <h3>推荐资源</h3>
+    <p>本课依据：<code>superpowers:subagent-driven-development</code>（自包含任务、隔离上下文）+ 系统自带 <code>Agent</code> 工具文档。完整清单见 <a href="../RESOURCES.md">RESOURCES.md</a>，术语见 <a href="../reference/术语表.md">术语表</a>。</p>
+  </div>
+
+  <div class="nav">
+    上一课：<a href="0003-dispatch-your-first-subagent.html">亲手派第一个子 agent</a>　·　下一课：<a href="0005-dispatching-parallel-subagents.html">并行派发多个子 agent</a><br>
+    有任何不清楚的，<strong>直接问你的 agent 老师</strong>。
+  </div>
+</div>
+<script>
+  const explain = {
+    '1': '上下文隔离——子 agent 看不到主会话历史，只看你这次的 prompt。',
+    '2': '查询里问的点，输出格式里要有对应栏目，否则返回可能漏掉那部分。',
+    '3': '多件不相关的独立任务，拆成多个子 agent 并行更高效（下一课主题）。'
+  };
+  document.querySelectorAll('.opts').forEach(opts => {
+    const q = opts.dataset.q, ans = opts.dataset.a, fb = document.getElementById('fb'+q);
+    opts.querySelectorAll('button').forEach(b => {
+      b.addEventListener('click', () => {
+        const correct = b.textContent.trim() === ans;
+        b.classList.add(correct ? 'right' : 'wrong');
+        fb.textContent = (correct ? '✓ 对。' : '✗ 再想想。') + explain[q];
+        fb.classList.add('show');
+      });
+    });
+  });
+</script>
+</body>
+</html>

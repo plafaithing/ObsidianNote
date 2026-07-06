@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>第 5 课 · 并行派发多个子 agent</title>
+<style>
+  :root { --ink:#1a1a1a; --muted:#6b6b6b; --accent:#b8860b; --bg:#fdfcf8; --rule:#e5e2d8; }
+  * { box-sizing:border-box; }
+  body { font-family:Georgia,"Songti SC","Noto Serif SC",serif; background:var(--bg); color:var(--ink); line-height:1.7; margin:0; padding:2rem 1.25rem 5rem; }
+  .wrap { max-width:700px; margin:0 auto; }
+  .meta { font-family:-apple-system,"PingFang SC",sans-serif; font-size:0.8rem; color:var(--muted); letter-spacing:0.05em; text-transform:uppercase; }
+  h1 { font-size:1.9rem; line-height:1.25; margin:0.4rem 0 1.4rem; }
+  h2 { font-size:1.15rem; margin:2rem 0 0.5rem; font-family:-apple-system,"PingFang SC",sans-serif; }
+  p { margin:0.6rem 0; }
+  .lead { font-size:1.08rem; }
+  code { font-family:"SF Mono",Consolas,monospace; background:#f0ede2; padding:0.1em 0.35em; border-radius:3px; font-size:0.9em; }
+  strong { color:#000; }
+  pre { background:#1f1d18; color:#f3efe2; padding:0.9rem 1.1rem; border-radius:6px; overflow-x:auto; font-size:0.85rem; line-height:1.5; }
+  pre code { background:none; padding:0; color:inherit; }
+  .compare { display:grid; grid-template-columns:1fr 1fr; gap:1rem; margin:1.2rem 0; }
+  .compare div { border:1px solid var(--rule); border-radius:6px; padding:0.9rem 1rem; background:#fff; }
+  .compare h3 { font-size:0.92rem; margin:0 0 0.4rem; font-family:-apple-system,"PingFang SC",sans-serif; }
+  .compare .bad h3 { color:#9a3a3a; } .compare .good h3 { color:#3a6a3a; }
+  .compare p { font-size:0.93rem; margin:0.3rem 0; }
+  .result { border:1px solid var(--rule); border-left:3px solid var(--accent); border-radius:0 6px 6px 0; padding:0.7rem 1.1rem; margin:1rem 0; background:#fff; font-size:0.93rem; }
+  .result .tag { font-family:-apple-system,"PingFang SC",sans-serif; font-size:0.76rem; color:var(--muted); letter-spacing:0.05em; text-transform:uppercase; }
+  .result p { margin:0.35rem 0; }
+  .elems { display:grid; grid-template-columns:repeat(3,1fr); gap:0.6rem; margin:1rem 0; }
+  .elems div { border:1px solid var(--rule); border-radius:6px; padding:0.7rem 0.9rem; background:#fff; font-size:0.9rem; }
+  .elems b { font-family:-apple-system,"PingFang SC",sans-serif; color:var(--accent); display:block; margin-bottom:0.2rem; }
+  ol.steps { padding-left:1.3rem; margin:0.8rem 0; } ol.steps li { margin:0.45rem 0; }
+  ul.tight { padding-left:1.2rem; } ul.tight li { margin:0.25rem 0; }
+  .quiz { border-left:3px solid var(--accent); padding:0.3rem 0 0.3rem 1.2rem; margin:1.6rem 0; }
+  .quiz q { display:block; font-weight:bold; font-family:-apple-system,"PingFang SC",sans-serif; font-style:normal; }
+  .opts { display:flex; gap:0.6rem; margin:0.5rem 0; flex-wrap:wrap; }
+  .opts button { font-family:-apple-system,"PingFang SC",sans-serif; font-size:0.95rem; padding:0.4rem 1.2rem; border:1px solid var(--rule); background:#fff; border-radius:999px; cursor:pointer; min-width:3.5rem; }
+  .opts button:hover { border-color:var(--accent); }
+  .opts button.right { background:#e7f0e0; border-color:#3a6a3a; color:#2a5a2a; }
+  .opts button.wrong { background:#f4e0e0; border-color:#9a3a3a; color:#7a2a2a; }
+  .fb { font-size:0.92rem; color:var(--ink); margin-top:0.4rem; min-height:1.2em; opacity:0; transition:opacity 0.2s; }
+  .fb.show { opacity:1; }
+  .ta { width:100%; min-height:90px; font-family:"SF Mono",Consolas,monospace; font-size:0.88rem; padding:0.6rem; border:1px solid var(--rule); border-radius:6px; resize:vertical; background:#fff; }
+  .box { background:#fff; border:1px solid var(--rule); border-radius:6px; padding:0.9rem 1.1rem; margin:1.4rem 0; font-size:0.94rem; }
+  .box h3 { margin:0 0 0.4rem; font-size:0.82rem; font-family:-apple-system,"PingFang SC",sans-serif; color:var(--muted); letter-spacing:0.05em; text-transform:uppercase; }
+  .motto { font-size:1.05rem; text-align:center; padding:0.8rem 1rem; background:#fff; border:1px dashed var(--accent); border-radius:6px; margin:1rem 0; }
+  a { color:var(--accent); }
+  .nav { margin-top:2.5rem; padding-top:1.2rem; border-top:1px solid var(--rule); font-size:0.9rem; font-family:-apple-system,"PingFang SC",sans-serif; color:var(--muted); }
+  @media (max-width:540px){ .compare{grid-template-columns:1fr;} .elems{grid-template-columns:1fr;} }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="meta">第 5 课 · 子 agent 系列 · 0005</div>
+  <h1>并行派发多个子 agent</h1>
+
+  <p class="lead">一个子 agent 派出去要等一会。要是你有 3 个独立任务，串行派得等 3 倍。这课讲怎么让它们同时跑。</p>
+
+  <h2>串行 vs 并行——时间账</h2>
+  <div class="compare">
+    <div class="bad">
+      <h3>串行派</h3>
+      <p>任务 A → B → C，各 3 分钟，共 <strong>9 分钟</strong>。主会话干等三趟。</p>
+    </div>
+    <div class="good">
+      <h3>并行派</h3>
+      <p>A / B / C 同时跑，共 <strong>3 分钟</strong>。主会话一次等完。</p>
+    </div>
+  </div>
+
+  <h2>核心原则</h2>
+  <p>每个<strong>独立问题域</strong>派一个 agent，让它们并发跑。主会话当调度员，等全部返回再整合。</p>
+  <div class="motto">多个独立任务 · 一人一个 · 同时出发 · 统一收口</div>
+
+  <h2>什么时候能并行（三个条件）</h2>
+  <p>不是"多个任务"就能并行，得同时满足：</p>
+  <div class="elems">
+    <div><b>独立</b>任务之间不依赖（A 的结果不是 B 的输入）</div>
+    <div><b>无共享状态</b>不会改同一个文件/资源、互不干扰</div>
+    <div><b>自包含</b>每个任务不用看其他任务就能干</div>
+  </div>
+  <div class="compare">
+    <div class="good">
+      <h3>适合并行</h3>
+      <p>3 个独立项目各做代码分析；3 个测试文件各有不同根因的失败；读代码 + 读文档 + 查依赖（三件不相关）。</p>
+    </div>
+    <div class="bad">
+      <h3>不适合并行</h3>
+      <p>任务相关（修一个可能修其他）；改同一文件（会冲突）；需先理解全局；还没摸清什么坏了。</p>
+    </div>
+  </div>
+
+  <h2>四步走</h2>
+  <ol class="steps">
+    <li><strong>识别独立域</strong>——按"什么活"分组，能分开的分开。</li>
+    <li><strong>给每个 agent 聚焦任务</strong>——范围 + 目标 + 约束 + 期望输出（第 4 课四要素）。</li>
+    <li><strong>并行派发</strong>——一条消息里放多个 Agent 工具调用。</li>
+    <li><strong>review 整合</strong>——读每个总结、查冲突、验证、整合。</li>
+  </ol>
+
+  <h2>关键技术点：怎么让它们"并行"</h2>
+  <p>在 Claude Code 里，<strong>一条消息里放多个 Agent 工具调用，它们就并发执行</strong>。分多条消息发 = 串行。</p>
+  <pre><code># ✅ 一条消息多个调用 = 并发
+Agent(subagent_type:"Explore", prompt:"分析 D:\...\raft1 的代码结构")
+Agent(subagent_type:"Explore", prompt:"分析 D:\...\raft2 的代码结构")
+Agent(subagent_type:"Explore", prompt:"分析 D:\...\raft3 的代码结构")
+# 三个同时跑，主会话等全部返回</code></pre>
+  <p style="font-size:0.9rem;color:var(--muted);">系统机制原话："send them in a single message with multiple tool uses so they run concurrently."</p>
+
+  <h2>真实案例（来自 dispatching-parallel-agents）</h2>
+  <div class="result">
+    <div class="tag">6 个测试失败，跨 3 个文件</div>
+    <p><strong>场景</strong>：大重构后，3 个文件各有失败——abort 逻辑 / 批量完成 / 竞态条件。三个域独立。</p>
+    <p><strong>派发</strong>：Agent1 修 abort 文件 · Agent2 修批量完成文件 · Agent3 修竞态文件，<strong>并行</strong>。</p>
+    <p><strong>结果</strong>：三个同时修完，互不冲突，全套测试转绿。省下串行的时间。</p>
+    <p><strong>关键</strong>：判断"独立"是前提——若同根因，就该一起查而非拆开。</p>
+  </div>
+
+  <h2>review 整合——别只收不管</h2>
+  <ul class="tight">
+    <li>读每个 agent 的返回总结</li>
+    <li>查冲突——可写 agent 是否改了同一文件（只读 <code>Explore</code> 不冲突）</li>
+    <li>验证——修 bug 的话跑全套测试</li>
+    <li>抽检——agent 会系统性出错，别全信，抽查关键结论</li>
+  </ul>
+
+  <h2>还是四要素（呼应第 4 课）</h2>
+  <p>每个 agent 的 prompt 仍是四要素。并行时最常见的错误是<strong>太宽</strong>：</p>
+  <div class="compare">
+    <div class="bad"><h3>太宽</h3><p>"把所有测试都修了" → agent 迷路。</p></div>
+    <div class="good"><h3>聚焦</h3><p>"修 agent-tool-abort.test.ts 这 3 个失败" → 范围明确。</p></div>
+  </div>
+
+  <h2>练一练</h2>
+  <div class="quiz">
+    <q>测验 1：并行派发要求任务之间无共享状态、互不干扰。</q>
+    <div class="opts" data-q="1" data-a="对"><button>对</button><button>错</button></div>
+    <div class="fb" id="fb1"></div>
+  </div>
+  <div class="quiz">
+    <q>测验 2：3 个失败如果是同一个根因引起的，应该拆成 3 个子 agent 并行查。</q>
+    <div class="opts" data-q="2" data-a="错"><button>对</button><button>错</button></div>
+    <div class="fb" id="fb2"></div>
+  </div>
+  <div class="quiz">
+    <q>测验 3：让多个子 agent 并发跑，方法是在一条消息里放多个 Agent 工具调用。</q>
+    <div class="opts" data-q="3" data-a="对"><button>对</button><button>错</button></div>
+    <div class="fb" id="fb3"></div>
+  </div>
+
+  <h2>动手写一个</h2>
+  <p>想一个你真实场景里"多个独立任务"的例子，写出怎么拆成并行派发：</p>
+  <textarea class="ta" placeholder="任务 A（agent 1 干嘛）：…为什么独立
+任务 B（agent 2 干嘛）：…为什么独立
+任务 C（agent 3 干嘛）：…为什么独立
+整合：主会话怎么收口"></textarea>
+  <p style="font-family:-apple-system,'PingFang SC',sans-serif;font-size:0.88rem;color:var(--muted);border-left:2px solid var(--rule);padding-left:0.9rem;margin:1rem 0;">写完发我核对——或者让我现场并行派 2 个 Explore 演示一次"一条消息并发"的真实效果。</p>
+
+  <div class="box">
+    <h3>推荐资源</h3>
+    <p>本课依据：<code>superpowers:dispatching-parallel-agents</code>（并行方法论、真实案例）+ 系统自带 <code>Agent</code> 工具（并发机制：一条消息多个调用）。完整清单见 <a href="../RESOURCES.md">RESOURCES.md</a>，术语见 <a href="../reference/术语表.md">术语表</a>。</p>
+  </div>
+
+  <div class="nav">
+    上一课：<a href="0004-how-to-instruct-a-subagent.html">怎么给子 agent 一份好指令</a>　·　下一课：<a href="0006-sdd-workflow.html">选学：SDD 工作流</a><br>
+    有任何不清楚的，<strong>直接问你的 agent 老师</strong>。
+  </div>
+</div>
+<script>
+  const explain = {
+    '1': '共享状态会让 agent 互相干扰（改同一文件冲突），这是并行的大忌。',
+    '2': '相关失败修一个可能修其他，该一起查；只有独立根因才值得拆开并行。',
+    '3': '一条消息里多个 Agent 工具调用就并发，分多条消息发就退化成串行。'
+  };
+  document.querySelectorAll('.opts').forEach(opts => {
+    const q = opts.dataset.q, ans = opts.dataset.a, fb = document.getElementById('fb'+q);
+    opts.querySelectorAll('button').forEach(b => {
+      b.addEventListener('click', () => {
+        const correct = b.textContent.trim() === ans;
+        b.classList.add(correct ? 'right' : 'wrong');
+        fb.textContent = (correct ? '✓ 对。' : '✗ 再想想。') + explain[q];
+        fb.classList.add('show');
+      });
+    });
+  });
+</script>
+</body>
+</html>

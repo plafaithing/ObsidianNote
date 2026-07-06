@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>L01 · RAG 是什么 & 为什么需要它</title>
+  <style>
+  /* RAG 课程样式 — Tufte 风格，内联以保证 Obsidian 渲染兼容 */
+  :root {
+    --bg: #fafaf7; --ink: #1a1a1a; --ink-soft: #444; --ink-mute: #777;
+    --rule: #e4e3dc; --accent: #2b5a8c; --accent-soft: #e8f0f7;
+    --warn: #b06a00; --warn-soft: #fdf3e3; --key: #2f7d52; --key-soft: #e8f5ee;
+    --pit: #a23a3a; --pit-soft: #fbecec; --code-bg: #f3f3ee;
+    --serif: 'Source Serif Pro','Noto Serif SC',Georgia,'Songti SC',serif;
+    --sans: -apple-system,BlinkMacSystemFont,'Segoe UI','PingFang SC','Microsoft YaHei',sans-serif;
+    --mono: 'SF Mono','JetBrains Mono',Consolas,monospace;
+  }
+  *{box-sizing:border-box} html{scroll-behavior:smooth}
+  body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--sans);font-size:16px;line-height:1.78;-webkit-font-smoothing:antialiased}
+  .lesson{max-width:760px;margin:0 auto;padding:48px 28px 96px}
+  .lesson-header{margin-bottom:36px;border-bottom:1px solid var(--rule);padding-bottom:22px}
+  .course-label{font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--accent);font-weight:700}
+  .lesson-num{font-size:13px;color:var(--ink-mute);margin:8px 0 2px}
+  .lesson-title{font-family:var(--serif);font-size:34px;line-height:1.22;margin:2px 0 8px;font-weight:700}
+  .lesson-sub{color:var(--ink-soft);font-size:15px;margin:0}
+  .lesson-nav{display:flex;justify-content:space-between;margin:0 0 40px;font-size:14px}
+  .lesson-nav a{color:var(--accent);text-decoration:none} .lesson-nav a:hover{text-decoration:underline}
+  .lesson-nav .disabled{color:var(--ink-mute);opacity:.4;pointer-events:none}
+  h2{font-family:var(--serif);font-size:24px;margin:44px 0 12px;font-weight:700}
+  h3{font-size:17px;margin:26px 0 8px;font-weight:600}
+  p{margin:12px 0} ul,ol{margin:12px 0;padding-left:24px} li{margin:6px 0}
+  strong{color:var(--ink);font-weight:600} em{color:var(--ink-soft)} a{color:var(--accent)}
+  code{font-family:var(--mono);background:var(--code-bg);padding:2px 6px;border-radius:4px;font-size:.9em}
+  pre{background:var(--code-bg);padding:16px;border-radius:8px;overflow-x:auto} pre code{background:none;padding:0}
+  .callout{margin:22px 0;padding:14px 18px;border-left:3px solid;border-radius:0 6px 6px 0}
+  .callout p:first-child{margin-top:0} .callout p:last-child{margin-bottom:0}
+  .callout-title{font-weight:700;font-size:13px;letter-spacing:.03em;margin-bottom:6px;display:block}
+  .callout.info{background:var(--accent-soft);border-color:var(--accent)}
+  .callout.warn{background:var(--warn-soft);border-color:var(--warn)}
+  .callout.key{background:var(--key-soft);border-color:var(--key)}
+  .callout.pit{background:var(--pit-soft);border-color:var(--pit)}
+  .callout.interview{background:var(--accent-soft);border-color:var(--accent)}
+  .callout.interview .callout-title::before{content:"🎤 "}
+  table{width:100%;border-collapse:collapse;margin:18px 0;font-size:14px}
+  th,td{text-align:left;padding:10px 12px;border-bottom:1px solid var(--rule);vertical-align:top}
+  th{font-weight:600;color:var(--ink-soft);background:var(--code-bg)}
+  .pipeline{display:flex;flex-wrap:wrap;align-items:center;gap:6px;margin:20px 0;font-size:13px}
+  .pipeline .stage{background:#fff;border:1px solid var(--rule);border-radius:6px;padding:8px 12px;white-space:nowrap}
+  .pipeline .stage.index{border-color:var(--accent);color:var(--accent)}
+  .pipeline .stage.query{border-color:var(--key);color:var(--key)}
+  .pipeline .arrow{color:var(--ink-mute)}
+  .pipeline .group-label{font-size:11px;color:var(--ink-mute);width:100%;margin-top:8px;letter-spacing:.05em}
+  .quiz{margin:30px 0;border:1px solid var(--rule);border-radius:12px;padding:24px 26px;background:#fff}
+  .quiz-q{font-weight:600;margin:0 0 16px;font-size:16px}
+  .quiz-options{display:flex;flex-direction:column;gap:10px}
+  .quiz-opt{display:flex;align-items:center;gap:12px;padding:12px 16px;border:1.5px solid var(--rule);border-radius:10px;cursor:pointer;transition:all .15s;user-select:none}
+  .quiz-opt:hover{border-color:var(--accent);background:var(--accent-soft)}
+  .quiz-opt .mark{width:24px;height:24px;border-radius:50%;border:1.5px solid var(--ink-mute);display:inline-flex;align-items:center;justify-content:center;font-size:13px;color:transparent;flex-shrink:0}
+  .quiz-opt.reveal.correct{border-color:var(--key);background:var(--key-soft)}
+  .quiz-opt.reveal.correct .mark{background:var(--key);color:#fff;border-color:var(--key)}
+  .quiz-opt.reveal.wrong{border-color:var(--pit);background:var(--pit-soft)}
+  .quiz-opt.reveal.wrong .mark{background:var(--pit);color:#fff;border-color:var(--pit)}
+  .quiz-feedback{margin-top:16px;font-size:14px;line-height:1.7;display:none;padding:14px 16px;background:var(--code-bg);border-radius:8px}
+  .quiz-feedback.show{display:block}
+  .win{margin:36px 0 24px;padding:22px 24px;background:var(--key-soft);border-radius:12px;border:1px solid var(--key)}
+  .win h3{margin-top:0;color:var(--key)}
+  .sources{margin-top:32px;padding-top:22px;border-top:1px solid var(--rule);font-size:14px}
+  .sources h3{margin-top:0} .sources ul{padding-left:20px}
+  .ask-reminder{margin-top:20px;padding:16px 18px;background:var(--accent-soft);border-radius:10px;font-size:14px}
+  .cite{font-size:13px;color:var(--ink-mute)}
+  @media print{body{background:#fff}.lesson-nav,.quiz-opt{break-inside:avoid}a{color:var(--ink)}}
+  @media (max-width:600px){.lesson{padding:28px 18px 64px}.lesson-title{font-size:26px}.pipeline{font-size:11px}}
+  </style>
+</head>
+<body>
+<article class="lesson">
+
+  <header class="lesson-header">
+    <div class="course-label">RAG 课程 · 检索增强生成</div>
+    <div class="lesson-num">第 01 节 / 共 12 节</div>
+    <h1 class="lesson-title">RAG 是什么 & 为什么需要它</h1>
+    <p class="lesson-sub">从「闭卷背诵」到「开卷考试」——理解 RAG 要解决的根本问题</p>
+  </header>
+
+  <nav class="lesson-nav">
+    <span class="disabled">← 上一节（已是第一节）</span>
+    <a href="0002-rag-pipeline.html">下一节：RAG 全流程地图 →</a>
+  </nav>
+
+  <h2>开场：一个会「一本正经胡说」的助手</h2>
+  <p>假设你的 DBA Copilot 直接接上大模型就上线了。一位运维问它：「GaussDB 里慢 SQL 怎么定位？」模型自信地回答：<em>「执行 <code>SELECT * FROM slow_query_log</code> 即可查看所有慢 SQL。」</em></p>
+  <p>问题在于——GaussDB 里压根没有这张系统视图，真实入口是 <code>PGXC_STAT_ACTIVITY</code> 和管控面的 Top SQL。模型编造了一个<em>看起来很合理</em>但<em>完全错误</em>的答案。这就是<strong>幻觉（Hallucination）</strong>。</p>
+  <div class="callout pit">
+    <span class="callout-title">运维场景的代价</span>
+    <p>在客服场景里，幻觉顶多让用户困惑；在<strong>运维场景</strong>里，幻觉 = 给错 SQL 建议 = 可能引发生产事故。这就是你的 DBA Copilot <em>必须</em>用 RAG 的根本原因：不能让模型凭记忆瞎编，必须让它「看着文档说话」。</p>
+  </div>
+
+  <h2>LLM 的三个固有限制</h2>
+  <p>RAG 不是噱头，它针对的是大语言模型（LLM）三个绕不开的缺陷<a href="https://wiki.hugogu.cn/zh/ai/tech/rag" target="_blank">[1]</a>：</p>
+  <ul>
+    <li><strong>知识截止（Knowledge Cutoff）</strong>：模型训练有截止日期。你的私有运维文档、最新版本手册，模型训练时根本没见过。</li>
+    <li><strong>幻觉问题（Hallucination）</strong>：面对未知，模型倾向于「编」一个看似合理的答案，而不是老实说「不知道」。</li>
+    <li><strong>知识隔离（Knowledge Isolation）</strong>：模型无法访问企业私有数据、实时数据、个人文档——这些恰恰是售前客户最在意的东西。</li>
+  </ul>
+  <p>注意这三个限制的本质：<strong>模型把知识「焊」在了参数里</strong>，参数一训练完就凝固了。而企业知识是活的——文档每周更新、版本每月迭代、客户数据每秒在变。用凝固的参数装活的知识，必然错位。</p>
+
+  <h2>RAG 的核心思想：开卷考试</h2>
+  <p>RAG（Retrieval-Augmented Generation，检索增强生成）的解法很直觉：<strong>别让模型闭卷背诵，让它开卷考试。</strong></p>
+  <p>具体说，就是在大模型生成回答<em>之前</em>，先从外部知识库<strong>检索</strong>出与问题相关的文档片段，把这些片段塞进模型的上下文，让它<strong>基于检索到的内容</strong>生成答案（这就是「增强」）。</p>
+  <div class="callout key">
+    <span class="callout-title">一句话定义</span>
+    <p>RAG = <strong>检索（Retrieve）外部知识 + 增强（Augment）模型上下文 + 生成（Generate）回答</strong>。把「知识」从模型参数里搬到可随时更新的外部知识库里。</p>
+  </div>
+  <p>这个思路最早由 Lewis 等人在 2020 年提出，2023 年随 ChatGPT 爆发而产业化，2024 年进阶到 Self-RAG / CRAG，2025 年成为 Agentic RAG（和 Agent 结合）<a href="https://wiki.hugogu.cn/zh/ai/tech/rag" target="_blank">[1]</a>。你现在学的是当下最主流的范式。</p>
+
+  <h2>一图看全流程</h2>
+  <p>RAG 分两个阶段：<strong>索引阶段</strong>（提前把知识准备好）和<strong>查询阶段</strong>（用户提问时实时检索+生成）。</p>
+  <div class="pipeline">
+    <span class="group-label">索引阶段（离线，一次性 + 增量）</span>
+    <span class="stage index">文档加载</span><span class="arrow">→</span>
+    <span class="stage index">切分 Chunking</span><span class="arrow">→</span>
+    <span class="stage index">向量化 Embedding</span><span class="arrow">→</span>
+    <span class="stage index">存入向量库</span>
+    <span class="group-label">查询阶段（在线，每次提问）</span>
+    <span class="stage query">用户问题</span><span class="arrow">→</span>
+    <span class="stage query">向量化</span><span class="arrow">→</span>
+    <span class="stage query">向量检索</span><span class="arrow">→</span>
+    <span class="stage query">重排 Rerank</span><span class="arrow">→</span>
+    <span class="stage query">组装上下文</span><span class="arrow">→</span>
+    <span class="stage query">LLM 生成</span>
+  </div>
+  <p>不用现在就记住每个环节的细节——这正是<a href="0002-rag-pipeline.html">第 02 节</a>要深挖的。这里你只需要建立<strong>全景认知</strong>：RAG 不是一个「调一下」的开关，而是一条由 7+ 个环节组成的流水线，<em>每个环节都有取舍</em>。这条流水线的质量上限由最弱的环节决定。</p>
+
+  <h2>RAG vs 微调 vs 长上下文</h2>
+  <p>这是<strong>面试最高频的问题之一</strong>：「RAG、微调、长上下文，什么时候用哪个？」<a href="https://juejin.cn/post/7641142853817974835" target="_blank">[2]</a></p>
+  <table>
+    <thead><tr><th>维度</th><th>RAG</th><th>微调 Fine-tuning</th><th>长上下文 Long Context</th></tr></thead>
+    <tbody>
+      <tr><td>知识更新</td><td>即时生效，更新知识库即可</td><td>需重新训练</td><td>即时（塞进 prompt）</td></tr>
+      <tr><td>幻觉控制</td><td>强（基于检索结果生成）</td><td>弱（依赖模型记忆）</td><td>中（取决于是否能找到）</td></tr>
+      <tr><td>成本</td><td>低（无需 GPU 训练）</td><td>高（训练资源）</td><td>按 token 计费，长输入贵</td></tr>
+      <tr><td>数据安全</td><td>可控（知识在本地索引）</td><td>知识进参数，难删除</td><td>数据进 prompt，注意泄露</td></tr>
+      <tr><td>适合场景</td><td>知识频繁更新、需引用溯源</td><td>改风格/格式/领域语感</td><td>单次分析大量文档</td></tr>
+    </tbody>
+  </table>
+  <div class="callout warn">
+    <span class="callout-title">长上下文 ≠ RAG 过时</span>
+    <p>现在模型上下文窗口动辄 200K，但 RAG 依然必要，三个原因<a href="https://wiki.hugogu.cn/zh/ai/tech/rag" target="_blank">[1]</a>：</p>
+    <ol>
+      <li><strong>成本</strong>：长输入的推理费用与 token 数成正比，每次提问都塞几万字不划算。</li>
+      <li><strong>迷失在中间（Lost in the Middle）</strong>：研究表明 LLM 对长上下文<em>中间</em>位置的信息召回率远低于首尾——塞进去不代表看得到。</li>
+      <li><strong>延迟</strong>：超长上下文的首 token 延迟显著增加。</li>
+    </ol>
+    <p>当前共识：<strong>长上下文与 RAG 是互补关系</strong>——RAG 负责精确定位相关文档，长上下文负责承载检索结果。</p>
+  </div>
+  <div class="callout interview">
+    <span class="callout-title">面试视角</span>
+    <p><strong>Q：企业知识库每周更新，选 RAG 还是微调？为什么？</strong></p>
+    <p>答 RAG。核心是<strong>知识更新即时生效</strong>：更新向量库索引后下次查询立刻生效；微调要把知识焊进参数，每次更新都重训，成本和时效都不可接受。再补一句「长上下文虽快但成本高且 Lost in the Middle」，就比只答 RAG 的候选人多了深度。</p>
+  </div>
+
+  <h2>你的北极星：运维知识库 RAG</h2>
+  <p>把这门课学到的东西，最终会汇聚成你的 DBA Copilot 的 RAG 部分：</p>
+  <ul>
+    <li><strong>知识源</strong>：GaussDB 运维文档、慢 SQL 诊断手册、会话分析指南、SQL 限流规则、历史故障复盘。</li>
+    <li><strong>用户提问</strong>：「这条慢 SQL 为什么慢？」「怎么定位锁等待？」</li>
+    <li><strong>RAG 做的事</strong>：检索出相关的运维文档片段 → 喂给大模型 → 模型基于文档生成<strong>带引用</strong>的诊断建议。</li>
+  </ul>
+  <p>后续每节课，你都会为这个 demo 加一块拼图：切分运维文档、选 embedding、混合检索、rerank、防幻觉引用、评估效果。第 10 节用 Dify 端到端跑通。</p>
+
+  <h2>小测验</h2>
+  <div class="quiz" id="quiz">
+    <p class="quiz-q">企业内部文档每周都在更新，选 RAG 而非微调，最关键的原因是？</p>
+    <div class="quiz-options">
+      <label class="quiz-opt" data-correct="true">
+        <span class="mark">✓</span><span>更新知识即时生效</span>
+      </label>
+      <label class="quiz-opt" data-correct="false">
+        <span class="mark">✗</span><span>模型参数可以缩小</span>
+      </label>
+      <label class="quiz-opt" data-correct="false">
+        <span class="mark">✗</span><span>推理延迟能够降低</span>
+      </label>
+    </div>
+    <div class="quiz-feedback" id="quiz-feedback">
+      <strong>✓ 更新知识即时生效。</strong> RAG 的知识在向量库里，更新文档即更新索引，下次查询立刻生效；微调要把新知识焊进模型参数，每次更新都要重训，频繁更新场景下成本和时效都不可接受。<br><br>
+      <em>推理延迟反而会因为多了检索环节而增加</em>（所以「推理延迟能够降低」错）；RAG <em>不改变模型参数大小</em>（所以「模型参数可以缩小」错）。这两个干扰项都是面试里真实会出现的误区。
+    </div>
+  </div>
+  <script>
+    document.querySelectorAll('#quiz .quiz-opt').forEach(opt => {
+      opt.addEventListener('click', () => {
+        const isCorrect = opt.dataset.correct === 'true';
+        document.querySelectorAll('#quiz .quiz-opt').forEach(o => {
+          o.classList.remove('correct', 'wrong');
+          o.classList.add('reveal');
+          if (o.dataset.correct === 'true') o.classList.add('correct');
+          else if (o === opt) o.classList.add('wrong');
+        });
+        document.getElementById('quiz-feedback').classList.add('show');
+      });
+    });
+  </script>
+
+  <div class="win">
+    <h3>✓ 本节胜利</h3>
+    <p>你现在能用自己的话说清三件事：</p>
+    <ol>
+      <li>RAG 解决的根本问题是什么（LLM 知识凝固 vs 企业知识活的）。</li>
+      <li>RAG = 检索 + 增强 + 生成，给模型「开卷考试」。</li>
+      <li>面对「RAG vs 微调 vs 长上下文」，你能给出带取舍的回答，而不是只说一句「RAG 好」。</li>
+    </ol>
+    <p>这三点足够你在售前沟通和面试里把「为什么要 RAG」讲得比大多数候选人清楚。</p>
+  </div>
+
+  <div class="sources">
+    <h3>本节取材与推荐阅读</h3>
+    <ul>
+      <li><a href="https://wiki.hugogu.cn/zh/ai/tech/rag" target="_blank">[1] HugoGu · RAG 检索增强生成 wiki</a> — 本节主源，结构完整、有实测数据与踩坑记录。强烈推荐通读一遍。</li>
+      <li><a href="https://juejin.cn/post/7641142853817974835" target="_blank">[2] 掘金 · 面试官狂问的 28 个 RAG 问题全解析</a> — 面试视角主源，建议先扫一遍找感觉。</li>
+      <li><a href="https://www.woshipm.com/ai/6235363.html" target="_blank">[3] 人人都是产品经理 · 为什么 RAG 是绕不开的技术路径</a> — 售前视角，讲企业为什么选 RAG。</li>
+    </ul>
+    <p class="cite">完整资源清单见 <code>learning/rag/RESOURCES.md</code>。</p>
+  </div>
+
+  <div class="ask-reminder">
+    💡 <strong>有不清楚的地方？直接问老师。</strong>比如：「Lost in the Middle 具体是什么实验？」「我们公司文档量不大，是不是用长上下文就够了？」任何概念、取舍、场景疑问都可以提。
+  </div>
+
+  <nav class="lesson-nav" style="margin-top:40px;">
+    <span class="disabled">← 上一节</span>
+    <a href="0002-rag-pipeline.html">下一节：RAG 全流程地图 →</a>
+  </nav>
+
+</article>
+</body>
+</html>

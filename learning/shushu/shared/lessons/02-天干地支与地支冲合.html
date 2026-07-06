@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>术数 · 共享基础 第2课 — 天干地支与地支冲合</title>
+<style>
+  :root {
+    --bg: #f7f5f0; --card: #ffffff; --ink: #2b2b2b; --muted: #6b6b6b;
+    --line: #e4e0d6; --accent: #8b5e3c;
+    --wood: #4CAF50; --fire: #E53935; --earth: #F9A825; --metal: #9E9E9E; --water: #1E88E5;
+    --ok: #2e7d32; --no: #c62828;
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; padding: 32px 16px; font-family: -apple-system, "PingFang SC", "Microsoft YaHei", sans-serif; background: var(--bg); color: var(--ink); line-height: 1.75; }
+  .wrap { max-width: 780px; margin: 0 auto; }
+  header { text-align: center; margin-bottom: 28px; }
+  .crumb { color: var(--muted); font-size: 14px; letter-spacing: 1px; }
+  h1 { font-size: 28px; margin: 8px 0 4px; }
+  .subtitle { color: var(--muted); }
+  .win { background: linear-gradient(135deg, #fff8ec, #fdf3e2); border: 1px solid #f0e0c4; border-radius: 14px; padding: 16px 20px; margin: 20px 0; }
+  .win b { color: var(--accent); }
+  section { background: var(--card); border: 1px solid var(--line); border-radius: 14px; padding: 24px; margin: 18px 0; }
+  h2 { font-size: 20px; margin-top: 0; border-left: 4px solid var(--accent); padding-left: 10px; }
+  table { width: 100%; border-collapse: collapse; margin: 12px 0; font-size: 14px; }
+  th, td { border: 1px solid var(--line); padding: 8px 10px; text-align: center; }
+  th { background: #faf6ee; }
+  .dot { display: inline-block; width: 14px; height: 14px; border-radius: 50%; vertical-align: middle; margin-right: 4px; }
+  .pair { display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; margin: 14px 0; align-items: center; }
+  .chip { padding: 6px 14px; border-radius: 20px; color: #fff; font-size: 15px; font-weight: 600; }
+  .rel { padding: 4px 10px; border-radius: 12px; background: #faf6ee; border: 1px solid var(--line); font-size: 13px; color: var(--muted); }
+  .note { font-size: 14px; color: var(--muted); background: #faf6ee; border-left: 3px solid var(--accent); padding: 8px 12px; border-radius: 4px; margin: 10px 0; }
+  .q-card { background: #faf6ee; border: 1px solid var(--line); border-radius: 12px; padding: 16px; margin: 14px 0; }
+  .opts { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 10px; }
+  @media (max-width: 500px) { .opts { grid-template-columns: 1fr; } }
+  .opt { background: #fff; border: 1px solid var(--line); border-radius: 8px; padding: 10px; cursor: pointer; text-align: center; transition: all .15s; }
+  .opt:hover { border-color: var(--accent); }
+  .opt.correct { background: #e8f5e9; border-color: var(--ok); color: var(--ok); }
+  .opt.wrong { background: #ffebee; border-color: var(--no); color: var(--no); }
+  .feedback { margin-top: 10px; font-size: 14px; min-height: 20px; }
+  .score { text-align: center; font-size: 15px; color: var(--accent); margin-top: 10px; }
+  .next { background: #f0e6d8; border-radius: 10px; padding: 14px 18px; margin-top: 10px; }
+  .tagb { display: inline-block; background: var(--accent); color: #fff; font-size: 12px; padding: 2px 8px; border-radius: 10px; }
+  code { background: #f0ece2; padding: 1px 6px; border-radius: 4px; font-size: 13px; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="crumb">术数 · 共享基础 第 2 / 4 节</div>
+    <h1>天干地支与地支冲合</h1>
+    <div class="subtitle">四门术数通用的符号骨架</div>
+  </header>
+
+  <div class="win">
+    🎯 本课小胜利：<b>①</b> 能说出十天干、十二地支及其五行归属<br>
+    <b>②</b> 能判断任意两个地支是「冲」「合」「三合」还是「无关系」
+  </div>
+
+  <section>
+    <h2>一、为什么学干支</h2>
+    <p>干支是术数的「字母表」。四门全都要用：</p>
+    <ul>
+      <li><b>六爻</b>：每个爻上装一个地支（纳甲），断卦看爻与爻的地支生克冲合</li>
+      <li><b>大六壬</b>：天地盘全是地支，四课三传由地支推演</li>
+      <li><b>奇门遁甲</b>：九宫排地支，定局用节气（地支月建）</li>
+      <li><b>梅花易数</b>：起卦用时辰地支，断卦看卦气旺衰也用地支</li>
+    </ul>
+    <p>所以这节课的<b>地支冲合</b>，是后面所有断卦的基础功。</p>
+  </section>
+
+  <section>
+    <h2>二、天干</h2>
+    <p><b>十干</b>：甲 乙 丙 丁 戊 己 庚 辛 壬 癸</p>
+    <table>
+      <tr><th>天干</th><th>阴阳</th><th>五行</th></tr>
+      <tr><td>甲</td><td>阳</td><td><span class="dot" style="background:var(--wood)"></span>木</td></tr>
+      <tr><td>乙</td><td>阴</td><td><span class="dot" style="background:var(--wood)"></span>木</td></tr>
+      <tr><td>丙</td><td>阳</td><td><span class="dot" style="background:var(--fire)"></span>火</td></tr>
+      <tr><td>丁</td><td>阴</td><td><span class="dot" style="background:var(--fire)"></span>火</td></tr>
+      <tr><td>戊</td><td>阳</td><td><span class="dot" style="background:var(--earth)"></span>土</td></tr>
+      <tr><td>己</td><td>阴</td><td><span class="dot" style="background:var(--earth)"></span>土</td></tr>
+      <tr><td>庚</td><td>阳</td><td><span class="dot" style="background:var(--metal)"></span>金</td></tr>
+      <tr><td>辛</td><td>阴</td><td><span class="dot" style="background:var(--metal)"></span>金</td></tr>
+      <tr><td>壬</td><td>阳</td><td><span class="dot" style="background:var(--water)"></span>水</td></tr>
+      <tr><td>癸</td><td>阴</td><td><span class="dot" style="background:var(--water)"></span>水</td></tr>
+    </table>
+    <h3>天干五合（隔五位相合，化出新五行）</h3>
+    <table>
+      <tr><th>合</th><th>化气</th><th>记忆</th></tr>
+      <tr><td>甲 + 己</td><td>土</td><td>中正之合</td></tr>
+      <tr><td>乙 + 庚</td><td>金</td><td>仁义之合</td></tr>
+      <tr><td>丙 + 辛</td><td>水</td><td>威制之合</td></tr>
+      <tr><td>丁 + 壬</td><td>木</td><td>淫昵之合</td></tr>
+      <tr><td>戊 + 癸</td><td>火</td><td>无情之合</td></tr>
+    </table>
+    <div class="note">规律：天干隔五位相合（甲与己隔五位），合化后的五行依次为<b>土金水木火</b>。六爻里天干用得少，五合主要在八字；但地支的「合」逻辑与之相通。</div>
+  </section>
+
+  <section>
+    <h2>三、地支</h2>
+    <p><b>十二支</b>：子 丑 寅 卯 辰 巳 午 未 申 酉 戌 亥</p>
+    <table>
+      <tr><th>季节</th><th>地支</th><th>五行</th></tr>
+      <tr><td>春</td><td>寅 卯</td><td><span class="dot" style="background:var(--wood)"></span>木</td></tr>
+      <tr><td>夏</td><td>巳 午</td><td><span class="dot" style="background:var(--fire)"></span>火</td></tr>
+      <tr><td>秋</td><td>申 酉</td><td><span class="dot" style="background:var(--metal)"></span>金</td></tr>
+      <tr><td>冬</td><td>亥 子</td><td><span class="dot" style="background:var(--water)"></span>水</td></tr>
+      <tr><td>四季末</td><td>辰 未 戌 丑</td><td><span class="dot" style="background:var(--earth)"></span>土（四库）</td></tr>
+    </table>
+    <div class="note">四库归属（按季节顺序）：春末<b>辰</b>为水库、夏末<b>未</b>为木库、秋末<b>戌</b>为火库、冬末<b>丑</b>为金库。四库也常连称「辰戌丑未」（因辰戌冲、丑未冲配对），但按春夏秋冬顺序应是「辰未戌丑」。</div>
+    <div class="note">📌 <b>月建</b>：寅正月、卯二月…丑十二月（见速查表）。<b>时辰</b>：子 23–1 时、丑 1–3 时…亥 21–23 时。月建和时辰是起卦、定旺衰的依据，必须熟。</div>
+  </section>
+
+  <section>
+    <h2>四、地支六冲（对宫相冲，主散动变）</h2>
+    <p>在十二地支圆盘上<b>正对面</b>（隔六位）的两个相冲。冲主散、主动、主变化。</p>
+    <div class="pair">
+      <span class="chip" style="background:var(--water)">子</span><span class="rel">冲</span><span class="chip" style="background:var(--fire)">午</span>
+      <span class="rel">|</span>
+      <span class="chip" style="background:var(--earth)">丑</span><span class="rel">冲</span><span class="chip" style="background:var(--earth)">未</span>
+      <span class="rel">|</span>
+      <span class="chip" style="background:var(--wood)">寅</span><span class="rel">冲</span><span class="chip" style="background:var(--metal)">申</span>
+    </div>
+    <div class="pair">
+      <span class="chip" style="background:var(--wood)">卯</span><span class="rel">冲</span><span class="chip" style="background:var(--metal)">酉</span>
+      <span class="rel">|</span>
+      <span class="chip" style="background:var(--earth)">辰</span><span class="rel">冲</span><span class="chip" style="background:var(--earth)">戌</span>
+      <span class="rel">|</span>
+      <span class="chip" style="background:var(--fire)">巳</span><span class="rel">冲</span><span class="chip" style="background:var(--water)">亥</span>
+    </div>
+    <div class="note">记忆：子午（北南）、卯酉（东西）是四正之冲；寅申、巳亥是四生之冲；丑未、辰戌是四库之冲。</div>
+  </section>
+
+  <section>
+    <h2>五、地支六合（相邻相合，主聚绊和）</h2>
+    <p>六合主聚、主绊、主和合。六组：</p>
+    <div class="pair">
+      <span class="chip" style="background:var(--water)">子</span>+<span class="chip" style="background:var(--earth)">丑</span><span class="rel">化土</span>
+      <span class="chip" style="background:var(--wood)">寅</span>+<span class="chip" style="background:var(--water)">亥</span><span class="rel">化木</span>
+      <span class="chip" style="background:var(--wood)">卯</span>+<span class="chip" style="background:var(--earth)">戌</span><span class="rel">化火</span>
+    </div>
+    <div class="pair">
+      <span class="chip" style="background:var(--earth)">辰</span>+<span class="chip" style="background:var(--metal)">酉</span><span class="rel">化金</span>
+      <span class="chip" style="background:var(--fire)">巳</span>+<span class="chip" style="background:var(--metal)">申</span><span class="rel">化水</span>
+      <span class="chip" style="background:var(--fire)">午</span>+<span class="chip" style="background:var(--earth)">未</span><span class="rel">化火*</span>
+    </div>
+    <div class="note">*午未合化气有「化火」「化土」两说，本课取化火说。六合化气在八字用得多；六爻里主要用「合」这个关系本身（合绊、合动），化气是次要。</div>
+  </section>
+
+  <section>
+    <h2>六、地支三合局（三方成局，力量大）</h2>
+    <p>三个地支在圆盘上等距（隔四位）组成三角，合成一种五行局。三合局力量大，主导事态。</p>
+    <table>
+      <tr><th>三合</th><th>化局</th><th>结构（生-旺-墓）</th></tr>
+      <tr><td>申 子 辰</td><td><span class="dot" style="background:var(--water)"></span>水局</td><td>申生水 · 子旺水 · 辰墓水</td></tr>
+      <tr><td>亥 卯 未</td><td><span class="dot" style="background:var(--wood)"></span>木局</td><td>亥生木 · 卯旺木 · 未墓木</td></tr>
+      <tr><td>寅 午 戌</td><td><span class="dot" style="background:var(--fire)"></span>火局</td><td>寅生火 · 午旺火 · 戌墓火</td></tr>
+      <tr><td>巳 酉 丑</td><td><span class="dot" style="background:var(--metal)"></span>金局</td><td>巳生金 · 酉旺金 · 丑墓金</td></tr>
+    </table>
+    <div class="note">记忆：三合 = 该五行的<b>长生 · 帝旺 · 墓库</b>三位。三个全到则成局，到两个叫「半合」（如申子半合水）。</div>
+  </section>
+
+  <section>
+    <h2>七、地支三会（一方之气，力量最大）</h2>
+    <p>同一方位的三个地支聚齐，会成一方之气。力量比三合更大，但条件更严（必须全到）。</p>
+    <table>
+      <tr><th>三会</th><th>化局</th></tr>
+      <tr><td>寅 卯 辰</td><td><span class="dot" style="background:var(--wood)"></span>东方木</td></tr>
+      <tr><td>巳 午 未</td><td><span class="dot" style="background:var(--fire)"></span>南方火</td></tr>
+      <tr><td>申 酉 戌</td><td><span class="dot" style="background:var(--metal)"></span>西方金</td></tr>
+      <tr><td>亥 子 丑</td><td><span class="dot" style="background:var(--water)"></span>北方水</td></tr>
+    </table>
+  </section>
+
+  <section>
+    <h2>八、练一练：判断地支关系</h2>
+    <p>下面给出两个地支，选出它们的关系。共 6 题。</p>
+    <div id="quiz"></div>
+    <div class="score" id="score"></div>
+  </section>
+
+  <section>
+    <h2>九、小结与预告</h2>
+    <p>✅ 本课你掌握了：</p>
+    <ul>
+      <li>十天干、十二地支及其<b>五行归属</b>（地支按季节分五行，辰戌丑未为土库）</li>
+      <li>地支<b>六冲</b>（对宫，主散动变）、<b>六合</b>（相邻，主聚绊和）</li>
+      <li>地支<b>三合局</b>（生旺墓三角，力量大）、<b>三会</b>（一方之气，力量最大）</li>
+    </ul>
+    <div class="next">
+      <span class="tagb">下节预告</span>
+      <b>第 3 课：八卦与六十四卦 + 万物类象</b><br>
+      八卦是四门术数的卦象基础——六爻装卦要分清八卦、梅花起卦得八卦、奇门九宫排八卦。下节学八卦的含义、六十四卦怎么来，以及「万物类象」（八卦对应自然、方位、人物等），这是梅花直读和奇门取象的核心。
+    </div>
+    <p style="font-size:14px;color:var(--muted)">📝 课后小任务：默写十二地支及其五行；把六冲、六合、三合局多念几遍直到顺口。翻 <code>reference/cheatsheet.md</code> 对着速查表自查。</p>
+  </section>
+</div>
+
+<script>
+const C = {木:'var(--wood)',火:'var(--fire)',土:'var(--earth)',金:'var(--metal)',水:'var(--water)'};
+// 地支 → 五行
+const ZW = {寅:'木',卯:'木',巳:'火',午:'火',申:'金',酉:'金',亥:'水',子:'水',辰:'土',戌:'土',丑:'土',未:'土'};
+const questions = [
+  {a:'子', b:'午', ans:'六冲', why:'子午相冲（北与南，正对面）'},
+  {a:'寅', b:'亥', ans:'六合', why:'寅亥相合，化木'},
+  {a:'申', b:'子', ans:'三合局', why:'申子辰合水局，申子为半合'},
+  {a:'卯', b:'酉', ans:'六冲', why:'卯酉相冲（东与西，正对面）'},
+  {a:'巳', b:'酉', ans:'三合局', why:'巳酉丑合金局，巳酉为半合'},
+  {a:'子', b:'寅', ans:'无关系', why:'子与寅既不相冲也不相合（子只与丑合、与午冲）'},
+];
+let idx = 0, score = 0;
+const quiz = document.getElementById('quiz');
+const scoreEl = document.getElementById('score');
+function render() {
+  if (idx >= questions.length) {
+    quiz.innerHTML = `<div class="q-card" style="text-align:center">🎉 全部完成！<br>得分：<b>${score} / ${questions.length}</b><br>${score===questions.length?'满分，地支冲合已拿捏 🟢':'错题再看看六冲六合三合的口诀，重做更稳'}</div>`;
+    scoreEl.textContent = '';
+    return;
+  }
+  const q = questions[idx];
+  const opts = ['六冲','六合','三合局','无关系'];
+  quiz.innerHTML = `
+    <div class="q-card">
+      <div style="font-size:15px">第 ${idx+1} 题：下面两个地支是什么关系？</div>
+      <div class="pair" style="margin:12px 0">
+        <span class="chip" style="background:${C[ZW[q.a]]}">A = ${q.a}</span>
+        <span class="rel">vs</span>
+        <span class="chip" style="background:${C[ZW[q.b]]}">B = ${q.b}</span>
+      </div>
+      <div class="opts" id="opts"></div>
+      <div class="feedback" id="fb"></div>
+    </div>`;
+  const optsEl = document.getElementById('opts');
+  opts.forEach(o => {
+    const b = document.createElement('div');
+    b.className = 'opt'; b.textContent = o;
+    b.onclick = () => answer(o, q, b);
+    optsEl.appendChild(b);
+  });
+  scoreEl.textContent = `进度：${idx} / ${questions.length}　得分：${score}`;
+}
+function answer(o, q, btn) {
+  document.querySelectorAll('.opt').forEach(x => x.onclick = null);
+  const fb = document.getElementById('fb');
+  if (o === q.ans) {
+    btn.classList.add('correct'); score++;
+    fb.innerHTML = `✅ 对！${q.why}`;
+  } else {
+    btn.classList.add('wrong');
+    document.querySelectorAll('.opt').forEach(x => { if (x.textContent === q.ans) x.classList.add('correct'); });
+    fb.innerHTML = `❌ 错。正确答案是「${q.ans}」——${q.why}`;
+  }
+  setTimeout(() => { idx++; render(); }, 1600);
+}
+render();
+</script>
+</body>
+</html>

@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>随堂测验 1 · L01-L04 综合</title>
+  <style>
+  :root {
+    --bg: #fafaf7; --ink: #1a1a1a; --ink-soft: #444; --ink-mute: #777;
+    --rule: #e4e3dc; --accent: #2b5a8c; --accent-soft: #e8f0f7;
+    --warn: #b06a00; --warn-soft: #fdf3e3; --key: #2f7d52; --key-soft: #e8f5ee;
+    --pit: #a23a3a; --pit-soft: #fbecec; --code-bg: #f3f3ee;
+    --serif: 'Source Serif Pro','Noto Serif SC',Georgia,'Songti SC',serif;
+    --sans: -apple-system,BlinkMacSystemFont,'Segoe UI','PingFang SC','Microsoft YaHei',sans-serif;
+    --mono: 'SF Mono','JetBrains Mono',Consolas,monospace;
+  }
+  *{box-sizing:border-box} html{scroll-behavior:smooth}
+  body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--sans);font-size:16px;line-height:1.78;-webkit-font-smoothing:antialiased}
+  .lesson{max-width:760px;margin:0 auto;padding:48px 28px 96px}
+  .lesson-header{margin-bottom:24px;border-bottom:1px solid var(--rule);padding-bottom:22px}
+  .course-label{font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--accent);font-weight:700}
+  .lesson-num{font-size:13px;color:var(--ink-mute);margin:8px 0 2px}
+  .lesson-title{font-family:var(--serif);font-size:32px;line-height:1.22;margin:2px 0 8px;font-weight:700}
+  .lesson-sub{color:var(--ink-soft);font-size:15px;margin:0}
+  .quiz-bar{position:sticky;top:0;background:var(--bg);padding:14px 0;border-bottom:1px solid var(--rule);margin:0 -28px 24px;padding-left:28px;padding-right:28px;z-index:10}
+  .quiz-bar-row{display:flex;align-items:center;gap:14px;font-size:14px}
+  .quiz-bar-track{flex:1;height:8px;background:var(--code-bg);border-radius:4px;overflow:hidden}
+  .quiz-bar-fill{height:100%;background:var(--accent);width:0;transition:width .3s}
+  .quiz-bar-score{font-family:var(--mono);font-size:13px;color:var(--ink-mute);min-width:60px;text-align:right}
+  .lesson-nav{display:flex;justify-content:space-between;margin:0 0 36px;font-size:14px}
+  .lesson-nav a{color:var(--accent);text-decoration:none} .lesson-nav a:hover{text-decoration:underline}
+  h2{font-family:var(--serif);font-size:22px;margin:36px 0 10px;font-weight:700}
+  p{margin:12px 0} ul,ol{margin:12px 0;padding-left:24px} li{margin:6px 0}
+  strong{color:var(--ink);font-weight:600} em{color:var(--ink-soft)} a{color:var(--accent)}
+  code{font-family:var(--mono);background:var(--code-bg);padding:2px 6px;border-radius:4px;font-size:.9em}
+  .quiz{margin:22px 0;border:1px solid var(--rule);border-radius:12px;padding:22px 24px;background:#fff}
+  .quiz-q{font-weight:600;margin:0 0 6px;font-size:16px}
+  .quiz-q .qnum{color:var(--accent);font-family:var(--mono);margin-right:8px}
+  .quiz-scene{color:var(--ink-soft);font-size:14px;margin:0 0 16px;line-height:1.7}
+  .quiz-options{display:flex;flex-direction:column;gap:10px}
+  .quiz-opt{display:flex;align-items:center;gap:12px;padding:12px 16px;border:1.5px solid var(--rule);border-radius:10px;cursor:pointer;transition:all .15s;user-select:none}
+  .quiz-opt:hover{border-color:var(--accent);background:var(--accent-soft)}
+  .quiz-opt .mark{width:24px;height:24px;border-radius:50%;border:1.5px solid var(--ink-mute);display:inline-flex;align-items:center;justify-content:center;font-size:13px;color:transparent;flex-shrink:0}
+  .quiz-opt.reveal.correct{border-color:var(--key);background:var(--key-soft)}
+  .quiz-opt.reveal.correct .mark{background:var(--key);color:#fff;border-color:var(--key)}
+  .quiz-opt.reveal.wrong{border-color:var(--pit);background:var(--pit-soft)}
+  .quiz-opt.reveal.wrong .mark{background:var(--pit);color:#fff;border-color:var(--pit)}
+  .quiz-feedback{margin-top:16px;font-size:14px;line-height:1.72;display:none;padding:14px 16px;background:var(--code-bg);border-radius:8px}
+  .quiz-feedback.show{display:block}
+  .summary{margin:30px 0;padding:26px 28px;border-radius:14px;display:none}
+  .summary.show{display:block}
+  .summary.good{background:var(--key-soft);border:1.5px solid var(--key)}
+  .summary.mid{background:var(--warn-soft);border:1.5px solid var(--warn)}
+  .summary.low{background:var(--pit-soft);border:1.5px solid var(--pit)}
+  .summary h3{margin-top:0;font-family:var(--serif);font-size:22px}
+  .summary .score-big{font-family:var(--mono);font-size:42px;font-weight:700;line-height:1}
+  .ask-reminder{margin-top:24px;padding:16px 18px;background:var(--accent-soft);border-radius:10px;font-size:14px}
+  @media (max-width:600px){.lesson{padding:28px 18px 64px}.lesson-title{font-size:24px}.quiz-bar{margin:0 -18px 20px;padding-left:18px;padding-right:18px}}
+  </style>
+</head>
+<body>
+<article class="lesson">
+
+  <header class="lesson-header">
+    <div class="course-label">RAG 课程 · 随堂测验</div>
+    <div class="lesson-num">测验 1 / 覆盖 L01–L04</div>
+    <h1 class="lesson-title">地基 + 数据侧 综合测验</h1>
+    <p class="lesson-sub">8 道混合问答 · 跨环节判断 · 做完看计分和反馈</p>
+  </header>
+
+  <nav class="lesson-nav">
+    <a href="0004-metadata-extraction.html">← 上一节：L04 元数据</a>
+    <a href="0005-embedding-selection.html">下一节：L05 Embedding 选型 →</a>
+  </nav>
+
+  <div class="quiz-bar">
+    <div class="quiz-bar-row">
+      <span>进度</span>
+      <div class="quiz-bar-track"><div class="quiz-bar-fill" id="q-bar"></div></div>
+      <span class="quiz-bar-score" id="q-progress">0/8</span>
+    </div>
+  </div>
+
+  <p style="color:var(--ink-soft);font-size:14px;margin-bottom:24px">说明：每题答完会显示详细反馈（重点解释"为什么不是其他选项"）。全部答完后底部出总分和针对性建议。可以猜，但先想再点。</p>
+
+  <div class="quiz">
+    <p class="quiz-q"><span class="qnum">Q1</span>RAG 适用场景（L01）</p>
+    <p class="quiz-scene">公司运维知识库<strong>每周更新</strong>（新故障案例、新版本参数），希望 LLM 能基于最新知识回答。以下哪种方案最合适？</p>
+    <div class="quiz-options">
+      <label class="quiz-opt" data-correct="false"><span class="mark">✗</span><span>每周用新知识微调 LLM</span></label>
+      <label class="quiz-opt" data-correct="true"><span class="mark">✓</span><span>RAG，每周更新知识库</span></label>
+      <label class="quiz-opt" data-correct="false"><span class="mark">✗</span><span>把所有知识塞进 LLM 长上下文窗口</span></label>
+      <label class="quiz-opt" data-correct="false"><span class="mark">✗</span><span>等待 LLM 训练数据更新</span></label>
+    </div>
+    <div class="quiz-feedback">
+      <strong>✓ RAG，每周更新知识库。</strong> 频繁更新是 RAG 的核心适用场景（L01）。<br>
+      <em>为什么不微调</em>：每次更新都要重新训练，成本高、周期长，且不能动态更新。<br>
+      <em>为什么不用长上下文</em>：有 token 上限，且每次调用都把全部知识塞进去，贵且 Lost in the Middle。<br>
+      <em>为什么不等数据更新</em>：LLM 训练数据有截止日期，等完全不现实。<br>
+      RAG 只更新知识库，LLM 不动——这是「开卷考试」的本质。
+    </div>
+  </div>
+
+  <div class="quiz">
+    <p class="quiz-q"><span class="qnum">Q2</span>chunk 大小与 overlap（L03）</p>
+    <p class="quiz-scene">关于 chunk 大小和 overlap 的设置，以下说法<strong>正确</strong>的是？</p>
+    <div class="quiz-options">
+      <label class="quiz-opt" data-correct="false"><span class="mark">✗</span><span>chunk 越大越好，保证语义完整</span></label>
+      <label class="quiz-opt" data-correct="false"><span class="mark">✗</span><span>overlap 越大越好，避免边界信息丢失</span></label>
+      <label class="quiz-opt" data-correct="true"><span class="mark">✓</span><span>chunk 500–1500 tokens、overlap 10–20%，评测驱动定值</span></label>
+      <label class="quiz-opt" data-correct="false"><span class="mark">✗</span><span>固定 512 token 切分适用所有文档</span></label>
+    </div>
+    <div class="quiz-feedback">
+      <strong>✓ C。</strong> L03 实践值。<br>
+      <em>为什么不是「chunk 越大越好」</em>：chunk 太大，一个 chunk 含多个主题，向量被「稀释」，召回精确度下降，还占窗口。<br>
+      <em>为什么不是「overlap 越大越好」</em>：overlap 大能保边界，但冗余增加（同段内容存多份）、重复内容可能多次进 Top-K 挤掉其他相关 chunk。<br>
+      <em>为什么不是「固定 512」</em>：固定大小会切坏表格、代码块（HugoGu 512 token 表格截断 85%→32% 的踩坑）。必须适配文档类型。<br>
+      <strong>口诀</strong>：参数有参考值，但最终靠评测驱动，不拍脑袋。
+    </div>
+  </div>
+
+  <div class="quiz">
+    <p class="quiz-q"><span class="qnum">Q3</span>POC 优化优先级（L02）</p>
+    <p class="quiz-scene">团队搭了运维 RAG demo，效果不好。以下优化顺序<strong>最合理</strong>的是？</p>
+    <div class="quiz-options">
+      <label class="quiz-opt" data-correct="false"><span class="mark">✗</span><span>换最强 embedding → 加 rerank → 优化切分 → 搭评估</span></label>
+      <label class="quiz-opt" data-correct="true"><span class="mark">✓</span><span>优化切分 → 混合检索+rerank → 搭评估 → 最后换模型</span></label>
+      <label class="quiz-opt" data-correct="false"><span class="mark">✗</span><span>搭评估 → 加 rerank → 优化切分 → 换 embedding</span></label>
+      <label class="quiz-opt" data-correct="false"><span class="mark">✗</span><span>加 rerank → 换 embedding → 优化切分 → 混合检索</span></label>
+    </div>
+    <div class="quiz-feedback">
+      <strong>✓ B。</strong> L02 的 POC 优化优先级，体现木桶效应和成本意识。<br>
+      <em>为什么先切分</em>：切分决定上限，改起来廉价（只重切文档，不重训模型），先补最弱且最廉价的板。<br>
+      <em>为什么混合检索+rerank 第二</em>：提命中，成本中等。<br>
+      <em>为什么评估第三</em>：评估先行才能量化改进——但这里评估放在优化后是为了先快速见效，实际中评估应尽早搭（L02 提过「评估先行」方法论，POC 里可灵活）。<br>
+      <em>为什么换模型最后</em>：换 embedding 成本最高（要重新向量化整个知识库），且未必是根因，放最后。<br>
+      <strong>反模式</strong>：不诊断就换模型（A/D）、评估最后才搭（A）。
+    </div>
+  </div>
+
+  <div class="quiz">
+    <p class="quiz-q"><span class="qnum">Q4</span>完整检索三层（L04 综合）</p>
+    <p class="quiz-scene">一个完整的运维 RAG 检索流程，<strong>正确顺序</strong>是？</p>
+    <div class="quiz-options">
+      <label class="quiz-opt" data-correct="true"><span class="mark">✓</span><span>metadata 过滤圈范围 → 向量+BM25 混合检索召回 → rerank 精排</span></label>
+      <label class="quiz-opt" data-correct="false"><span class="mark">✗</span><span>向量检索 → rerank → metadata 过滤</span></label>
+      <label class="quiz-opt" data-correct="false"><span class="mark">✗</span><span>混合检索 → metadata 过滤 → rerank</span></label>
+      <label class="quiz-opt" data-correct="false"><span class="mark">✗</span><span>rerank → 混合检索 → metadata 过滤</span></label>
+    </div>
+    <div class="quiz-feedback">
+      <strong>✓ A。</strong> L04 面试视角的「完整检索三层」，顺序不能乱：<br>
+      ① <strong>metadata 过滤先圈范围</strong>——缩小候选集，省算力、保候选质量（pre-filtering）。<br>
+      ② <strong>混合检索在范围内召回</strong>——向量+BM25 互补，提 recall。<br>
+      ③ <strong>rerank 最后精排</strong>——对召回的 Top-K 重排，提 precision。<br>
+      <em>为什么 metadata 不能放最后</em>：Top-K 已定，过滤后可能太少甚至空（post-filtering 的坑）。<br>
+      <em>为什么 rerank 不能放前面</em>：rerank 重排的是召回结果，没召回就没得排。<br>
+      这三层正交可叠加——一个完整检索 = 圈范围 + 召回 + 精排。
+    </div>
+  </div>
+
+  <div class="quiz">
+    <p class="quiz-q"><span class="qnum">Q5</span>大面积跑偏诊断（环节边界）</p>
+    <p class="quiz-scene">用户问「GaussDB 慢 SQL 诊断」，检索 Top-5 返回了 <strong>5 个完全不相关</strong>的章节（安装部署、备份恢复等），但库里明明有慢 SQL 章节。<strong>最可能</strong>的问题环节？</p>
+    <div class="quiz-options">
+      <label class="quiz-opt" data-correct="false"><span class="mark">✗</span><span>切分把慢 SQL 章节切碎了</span></label>
+      <label class="quiz-opt" data-correct="true"><span class="mark">✓</span><span>embedding 模型对运维语料理解差</span></label>
+      <label class="quiz-opt" data-correct="false"><span class="mark">✗</span><span>K 值太小</span></label>
+      <label class="quiz-opt" data-correct="false"><span class="mark">✗</span><span>缺 rerank</span></label>
+    </div>
+    <div class="quiz-feedback">
+      <strong>✓ embedding 对运维语料理解差。</strong> 返回完全不相关 = 大面积跑偏 → 向量化问题（Q&A 0001 口诀：召回大面积跑偏 → 向量化）。<br>
+      <em>为什么不是切分</em>：切分把章节切碎，至少会召回<strong>部分</strong>慢 SQL 片段（残缺但相关），不会返回完全不相关的章节。<br>
+      <em>为什么不是 K 太小</em>：K 小是<strong>漏召回</strong>（结果太少），不是<strong>全错</strong>（结果全不相关）。<br>
+      <em>为什么不是缺 rerank</em>：rerank 解决<strong>排序</strong>问题，不解决<strong>召回</strong>问题——召回的都不相关，rerank 排序也排不出相关的。<br>
+      <strong>辨析</strong>：如果是「召回 GaussDB 慢SQL 但混了 PostgreSQL 慢SQL」（相关但属性不对）→ 元数据问题；本题是「完全不相关」（大面积跑偏）→ 向量化问题。
+    </div>
+  </div>
+
+  <div class="quiz">
+    <p class="quiz-q"><span class="qnum">Q6</span>切分 + 元数据双问题（环节边界）</p>
+    <p class="quiz-scene">用户问「GaussDB 慢 SQL 怎么处理」，返回了只含「现象 + 半个原因」的 chunk（<strong>答案残缺</strong>），同时 Top-5 里 GaussDB 和 PostgreSQL 的慢 SQL 文档<strong>混在一起</strong>。这两个问题分别怎么解决？</p>
+    <div class="quiz-options">
+      <label class="quiz-opt" data-correct="false"><span class="mark">✗</span><span>都靠换更强 embedding 模型</span></label>
+      <label class="quiz-opt" data-correct="true"><span class="mark">✓</span><span>第一个用结构化切分（保证现象/原因/处理同 chunk），第二个加 product 元数据 pre-filter</span></label>
+      <label class="quiz-opt" data-correct="false"><span class="mark">✗</span><span>都靠加 rerank 重排</span></label>
+      <label class="quiz-opt" data-correct="false"><span class="mark">✗</span><span>第一个增大 K，第二个增大 K</span></label>
+    </div>
+    <div class="quiz-feedback">
+      <strong>✓ B。</strong> 两个问题根因不同，解法不同——这题考切分和元数据的<strong>职责边界</strong>：<br>
+      ① <strong>残缺</strong>是切分问题（语义完整性）→ 结构化切分按章节切，保证「现象/原因/处理步骤」同 chunk。<br>
+      ② <strong>混召回</strong>是元数据问题（结构化属性过滤）→ 加 product 元数据 pre-filter <code>product=GaussDB</code>。<br>
+      <em>为什么换 embedding 不行</em>：embedding 救不了切分残缺（片段本就残缺），也救不了产品边界（语义相似的结构化属性该用过滤）。<br>
+      <em>为什么 rerank 不行</em>：能降权 PG 文档，但治标不治本——PG 还占着 Top-K 名额挤掉 GaussDB；更救不了残缺。<br>
+      <em>为什么增大 K 不行</em>：只多塞噪声，没解决任一根因。<br>
+      <strong>口诀</strong>：切分管语义完整性，元数据管结构化属性——别让一个工具干两个活。
+    </div>
+  </div>
+
+  <div class="quiz">
+    <p class="quiz-q"><span class="qnum">Q7</span>pre vs post filtering（L04）</p>
+    <p class="quiz-scene">知识库有 product（GaussDB/MySQL）和 version（v8.0/v9.0）元数据。用户问「GaussDB v9.0 参数配置」，团队用 <strong>post-filtering</strong>（先向量检索 Top-20 再筛 product+version），经常<strong>结果太少</strong>。最佳改进？</p>
+    <div class="quiz-options">
+      <label class="quiz-opt" data-correct="false"><span class="mark">✗</span><span>增大 Top-K 到 50</span></label>
+      <label class="quiz-opt" data-correct="true"><span class="mark">✓</span><span>换 pre-filtering，先按 product+version 过滤再向量检索</span></label>
+      <label class="quiz-opt" data-correct="false"><span class="mark">✗</span><span>加 rerank 重排</span></label>
+      <label class="quiz-opt" data-correct="false"><span class="mark">✗</span><span>换更强 embedding 模型</span></label>
+    </div>
+    <div class="quiz-feedback">
+      <strong>✓ pre-filtering。</strong> L04 重点。post-filtering 的坑：Top-20 里满足 <code>product=GaussDB AND version=v9.0</code> 的可能只有几个，过滤后结果太少甚至空。<br>
+      <em>为什么 pre-filtering 更好</em>：先把范围缩到 GaussDB v9.0，再在范围内向量检索，召回充足，还省算力（向量检索只在小范围跑）。<br>
+      <em>为什么不是增大 K</em>：能缓解（多召回些再筛），但成本高（向量检索在大范围跑），且没解决根因——若 GaussDB v9.0 文档本就少，增大 K 也捞不到。<br>
+      <em>为什么不是 rerank/embedding</em>：这是<strong>过滤策略</strong>问题，不是召回质量或排序问题，换模型/加 rerank 都不对症。<br>
+      <strong>运维类比</strong>：先 <code>WHERE product='GaussDB' AND version='v9.0'</code> 再全文搜，而不是先全文搜 Top-20 再 WHERE 筛。
+    </div>
+  </div>
+
+  <div class="quiz">
+    <p class="quiz-q"><span class="qnum">Q8</span>Recall 优化方向（评估）</p>
+    <p class="quiz-scene">评测发现 RAG 系统 <strong>Recall@5=40%，Precision@5=80%</strong>。这说明什么？该怎么优化？</p>
+    <div class="quiz-options">
+      <label class="quiz-opt" data-correct="true"><span class="mark">✓</span><span>召回太低，相关文档大量没进 Top-5；应增大 K 或优化检索（混合检索 / 调 ANN 参数）</span></label>
+      <label class="quiz-opt" data-correct="false"><span class="mark">✗</span><span>精度太低，Top-5 噪声多；应加 rerank</span></label>
+      <label class="quiz-opt" data-correct="false"><span class="mark">✗</span><span>都正常，不用优化</span></label>
+      <label class="quiz-opt" data-correct="false"><span class="mark">✗</span><span>应换更强 embedding 模型</span></label>
+    </div>
+    <div class="quiz-feedback">
+      <strong>✓ A。</strong> Recall@5=40% 意味着相关文档只有 40% 进了 Top-5——<strong>漏召回严重</strong>（答案在库里但没喂给 LLM → 残缺/幻觉）。Precision 80% 说明进去的基本都相关（精度不错）。<br>
+      <em>优化方向</em>：优先提 <strong>recall</strong>——增大 K（广召回）、混合检索（向量+BM25 互补提 recall）、调 ANN 参数（<code>ef_search</code> 调大减少近似损失）。<br>
+      <em>为什么不是「加 rerank」</em>：rerank 提 <strong>precision</strong>（精度），不提 recall。本题 precision 已经 80%，不缺精度缺召回。<br>
+      <em>为什么不是「换 embedding」</em>：未诊断根因就换模型是反模式（L02 优化优先级，换模型成本最高放最后）。先试增大 K / 混合检索这些低成本手段。<br>
+      <strong>记忆</strong>：recall 低 → 广召回（大 K / 混合检索 / 调 ANN）；precision 低 → 精排（rerank）。
+    </div>
+  </div>
+
+  <div class="summary" id="summary">
+    <h3 id="sum-title">测验完成</h3>
+    <div class="score-big" id="sum-score">0/8</div>
+    <p id="sum-feedback" style="margin-top:10px"></p>
+  </div>
+
+  <div class="ask-reminder">
+    💡 <strong>做完看反馈</strong>：错题的反馈里写了「为什么不是其他选项」，这是最该重看的部分。做完告诉我分数和哪几题错了，我帮你针对性复盘，再进 L05。
+  </div>
+
+  <nav class="lesson-nav" style="margin-top:36px;">
+    <a href="0004-metadata-extraction.html">← 上一节：L04 元数据</a>
+    <a href="0005-embedding-selection.html">下一节：L05 Embedding 选型 →</a>
+  </nav>
+
+</article>
+
+<script>
+  let done = 0, right = 0;
+  const total = 8;
+  const quizzes = document.querySelectorAll('.quiz');
+
+  function updateProgress() {
+    document.getElementById('q-progress').textContent = `${done}/${total}`;
+    document.getElementById('q-bar').style.width = `${done/total*100}%`;
+    if (done === total) showSummary();
+  }
+
+  function showSummary() {
+    const summary = document.getElementById('summary');
+    const pct = Math.round(right/total*100);
+    document.getElementById('sum-score').textContent = `${right}/${total}（${pct}%）`;
+    let fb = '', cls = 'good';
+    if (pct >= 85) {
+      fb = '<strong>掌握扎实</strong>——环节边界清晰，场景判断到位。M1 地基 + M2 数据侧这块稳了，可以推进 L05 Embedding 选型。注意错题（如果有），重看下反馈里的「为什么不是其他选项」即可。';
+      cls = 'good';
+    } else if (pct >= 60) {
+      fb = '<strong>基础概念掌握，但场景判断还有盲点</strong>。重点回看错题涉及的环节：<br>• 切分 vs 向量化 vs 检索的边界 → 重看 [[Q&A 0001 环节边界口诀]] 和 L02 排查练习<br>• 切分 vs 元数据的职责 → 重看 L03/L04<br>• Recall/Precision 优化方向 → 重看 Q&A 0002<br>建议把错题对应的课程「运维场景代入」和「面试视角」再过一遍，然后进 L05。';
+      cls = 'mid';
+    } else if (pct >= 35) {
+      fb = '<strong>概念有印象，但跨环节判断弱</strong>。这说明「文字看懂」和「会判断」之间还有距离（fluency illusion）。建议：①重看 L02 全流程地图的 9 环节职责表和木桶效应；②做一遍 L02 排查练习（6 题场景诊断）；③回头再做本测验。别急着进 L05，先把这块的判断力练出来。';
+      cls = 'low';
+    } else {
+      fb = '<strong>建议先重看 L01–L04 课程正文</strong>。别急着推进——地基不稳后面会更吃力。重看时重点抓：RAG 为什么需要（L01）、9 环节各自职责（L02）、切分策略表（L03）、元数据过滤（L04）。看完再做本测验，目标至少 60% 再进 L05。';
+      cls = 'low';
+    }
+    document.getElementById('sum-feedback').innerHTML = fb;
+    summary.classList.add('show', cls);
+    summary.scrollIntoView({behavior:'smooth', block:'center'});
+  }
+
+  quizzes.forEach(quiz => {
+    const opts = quiz.querySelectorAll('.quiz-opt');
+    const fb = quiz.querySelector('.quiz-feedback');
+    let answered = false;
+    opts.forEach(opt => {
+      opt.addEventListener('click', () => {
+        if (answered) return;
+        answered = true;
+        const isCorrect = opt.dataset.correct === 'true';
+        opts.forEach(o => {
+          o.classList.remove('correct','wrong');
+          o.classList.add('reveal');
+          if (o.dataset.correct === 'true') o.classList.add('correct');
+          else if (o === opt) o.classList.add('wrong');
+        });
+        fb.classList.add('show');
+        done++; if (isCorrect) right++;
+        updateProgress();
+      });
+    });
+  });
+</script>
+</body>
+</html>

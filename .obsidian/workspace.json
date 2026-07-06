@@ -1,0 +1,299 @@
+{
+  "main": {
+    "id": "b86e16f30e29043e",
+    "type": "split",
+    "children": [
+      {
+        "id": "2dca3a9f4af4290e",
+        "type": "tabs",
+        "children": [
+          {
+            "id": "37832fc5b06fe467",
+            "type": "leaf",
+            "state": {
+              "type": "html-view",
+              "state": {
+                "file": "learning/rag/lessons/0005-embedding-selection.html"
+              },
+              "icon": "code-glyph",
+              "title": "0005-embedding-selection"
+            }
+          },
+          {
+            "id": "a88bf22d88470ce3",
+            "type": "leaf",
+            "state": {
+              "type": "webviewer",
+              "state": {
+                "url": "https://milvus.io/docs/zh/boolean.md",
+                "title": "标量过滤规则 | Milvus 文档",
+                "mode": "webview"
+              },
+              "icon": "globe-2",
+              "title": "标量过滤规则 | Milvus 文档"
+            }
+          },
+          {
+            "id": "fba31a87049910d4",
+            "type": "leaf",
+            "state": {
+              "type": "webviewer",
+              "state": {
+                "url": "https://zhuanlan.zhihu.com/p/2008281994912609286",
+                "title": "深入RAG架构：分块策略、混合检索与重排序的工程实现 - 知乎",
+                "mode": "webview"
+              },
+              "icon": "globe-2",
+              "title": "深入RAG架构：分块策略、混合检索与重排序的工程实现 - 知乎"
+            }
+          },
+          {
+            "id": "c9ae344c4a810295",
+            "type": "leaf",
+            "state": {
+              "type": "webviewer",
+              "state": {
+                "url": "https://zhuanlan.zhihu.com/p/2008281994912609286",
+                "title": "深入RAG架构：分块策略、混合检索与重排序的工程实现 - 知乎",
+                "mode": "webview"
+              },
+              "icon": "globe-2",
+              "title": "深入RAG架构：分块策略、混合检索与重排序的工程实现 - 知乎"
+            }
+          }
+        ]
+      }
+    ],
+    "direction": "vertical"
+  },
+  "left": {
+    "id": "e234b264ae1a16a8",
+    "type": "split",
+    "children": [
+      {
+        "id": "55b2813acb123f89",
+        "type": "tabs",
+        "dimension": 56.35245901639344,
+        "children": [
+          {
+            "id": "665a9b0ca2f3a042",
+            "type": "leaf",
+            "state": {
+              "type": "file-explorer",
+              "state": {
+                "sortOrder": "alphabetical",
+                "autoReveal": true
+              },
+              "icon": "lucide-folder-closed",
+              "title": "文件列表"
+            }
+          },
+          {
+            "id": "2d658c537c08771f",
+            "type": "leaf",
+            "state": {
+              "type": "search",
+              "state": {
+                "query": "",
+                "matchingCase": false,
+                "explainSearch": false,
+                "collapseAll": false,
+                "extraContext": false,
+                "sortOrder": "alphabetical"
+              },
+              "icon": "lucide-search",
+              "title": "搜索"
+            }
+          },
+          {
+            "id": "3cd075e6d56dd08a",
+            "type": "leaf",
+            "state": {
+              "type": "bookmarks",
+              "state": {},
+              "icon": "lucide-bookmark",
+              "title": "书签"
+            }
+          }
+        ]
+      },
+      {
+        "id": "982749611f8c58ad",
+        "type": "tabs",
+        "dimension": 43.64754098360656,
+        "children": [
+          {
+            "id": "2c6d6979181d0e77",
+            "type": "leaf",
+            "state": {
+              "type": "outline",
+              "state": {
+                "file": "learning/rag/lessons/0005-embedding-selection.html",
+                "followCursor": true,
+                "showSearch": false,
+                "searchQuery": ""
+              },
+              "icon": "lucide-list",
+              "title": "0005-embedding-selection 的大纲"
+            }
+          }
+        ]
+      }
+    ],
+    "direction": "horizontal",
+    "width": 300
+  },
+  "right": {
+    "id": "dfff3570d0fe8bd5",
+    "type": "split",
+    "children": [
+      {
+        "id": "5bed6db127741866",
+        "type": "tabs",
+        "children": [
+          {
+            "id": "711b3f3b508522b0",
+            "type": "leaf",
+            "state": {
+              "type": "tag",
+              "state": {
+                "sortOrder": "frequency",
+                "useHierarchy": true,
+                "showSearch": false,
+                "searchQuery": ""
+              },
+              "icon": "lucide-tags",
+              "title": "标签"
+            }
+          },
+          {
+            "id": "da73a5f1c3251a5b",
+            "type": "leaf",
+            "state": {
+              "type": "all-properties",
+              "state": {
+                "sortOrder": "frequency",
+                "showSearch": false,
+                "searchQuery": ""
+              },
+              "icon": "lucide-archive",
+              "title": "添加笔记属性"
+            }
+          },
+          {
+            "id": "e61ebe82777c98ae",
+            "type": "leaf",
+            "state": {
+              "type": "claudian-view",
+              "state": {},
+              "icon": "bot",
+              "title": "Claudian"
+            }
+          },
+          {
+            "id": "9fddddb71902e55e",
+            "type": "leaf",
+            "state": {
+              "type": "backlink",
+              "state": {
+                "file": "learning/liuyao/lessons/01-全景地图与阴阳五行.html",
+                "collapseAll": false,
+                "extraContext": false,
+                "sortOrder": "alphabetical",
+                "showSearch": false,
+                "searchQuery": "",
+                "backlinkCollapsed": false,
+                "unlinkedCollapsed": true
+              },
+              "icon": "links-coming-in",
+              "title": "01-全景地图与阴阳五行 的反向链接列表"
+            }
+          },
+          {
+            "id": "3c276336e07a4083",
+            "type": "leaf",
+            "state": {
+              "type": "outgoing-link",
+              "state": {
+                "file": "learning/liuyao/lessons/01-全景地图与阴阳五行.html",
+                "linksCollapsed": false,
+                "unlinkedCollapsed": true
+              },
+              "icon": "links-going-out",
+              "title": "01-全景地图与阴阳五行 的出链列表"
+            }
+          }
+        ],
+        "currentTab": 2
+      }
+    ],
+    "direction": "horizontal",
+    "width": 476.5
+  },
+  "left-ribbon": {
+    "hiddenItems": {
+      "switcher:打开快速切换": false,
+      "graph:查看关系图谱": false,
+      "canvas:新建白板": false,
+      "daily-notes:打开/创建今天的日记": false,
+      "templates:插入模板": false,
+      "command-palette:打开命令面板": false,
+      "bases:新建数据库": false,
+      "terminal:Open terminal": false,
+      "realclaudian:Open Claudian": false,
+      "obsidian-excalidraw-plugin:新建绘图文件": false,
+      "pdf-plus:PDF++: Toggle auto-copy": false,
+      "pdf-plus:PDF++: Toggle auto-focus": false,
+      "pdf-plus:PDF++: Toggle auto-paste": false
+    }
+  },
+  "active": "37832fc5b06fe467",
+  "lastOpenFiles": [
+    "CCLearningRecord/cc安装指导.md",
+    "CCLearningRecord",
+    "ObsidianNote",
+    "learning/rag/lessons/0005-embedding-selection.html",
+    "learning/rag/Q&A.md.tmp.27484.1791fa2fdc6d",
+    "learning/rag/lessons/quiz-01-foundations.html",
+    "learning/rag/NOTES.md.tmp.27484.a6e301935f81",
+    "learning/rag/Q&A.md.tmp.27484.cae889901442",
+    "learning/rag/lessons/0004-metadata-extraction.html",
+    "learning/rag/index.html.tmp.27484.2b90e6c92b21",
+    "learning/rag/Q&A.md.tmp.27484.05359b080d49",
+    "learning/rag/Q&A.md",
+    "learning/shushu/Q&A.md",
+    "learning/shushu/reference/cheatsheet.md",
+    "learning/shushu/reference/glossary.md",
+    "learning/shushu/MISSION.md",
+    "learning/shushu/RESOURCES.md",
+    "learning/shushu/NOTES.md",
+    "learning/rag/RESOURCES.md",
+    "learning/liuyao/NOTES.md",
+    "learning/liuyao/RESOURCES.md",
+    "learning/liuyao/MISSION.md",
+    "learning/rag/NOTES.md",
+    "learning/rag/MISSION.md",
+    "CLAUDE.md",
+    "learning/INDEX.md",
+    "learning/subagents/课程目录.md",
+    "简历/简历沟通.md",
+    "简历/张恺暄-简历.md",
+    "learning/subagents/MISSION.md",
+    "cc使用记录/cc安装指导.md",
+    "Excalidraw/Drawing 2026-06-20 01.26.28.excalidraw.md",
+    "learning/subagents/learning-records/0002-how-subagents-get-triggered.md",
+    "learning/subagents/Q&A.md",
+    "learning/subagents/NOTES.md",
+    "learning/subagents/reference/术语表.md",
+    "Pasted image 20260523205829.png",
+    "Pasted image 20260523205827.png",
+    "Pasted image 20260523205348.png",
+    "Pasted image 20260523213451.png",
+    "Pasted image 20260523213311.png",
+    "Pasted image 20260523212911.png",
+    "Pasted image 20260523212533.png",
+    "Pasted image 20260523212445.png",
+    "Pasted image 20260523211952.png",
+    "Pasted image 20260523211552.png"
+  ]
+}

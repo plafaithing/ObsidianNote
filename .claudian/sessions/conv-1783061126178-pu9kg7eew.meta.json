@@ -1,0 +1,23 @@
+{
+  "id": "conv-1783061126178-pu9kg7eew",
+  "providerId": "claude",
+  "title": "解释龟甲占卜的具体操作方法\n\n我来帮您搜索龟甲占卜的具体操作方法。\n\n根据我搜索到的资料，我来...",
+  "titleGenerationStatus": "success",
+  "createdAt": 1783061126179,
+  "updatedAt": 1783070990042,
+  "lastResponseAt": 1783070990042,
+  "sessionId": "6503656c-d29d-4de3-8de9-cebcc42ccbd6",
+  "providerState": {
+    "providerSessionId": "6503656c-d29d-4de3-8de9-cebcc42ccbd6"
+  },
+  "usage": {
+    "model": "haiku",
+    "inputTokens": 6584,
+    "cacheCreationInputTokens": 0,
+    "cacheReadInputTokens": 140288,
+    "contextWindow": 200000,
+    "contextTokens": 146872,
+    "percentage": 73,
+    "contextWindowIsAuthoritative": true
+  }
+}
