@@ -54,8 +54,8 @@
     <h1 class="index-title">运维知识库 RAG</h1>
     <p class="index-sub">售前 / 解决方案方向 · 深度优先 · 共 12 节</p>
     <div class="progress">
-      进度：5 / 12 节
-      <div class="progress-bar"><div class="progress-fill" style="width:41.6%"></div></div>
+      进度：10 / 12 节
+      <div class="progress-bar"><div class="progress-fill" style="width:83.3%"></div></div>
     </div>
   </header>
 
@@ -88,11 +88,19 @@
   </section>
 
   <section class="module">
-    <h2><span class="module-num">测验</span>随堂巩固</h2>
+    <h2><span class="module-num">测验</span>随堂与阶段</h2>
     <div class="cards">
       <a class="card" href="lessons/quiz-01-foundations.html">
         <div class="card-row"><span class="card-num">Q1</span><span class="card-title">随堂测验 1 · L01–L04 综合</span><span class="card-status done">✅ 已完成</span></div>
         <p class="card-desc">地基 + 数据侧：RAG 本质 / 流水线 / 切分 / 元数据（8 题混合问答）</p>
+      </a>
+      <a class="card" href="lessons/quiz-midterm.html">
+        <div class="card-row"><span class="card-num">中</span><span class="card-title">期中考试 · L01–L06 综合</span><span class="card-status done">✅ 已完成</span></div>
+        <p class="card-desc">地基 + 数据侧 + 检索侧：场景诊断 + 跨环节边界 + 选型 + 概念辨析（20 题计分）</p>
+      </a>
+      <a class="card" href="lessons/quiz-02-retrieval.html">
+        <div class="card-row"><span class="card-num">Q2</span><span class="card-title">随堂测验 2 · L05–L07 综合</span><span class="card-status now">▶ 待做</span></div>
+        <p class="card-desc">检索侧三件套：embedding / 混合检索 / rerank 综合诊断（8 题计分）</p>
       </a>
     </div>
   </section>
@@ -104,40 +112,40 @@
         <div class="card-row"><span class="card-num">05</span><span class="card-title">Embedding 选型</span><span class="card-status done">✅ 已完成</span></div>
         <p class="card-desc">中文 / 运维语料；维度 / 效率 / 效果</p>
       </a>
-      <div class="card disabled">
-        <div class="card-row"><span class="card-num">06</span><span class="card-title">向量检索 + BM25 混合检索</span><span class="card-status now">▶ 下一节</span></div>
-        <p class="card-desc">RRF 融合；稀疏 vs 稠密</p>
-      </div>
-      <div class="card disabled">
-        <div class="card-row"><span class="card-num">07</span><span class="card-title">Rerank 重排</span><span class="card-status todo">⚪ 待学</span></div>
-        <p class="card-desc">Cross-Encoder 精排；68%→89%；成本 / 延迟取舍</p>
-      </div>
+      <a class="card" href="lessons/0006-hybrid-retrieval.html">
+        <div class="card-row"><span class="card-num">06</span><span class="card-title">向量 + BM25 混合检索</span><span class="card-status done">✅ 已完成</span></div>
+        <p class="card-desc">稠密管语义、稀疏管精确；RRF 融合；三种架构</p>
+      </a>
+      <a class="card" href="lessons/0007-rerank.html">
+        <div class="card-row"><span class="card-num">07</span><span class="card-title">Rerank 重排</span><span class="card-status done">✅ 已完成</span></div>
+        <p class="card-desc">Cross-Encoder 精排；68%→89%；两阶段检索；成本 / 延迟取舍</p>
+      </a>
     </div>
   </section>
 
   <section class="module">
     <h2><span class="module-num">M4</span>生成与质量</h2>
     <div class="cards">
-      <div class="card disabled">
-        <div class="card-row"><span class="card-num">08</span><span class="card-title">上下文组装与 Prompt 工程</span><span class="card-status todo">⚪ 待学</span></div>
-        <p class="card-desc">结构化输出 / 引用 / 防幻觉；少样本 / CoT</p>
-      </div>
-      <div class="card disabled">
-        <div class="card-row"><span class="card-num">09</span><span class="card-title">RAG 评估</span><span class="card-status todo">⚪ 待学</span></div>
-        <p class="card-desc">检索质量 + 生成质量；RAGAS</p>
-      </div>
+      <a class="card" href="lessons/0008-context-prompt.html">
+        <div class="card-row"><span class="card-num">08</span><span class="card-title">上下文组装与 Prompt 工程</span><span class="card-status done">✅ 已完成</span></div>
+        <p class="card-desc">上下文组装 / 结构化输出 / 引用 / 防幻觉四件套；少样本 / CoT</p>
+      </a>
+      <a class="card" href="lessons/0009-evaluation.html">
+        <div class="card-row"><span class="card-num">09</span><span class="card-title">RAG 评估</span><span class="card-status done">✅ 已完成</span></div>
+        <p class="card-desc">四指标（Context Recall/Precision + Faithfulness/Relevancy）/ RAGAS / 评估集 / 评估驱动闭环</p>
+      </a>
     </div>
   </section>
 
   <section class="module">
     <h2><span class="module-num">M5</span>实战与面试</h2>
     <div class="cards">
+      <a class="card" href="lessons/0010-dify-demo.html">
+        <div class="card-row"><span class="card-num">10</span><span class="card-title">动手：Dify 搭运维知识库 RAG demo</span><span class="card-status done">✅ 已完成</span></div>
+        <p class="card-desc">概念→Dify 配置映射 / 5 步搭 demo / 混合检索+rerank / 召回测试 / 引用归属 / Dify 边界</p>
+      </a>
       <div class="card disabled">
-        <div class="card-row"><span class="card-num">10</span><span class="card-title">动手：Dify 搭运维知识库 RAG demo</span><span class="card-status todo">⚪ 待学</span></div>
-        <p class="card-desc">端到端跑通 DBA Copilot RAG 部分</p>
-      </div>
-      <div class="card disabled">
-        <div class="card-row"><span class="card-num">11</span><span class="card-title">企业落地痛点与 POC 设计</span><span class="card-status todo">⚪ 待学</span></div>
+        <div class="card-row"><span class="card-num">11</span><span class="card-title">企业落地痛点与 POC 设计</span><span class="card-status now">▶ 下一节</span></div>
         <p class="card-desc">10 万文档踩坑；选型 / 数据治理 / 成本 / 评估</p>
       </div>
       <div class="card disabled">
@@ -148,7 +156,7 @@
   </section>
 
   <div class="index-foot">
-    <p><strong>复习方式</strong>：本页是课程入口，建议在浏览器收藏。Obsidian 不渲染 HTML，课程正文请在浏览器阅读。</p>
+    <p><strong>复习方式</strong>：本页是课程入口，建议在浏览器收藏。装了 HTML Reader 插件后，Obsidian 内也可直接点开课程 HTML 阅读。</p>
     <p><strong>相关文档</strong>（在 Obsidian 内查看）：<code>MISSION.md</code> 学习目标 · <code>NOTES.md</code> 偏好与大纲 · <code>RESOURCES.md</code> 资源清单</p>
     <p class="cite">课程目录与资源见 vault 内 <code>learning/rag/</code></p>
   </div>

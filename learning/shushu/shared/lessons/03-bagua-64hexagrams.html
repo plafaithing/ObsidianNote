@@ -1,0 +1,401 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>术数 · 共享基础 第3课 — 八卦与六十四卦 · 万物类象</title>
+<style>
+  :root {
+    --bg: #f7f5f0; --card: #ffffff; --ink: #2b2b2b; --muted: #6b6b6b;
+    --line: #e4e0d6; --accent: #8b5e3c;
+    --wood: #4CAF50; --fire: #E53935; --earth: #F9A825; --metal: #9E9E9E; --water: #1E88E5;
+    --ok: #2e7d32; --no: #c62828;
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; padding: 32px 16px; font-family: -apple-system, "PingFang SC", "Microsoft YaHei", sans-serif; background: var(--bg); color: var(--ink); line-height: 1.75; }
+  .wrap { max-width: 800px; margin: 0 auto; }
+  header { text-align: center; margin-bottom: 28px; }
+  .crumb { color: var(--muted); font-size: 14px; letter-spacing: 1px; }
+  h1 { font-size: 28px; margin: 8px 0 4px; }
+  .subtitle { color: var(--muted); }
+  .win { background: linear-gradient(135deg, #fff8ec, #fdf3e2); border: 1px solid #f0e0c4; border-radius: 14px; padding: 16px 20px; margin: 20px 0; }
+  .win b { color: var(--accent); }
+  section { background: var(--card); border: 1px solid var(--line); border-radius: 14px; padding: 24px; margin: 18px 0; }
+  h2 { font-size: 20px; margin-top: 0; border-left: 4px solid var(--accent); padding-left: 10px; }
+  h3 { font-size: 16px; margin: 18px 0 6px; }
+  table { width: 100%; border-collapse: collapse; margin: 12px 0; font-size: 13.5px; }
+  th, td { border: 1px solid var(--line); padding: 7px 8px; text-align: center; }
+  th { background: #faf6ee; }
+  .dot { display: inline-block; width: 12px; height: 12px; border-radius: 50%; vertical-align: middle; margin-right: 3px; }
+  .note { font-size: 14px; color: var(--muted); background: #faf6ee; border-left: 3px solid var(--accent); padding: 8px 12px; border-radius: 4px; margin: 10px 0; }
+  code { background: #f0ece2; padding: 1px 6px; border-radius: 4px; font-size: 13px; }
+
+  /* 卦象绘制 */
+  .gua { display: inline-flex; flex-direction: column-reverse; gap: 5px; padding: 4px; vertical-align: middle; }
+  .yao { width: 46px; height: 7px; border-radius: 2px; }
+  .yao.yang { background: var(--ink); }
+  .yao.yin { background: linear-gradient(to right, var(--ink) 0 40%, transparent 40% 60%, var(--ink) 60% 100%); }
+
+  /* 八卦卡片 */
+  .gua-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin: 14px 0; }
+  @media (max-width: 560px) { .gua-grid { grid-template-columns: repeat(2, 1fr); } }
+  .gcard { background: #faf6ee; border: 1px solid var(--line); border-radius: 10px; padding: 12px 8px; text-align: center; }
+  .gcard .name { font-size: 17px; font-weight: 700; margin: 6px 0 2px; }
+  .gcard .sym { font-size: 12px; color: var(--muted); }
+  .gcard .ku { font-size: 12px; color: var(--accent); margin-top: 4px; }
+
+  /* 九宫方位图 */
+  .palace { display: grid; grid-template-columns: repeat(3, 1fr); gap: 4px; max-width: 320px; margin: 14px auto; }
+  .cell { background: #faf6ee; border: 1px solid var(--line); border-radius: 8px; padding: 10px 4px; text-align: center; font-size: 13px; min-height: 56px; display: flex; flex-direction: column; justify-content: center; }
+  .cell .gname { font-weight: 700; font-size: 15px; }
+  .cell .dir { font-size: 11px; color: var(--muted); }
+  .cell.center { background: #f0ece2; color: var(--muted); }
+  .palace-wrap { display: flex; flex-wrap: wrap; gap: 20px; justify-content: center; }
+  .palace-box { flex: 0 0 auto; }
+  .palace-box .ptitle { text-align: center; font-size: 14px; color: var(--accent); font-weight: 600; margin-bottom: 4px; }
+
+  /* 六十四卦叠合示意 */
+  .stack { display: flex; flex-direction: column; align-items: center; gap: 2px; }
+  .stack .label { font-size: 12px; color: var(--muted); }
+
+  /* 练习 */
+  .q-card { background: #faf6ee; border: 1px solid var(--line); border-radius: 12px; padding: 16px; margin: 14px 0; }
+  .opts { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 10px; }
+  @media (max-width: 500px) { .opts { grid-template-columns: 1fr; } }
+  .opt { background: #fff; border: 1px solid var(--line); border-radius: 8px; padding: 10px; cursor: pointer; text-align: center; transition: all .15s; }
+  .opt:hover { border-color: var(--accent); }
+  .opt.correct { background: #e8f5e9; border-color: var(--ok); color: var(--ok); }
+  .opt.wrong { background: #ffebee; border-color: var(--no); color: var(--no); }
+  .feedback { margin-top: 10px; font-size: 14px; min-height: 20px; }
+  .score { text-align: center; font-size: 15px; color: var(--accent); margin-top: 10px; }
+  .next { background: #f0e6d8; border-radius: 10px; padding: 14px 18px; margin-top: 10px; }
+  .tagb { display: inline-block; background: var(--accent); color: #fff; font-size: 12px; padding: 2px 8px; border-radius: 10px; }
+  .pair { display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; margin: 10px 0; align-items: center; }
+  .chip { padding: 5px 13px; border-radius: 20px; color: #fff; font-size: 14px; font-weight: 600; }
+  .rel { padding: 3px 9px; border-radius: 12px; background: #faf6ee; border: 1px solid var(--line); font-size: 12px; color: var(--muted); }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="crumb">术数 · 共享基础 第 3 / 4 节</div>
+    <h1>八卦与六十四卦 · 万物类象</h1>
+    <div class="subtitle">四门术数共用的卦象符号系统</div>
+  </header>
+
+  <div class="win">
+    🎯 本课小胜利：<b>①</b> 能凭卦象认出八个卦（乾兑离震巽坎艮坤）<br>
+    <b>②</b> 能说出每卦的自然、身体、动物、家庭类象<br>
+    <b>③</b> 能用「上卦 + 下卦」拼出一个六十四卦（如地天泰）
+  </div>
+
+  <section>
+    <h2>一、为什么学八卦</h2>
+    <p>八卦是四门术数的「卦象骨架」。上一节干支是字母表，这一节八卦就是「词根」：</p>
+    <ul>
+      <li><b>六爻</b>：一个六爻卦 = 上下两个八卦相叠，装卦时要分清上卦下卦</li>
+      <li><b>梅花易数</b>：用先天八卦数起卦，断卦时直读八卦万物类象</li>
+      <li><b>奇门遁甲</b>：九宫里排的就是后天八卦方位</li>
+      <li><b>大六壬</b>：天将与八卦方位对应，断象时也取八卦类象</li>
+    </ul>
+    <p>所以八卦的<b>形状、五行、类象</b>是后面所有断卦的视觉与语义基础。</p>
+  </section>
+
+  <section>
+    <h2>二、八卦的卦象与口诀</h2>
+    <p>每个卦由三爻组成（叫「经卦」）。爻从下往上读：<b>初爻 → 二爻 → 三爻</b>。实线 ⚊ 为阳爻，断线 ⚋ 为阴爻。</p>
+    <p>八卦顺序（先天序）：<b>乾 兑 离 震 巽 坎 艮 坤</b>。记忆口诀「<b>八卦取象歌</b>」：</p>
+    <div class="gua-grid">
+      <div class="gcard">
+        <div class="gua"><div class="yao yang"></div><div class="yao yang"></div><div class="yao yang"></div></div>
+        <div class="name">乾</div><div class="sym">☰ 天</div><div class="ku">乾三连</div>
+      </div>
+      <div class="gcard">
+        <div class="gua"><div class="yao yang"></div><div class="yao yang"></div><div class="yao yin"></div></div>
+        <div class="name">兑</div><div class="sym">☱ 泽</div><div class="ku">兑上缺</div>
+      </div>
+      <div class="gcard">
+        <div class="gua"><div class="yao yang"></div><div class="yao yin"></div><div class="yao yang"></div></div>
+        <div class="name">离</div><div class="sym">☲ 火</div><div class="ku">离中虚</div>
+      </div>
+      <div class="gcard">
+        <div class="gua"><div class="yao yang"></div><div class="yao yin"></div><div class="yao yin"></div></div>
+        <div class="name">震</div><div class="sym">☳ 雷</div><div class="ku">震仰盂</div>
+      </div>
+      <div class="gcard">
+        <div class="gua"><div class="yao yin"></div><div class="yao yang"></div><div class="yao yang"></div></div>
+        <div class="name">巽</div><div class="sym">☴ 风</div><div class="ku">巽下断</div>
+      </div>
+      <div class="gcard">
+        <div class="gua"><div class="yao yin"></div><div class="yao yang"></div><div class="yao yin"></div></div>
+        <div class="name">坎</div><div class="sym">☵ 水</div><div class="ku">坎中满</div>
+      </div>
+      <div class="gcard">
+        <div class="gua"><div class="yao yin"></div><div class="yao yin"></div><div class="yao yang"></div></div>
+        <div class="name">艮</div><div class="sym">☶ 山</div><div class="ku">艮覆碗</div>
+      </div>
+      <div class="gcard">
+        <div class="gua"><div class="yao yin"></div><div class="yao yin"></div><div class="yao yin"></div></div>
+        <div class="name">坤</div><div class="sym">☷ 地</div><div class="ku">坤六断</div>
+      </div>
+    </div>
+    <div class="note">口诀看形：乾三连（三实线）、坤六断（三断成六段）；震仰盂（像口朝上的碗，底实口空）、艮覆碗（倒扣的碗，上实下空）；离中虚（中间断）、坎中满（中间实）；兑上缺（顶上断一口）、巽下断（底下断）。</div>
+  </section>
+
+  <section>
+    <h2>三、八卦的五行与家庭</h2>
+    <h3>五行归属</h3>
+    <table>
+      <tr><th>五行</th><th>八卦</th><th>记忆</th></tr>
+      <tr><td><span class="dot" style="background:var(--metal)"></span>金</td><td>乾、兑</td><td>乾为天为金，兑为泽（金生水之泽）</td></tr>
+      <tr><td><span class="dot" style="background:var(--wood)"></span>木</td><td>震、巽</td><td>震为雷为木，巽为风为木</td></tr>
+      <tr><td><span class="dot" style="background:var(--water)"></span>水</td><td>坎</td><td>坎为水</td></tr>
+      <tr><td><span class="dot" style="background:var(--fire)"></span>火</td><td>离</td><td>离为火</td></tr>
+      <tr><td><span class="dot" style="background:var(--earth)"></span>土</td><td>坤、艮</td><td>坤为地，艮为山（皆土）</td></tr>
+    </table>
+
+    <h3>家庭角色（出自《说卦传》）</h3>
+    <p>把八卦看成一家八口：乾父坤母，下面三儿三女。「长、中、少」由<b>从下往上第几个阳爻/阴爻</b>决定。</p>
+    <table>
+      <tr><th>卦</th><th>角色</th><th>爻象（自下而上）</th><th>怎么来的</th></tr>
+      <tr><td>乾 ☰</td><td>父</td><td>阳阳阳</td><td>纯阳</td></tr>
+      <tr><td>坤 ☷</td><td>母</td><td>阴阴阴</td><td>纯阴</td></tr>
+      <tr><td>震 ☳</td><td>长男</td><td>阳阴阴</td><td>初爻为阳 → 长男</td></tr>
+      <tr><td>坎 ☵</td><td>中男</td><td>阴阳阴</td><td>二爻为阳 → 中男</td></tr>
+      <tr><td>艮 ☶</td><td>少男</td><td>阴阴阳</td><td>三爻为阳 → 少男</td></tr>
+      <tr><td>巽 ☴</td><td>长女</td><td>阴阳阳</td><td>初爻为阴 → 长女</td></tr>
+      <tr><td>离 ☲</td><td>中女</td><td>阳阴阳</td><td>二爻为阴 → 中女</td></tr>
+      <tr><td>兑 ☱</td><td>少女</td><td>阳阳阴</td><td>三爻为阴 → 少女</td></tr>
+    </table>
+    <div class="note">规律：阳卦（震坎艮）是「一阳两阴」，阴卦（巽离兑）是「一阴两阳」。<b>谁在下谁是长</b>——初爻定长幼，因为事物从下往上长。这条规律在断卦里也用：占长子看震、占中男看坎。</div>
+  </section>
+
+  <section>
+    <h2>四、八卦万物类象（核心）</h2>
+    <p>万物类象 = 把世间万物归到八个卦上。这是<b>梅花直读、六爻取象、奇门断意</b>的共同基础。下表出自《周易·说卦传》及后世易学扩充：</p>
+    <table>
+      <tr>
+        <th>卦</th><th>自然</th><th>方位(后)</th><th>季节</th><th>五行</th>
+        <th>家庭</th><th>身体</th><th>动物</th><th>特性</th>
+      </tr>
+      <tr><td>乾 ☰</td><td>天</td><td>西北</td><td>秋冬间</td><td><span class="dot" style="background:var(--metal)"></span>金</td><td>父</td><td>首(头)</td><td>马</td><td>刚健·尊贵</td></tr>
+      <tr><td>兑 ☱</td><td>泽</td><td>西</td><td>秋</td><td><span class="dot" style="background:var(--metal)"></span>金</td><td>少女</td><td>口</td><td>羊</td><td>喜悦·口舌</td></tr>
+      <tr><td>离 ☲</td><td>火</td><td>南</td><td>夏</td><td><span class="dot" style="background:var(--fire)"></span>火</td><td>中女</td><td>目</td><td>雉</td><td>光明·依附</td></tr>
+      <tr><td>震 ☳</td><td>雷</td><td>东</td><td>春</td><td><span class="dot" style="background:var(--wood)"></span>木</td><td>长男</td><td>足</td><td>龙</td><td>震动·奋起</td></tr>
+      <tr><td>巽 ☴</td><td>风/木</td><td>东南</td><td>春夏间</td><td><span class="dot" style="background:var(--wood)"></span>木</td><td>长女</td><td>股(腿)</td><td>鸡</td><td>顺入·渗透</td></tr>
+      <tr><td>坎 ☵</td><td>水</td><td>北</td><td>冬</td><td><span class="dot" style="background:var(--water)"></span>水</td><td>中男</td><td>耳</td><td>豕(猪)</td><td>险陷·曲折</td></tr>
+      <tr><td>艮 ☶</td><td>山</td><td>东北</td><td>冬春间</td><td><span class="dot" style="background:var(--earth)"></span>土</td><td>少男</td><td>手</td><td>狗</td><td>静止·阻止</td></tr>
+      <tr><td>坤 ☷</td><td>地</td><td>西南</td><td>夏秋间</td><td><span class="dot" style="background:var(--earth)"></span>土</td><td>母</td><td>腹</td><td>牛</td><td>柔顺·承载</td></tr>
+    </table>
+    <div class="note">📌 <b>速记三条线</b>：① 身体「乾首坤腹震足巽股坎耳离目艮手兑口」② 动物「乾马坤牛震龙巽鸡坎豕离雉艮狗兑羊」③ 家庭「乾父坤母·震长坎中艮少(男)·巽长离中兑少(女)」。这三条是《说卦传》原文，最常考、最常用。</div>
+    <div class="note">类象不止上面这些——乾还可为君、为玉、为金；坤为众、为布、为釜；坎为盗、为病、为酒；离为日、为电、为甲胄……随课程推进会随用随补，不必一次硬背。梅花断卦时讲究「见什么取什么象」，先用熟这张主表。</div>
+  </section>
+
+  <section>
+    <h2>五、先天八卦与后天八卦</h2>
+    <p>八卦排成圆盘有两种排法，方位不同，用途不同。记住一句话：<b>「先天为体，后天为用」</b>。</p>
+
+    <div class="palace-wrap">
+      <div class="palace-box">
+        <div class="ptitle">先天八卦（伏羲）· 讲对待</div>
+        <div class="palace">
+          <div class="cell"><div class="gname">巽</div><div class="dir">西南</div></div>
+          <div class="cell"><div class="gname">乾</div><div class="dir">南</div></div>
+          <div class="cell"><div class="gname">兑</div><div class="dir">东南</div></div>
+          <div class="cell"><div class="gname">坎</div><div class="dir">西</div></div>
+          <div class="cell center">中</div>
+          <div class="cell"><div class="gname">离</div><div class="dir">东</div></div>
+          <div class="cell"><div class="gname">艮</div><div class="dir">西北</div></div>
+          <div class="cell"><div class="gname">坤</div><div class="dir">北</div></div>
+          <div class="cell"><div class="gname">震</div><div class="dir">东北</div></div>
+        </div>
+      </div>
+      <div class="palace-box">
+        <div class="ptitle">后天八卦（文王）· 讲流行</div>
+        <div class="palace">
+          <div class="cell"><div class="gname">巽</div><div class="dir">东南</div></div>
+          <div class="cell"><div class="gname">离</div><div class="dir">南</div></div>
+          <div class="cell"><div class="gname">坤</div><div class="dir">西南</div></div>
+          <div class="cell"><div class="gname">震</div><div class="dir">东</div></div>
+          <div class="cell center">中</div>
+          <div class="cell"><div class="gname">兑</div><div class="dir">西</div></div>
+          <div class="cell"><div class="gname">艮</div><div class="dir">东北</div></div>
+          <div class="cell"><div class="gname">坎</div><div class="dir">北</div></div>
+          <div class="cell"><div class="gname">乾</div><div class="dir">西北</div></div>
+        </div>
+      </div>
+    </div>
+    <div class="note">方位图按古法：<b>上南下北，左东右西</b>（与现代地图相反）。先天八卦乾坤定南北、坎离定东西，强调阴阳正对；后天八卦按四季流转排布——震东方春起、离南方夏旺、兑西方秋收、坎北方冬藏。</div>
+
+    <h3>两套数（重要，别混）</h3>
+    <table>
+      <tr><th>数系</th><th>口诀</th><th>谁用</th></tr>
+      <tr><td><b>先天数</b></td><td>乾1 兑2 离3 震4 巽5 坎6 艮7 坤8</td><td>梅花易数起卦取数</td></tr>
+      <tr><td><b>后天数（洛书）</b></td><td>坎1 坤2 震3 巽4 (中5) 乾6 兑7 艮8 离9</td><td>奇门九宫、风水飞星</td></tr>
+    </table>
+    <div class="note">用哪套看术数：梅花用<b>先天数</b>起卦（如看到3个字，3为离卦）；断卦时方位、季节、旺衰一律看<b>后天八卦</b>。六爻装卦认八卦、看五行，用的是后天体系。</div>
+  </section>
+
+  <section>
+    <h2>六、六十四卦怎么来的</h2>
+    <p>把两个经卦（三爻卦）上下叠起来，就成了六爻卦，叫「别卦」。8 个经卦两两组合 = <b>8 × 8 = 64</b> 卦。</p>
+    <ul>
+      <li><b>上卦</b>（外卦）：上面三爻，代表外环境、对方</li>
+      <li><b>下卦</b>（内卦）：下面三爻，代表内环境、自己</li>
+    </ul>
+    <p>命名格式：<b>「上卦象 + 下卦象 + 卦名」</b>。举几个最经典的：</p>
+    <table>
+      <tr><th>卦名</th><th>读法</th><th>上卦</th><th>下卦</th><th>卦象</th><th>含义</th></tr>
+      <tr>
+        <td>泰</td><td>地天泰</td><td>坤☷(地)</td><td>乾☰(天)</td>
+        <td><div class="stack"><div class="gua" style="gap:3px"><div class="yao yin" style="width:34px;height:5px"></div><div class="yao yin" style="width:34px;height:5px"></div><div class="yao yin" style="width:34px;height:5px"></div><div class="yao yang" style="width:34px;height:5px"></div><div class="yao yang" style="width:34px;height:5px"></div><div class="yao yang" style="width:34px;height:5px"></div></div></div>
+        <td>地气下降、天气上升，<b>天地交</b>，通达</td>
+      </tr>
+      <tr>
+        <td>否</td><td>天地否</td><td>乾☰(天)</td><td>坤☷(地)</td>
+        <td><div class="stack"><div class="gua" style="gap:3px"><div class="yao yang" style="width:34px;height:5px"></div><div class="yao yang" style="width:34px;height:5px"></div><div class="yao yang" style="width:34px;height:5px"></div><div class="yao yin" style="width:34px;height:5px"></div><div class="yao yin" style="width:34px;height:5px"></div><div class="yao yin" style="width:34px;height:5px"></div></div></div>
+        <td>天气上行、地气下行，<b>不交</b>，闭塞</td>
+      </tr>
+      <tr>
+        <td>既济</td><td>水火既济</td><td>坎☵(水)</td><td>离☲(火)</td>
+        <td><div class="stack"><div class="gua" style="gap:3px"><div class="yao yin" style="width:34px;height:5px"></div><div class="yao yang" style="width:34px;height:5px"></div><div class="yao yin" style="width:34px;height:5px"></div><div class="yao yang" style="width:34px;height:5px"></div><div class="yao yin" style="width:34px;height:5px"></div><div class="yao yang" style="width:34px;height:5px"></div></div></div>
+        <td>水在火上（如锅烧水），事成</td>
+      </tr>
+      <tr>
+        <td>未济</td><td>火水未济</td><td>离☲(火)</td><td>坎☵(水)</td>
+        <td><div class="stack"><div class="gua" style="gap:3px"><div class="yao yang" style="width:34px;height:5px"></div><div class="yao yin" style="width:34px;height:5px"></div><div class="yao yang" style="width:34px;height:5px"></div><div class="yao yin" style="width:34px;height:5px"></div><div class="yao yang" style="width:34px;height:5px"></div><div class="yao yin" style="width:34px;height:5px"></div></div></div>
+        <td>火在水上，不交，事未成</td>
+      </tr>
+    </table>
+    <div class="note">🔑 <b>泰 vs 否</b>是理解六十四卦的钥匙：不是「乾就好、坤就坏」，而是看上下卦气<b>是否相交</b>。泰卦地在上天在下，气相向而行则交；否卦天在上地在下，气相背而行则不交。六爻里看动爻生克、梅花里看体用，底层都是这个「交不交」的道理。</div>
+    <div class="note">六十四卦各有固定卦名（出自《周易》），不必现在全背。六爻装卦时会自动给出本卦和变卦的名称，重点是会拆「上卦 + 下卦」。</div>
+  </section>
+
+  <section>
+    <h2>七、练一练</h2>
+    <p>共 6 题，覆盖卦象识别与万物类象。</p>
+    <div id="quiz"></div>
+    <div class="score" id="score"></div>
+  </section>
+
+  <section>
+    <h2>八、小结与预告</h2>
+    <p>✅ 本课你掌握了：</p>
+    <ul>
+      <li>八个卦的<b>卦象与口诀</b>（乾三连、坤六断、震仰盂、艮覆碗、离中虚、坎中满、兑上缺、巽下断）</li>
+      <li>八卦的<b>五行</b>（乾兑金、震巽木、坎水、离火、坤艮土）与<b>家庭</b>（长中少由初/二/三爻定）</li>
+      <li><b>万物类象</b>主表：自然、方位、身体、动物、特性——梅花直读与六爻取象的基础</li>
+      <li><b>先天为体后天为用</b>：梅花用先天数起卦，方位旺衰看后天八卦</li>
+      <li>六十四卦 = 上下两个八卦相叠，命名「上象+下象+卦名」（如地天泰）</li>
+    </ul>
+    <div class="next">
+      <span class="tagb">下节预告</span>
+      <b>第 4 课：干支历法（年月日时、节气、月建日辰、旬空）</b><br>
+      这是共享基础最后一节。学会把一个具体时间转成「年柱、月柱、日柱、时柱」四柱，理解节气如何定月建、如何查旬空——这是六爻定日辰、六壬起课、奇门定局的共同前置技能。学完就能进入第二阶段：六爻。
+    </div>
+    <p style="font-size:14px;color:var(--muted)">📝 课后小任务：默写八卦口诀和五行归属；把万物类象主表的三条速记线（身体/动物/家庭）背到顺口。翻 <code>reference/cheatsheet.md</code> 对着速查表自查。</p>
+  </section>
+</div>
+
+<script>
+const C = {金:'var(--metal)',木:'var(--wood)',水:'var(--water)',火:'var(--fire)',土:'var(--earth)'};
+const W = {乾:'金',兑:'金',离:'火',震:'木',巽:'木',坎:'水',艮:'土',坤:'土'};
+
+// 卦象 HTML（初→二→三，column-reverse 会把初爻放最下）
+function guaHtml(bits){ // bits 自下而上，如 [1,0,1]
+  return `<div class="gua">${bits.map(b=>`<div class="yao ${b?'yang':'yin'}"></div>`).join('')}</div>`;
+}
+const GUA = {
+  '乾':[1,1,1],'兑':[1,1,0],'离':[1,0,1],'震':[1,0,0],
+  '巽':[0,1,1],'坎':[0,1,0],'艮':[0,0,1],'坤':[0,0,0]
+};
+
+const questions = [
+  {
+    ask:'第 1 题：下面这个卦象是哪个卦？',
+    show: guaHtml([1,0,1]),
+    opts:['离','坎','兑','巽'],
+    ans:'离',
+    why:'阳阴阳，中间虚（离中虚），☲ 为离卦，属火'
+  },
+  {
+    ask:'第 2 题：「雷」是哪个卦的自然类象？',
+    show:'<span class="chip" style="background:var(--accent)">雷</span>',
+    opts:['震','巽','艮','乾'],
+    ans:'震',
+    why:'震为雷，东方春木，长男，☳'
+  },
+  {
+    ask:'第 3 题：八卦中代表「眼睛」的卦是？',
+    show:'<span class="chip" style="background:var(--accent)">目（眼睛）</span>',
+    opts:['离','坎','艮','兑'],
+    ans:'离',
+    why:'离为目（乾首坤腹震足巽股坎耳离目艮手兑口）'
+  },
+  {
+    ask:'第 4 题：占长男之事，看哪个卦？',
+    show:'<span class="chip" style="background:var(--accent)">长男</span>',
+    opts:['震','坎','艮','乾'],
+    ans:'震',
+    why:'震初爻为阳→长男；坎中男、艮少男、乾父'
+  },
+  {
+    ask:'第 5 题：八卦中代表「牛」的卦是？',
+    show:'<span class="chip" style="background:var(--accent)">牛</span>',
+    opts:['坤','乾','艮','巽'],
+    ans:'坤',
+    why:'坤为牛（乾马坤牛震龙巽鸡坎豕离雉艮狗兑羊）'
+  },
+  {
+    ask:'第 6 题：「地天泰」的上下卦分别是？',
+    show:'<span class="chip" style="background:var(--accent)">地天泰</span>',
+    opts:['上坤下乾','上乾下坤','上坎下离','上离下坎'],
+    ans:'上坤下乾',
+    why:'读法「上象+下象+卦名」：地(坤)在上，天(乾)在下，故泰卦天地交泰'
+  }
+];
+
+let idx = 0, score = 0;
+const quiz = document.getElementById('quiz');
+const scoreEl = document.getElementById('score');
+
+function render() {
+  if (idx >= questions.length) {
+    quiz.innerHTML = `<div class="q-card" style="text-align:center">🎉 全部完成！<br>得分：<b>${score} / ${questions.length}</b><br>${score===questions.length?'满分，八卦类象已拿捏 🟢':'错题对照万物类象表再过一遍，重做更稳'}</div>`;
+    scoreEl.textContent = '';
+    return;
+  }
+  const q = questions[idx];
+  quiz.innerHTML = `
+    <div class="q-card">
+      <div style="font-size:15px">${q.ask}</div>
+      <div class="pair" style="margin:14px 0">${q.show}</div>
+      <div class="opts" id="opts"></div>
+      <div class="feedback" id="fb"></div>
+    </div>`;
+  const optsEl = document.getElementById('opts');
+  q.opts.forEach(o => {
+    const b = document.createElement('div');
+    b.className = 'opt'; b.textContent = o;
+    b.onclick = () => answer(o, q, b);
+    optsEl.appendChild(b);
+  });
+  scoreEl.textContent = `进度：${idx} / ${questions.length}　得分：${score}`;
+}
+function answer(o, q, btn) {
+  document.querySelectorAll('.opt').forEach(x => x.onclick = null);
+  const fb = document.getElementById('fb');
+  if (o === q.ans) {
+    btn.classList.add('correct'); score++;
+    fb.innerHTML = `✅ 对！${q.why}`;
+  } else {
+    btn.classList.add('wrong');
+    document.querySelectorAll('.opt').forEach(x => { if (x.textContent === q.ans) x.classList.add('correct'); });
+    fb.innerHTML = `❌ 错。正确答案是「${q.ans}」——${q.why}`;
+  }
+  setTimeout(() => { idx++; render(); }, 1700);
+}
+render();
+</script>
+</body>
+</html>

@@ -1,11 +1,11 @@
 {
   "id": "conv-1783045083952-k9s2jzbif",
   "providerId": "claude",
-  "title": "Create new RAG course\n\n我来为您创建一个新的 RAG 课程。首先需要了解...",
+  "title": "继续RAG学习任务",
   "titleGenerationStatus": "success",
   "createdAt": 1783045083953,
-  "updatedAt": 1783329193122,
-  "lastResponseAt": 1783329193122,
+  "updatedAt": 1783332139563,
+  "lastResponseAt": 1783331832910,
   "sessionId": "f8546cc6-3064-4e93-8ae8-ba69d27d7cd9",
   "providerState": {
     "providerSessionId": "f8546cc6-3064-4e93-8ae8-ba69d27d7cd9"

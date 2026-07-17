@@ -1,0 +1,308 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>随堂测验 2 · L05-L07 综合</title>
+  <style>
+  :root {
+    --bg: #fafaf7; --ink: #1a1a1a; --ink-soft: #444; --ink-mute: #777;
+    --rule: #e4e3dc; --accent: #2b5a8c; --accent-soft: #e8f0f7;
+    --warn: #b06a00; --warn-soft: #fdf3e3; --key: #2f7d52; --key-soft: #e8f5ee;
+    --pit: #a23a3a; --pit-soft: #fbecec; --code-bg: #f3f3ee;
+    --serif: 'Source Serif Pro','Noto Serif SC',Georgia,'Songti SC',serif;
+    --sans: -apple-system,BlinkMacSystemFont,'Segoe UI','PingFang SC','Microsoft YaHei',sans-serif;
+    --mono: 'SF Mono','JetBrains Mono',Consolas,monospace;
+  }
+  *{box-sizing:border-box} html{scroll-behavior:smooth}
+  body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--sans);font-size:16px;line-height:1.78;-webkit-font-smoothing:antialiased}
+  .lesson{max-width:760px;margin:0 auto;padding:48px 28px 96px}
+  .lesson-header{margin-bottom:24px;border-bottom:1px solid var(--rule);padding-bottom:22px}
+  .course-label{font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--accent);font-weight:700}
+  .lesson-num{font-size:13px;color:var(--ink-mute);margin:8px 0 2px}
+  .lesson-title{font-family:var(--serif);font-size:32px;line-height:1.22;margin:2px 0 8px;font-weight:700}
+  .lesson-sub{color:var(--ink-soft);font-size:15px;margin:0}
+  .quiz-bar{position:sticky;top:0;background:var(--bg);padding:14px 0;border-bottom:1px solid var(--rule);margin:0 -28px 24px;padding-left:28px;padding-right:28px;z-index:10}
+  .quiz-bar-row{display:flex;align-items:center;gap:14px;font-size:14px}
+  .quiz-bar-track{flex:1;height:8px;background:var(--code-bg);border-radius:4px;overflow:hidden}
+  .quiz-bar-fill{height:100%;background:var(--accent);width:0;transition:width .3s}
+  .quiz-bar-score{font-family:var(--mono);font-size:13px;color:var(--ink-mute);min-width:60px;text-align:right}
+  .lesson-nav{display:flex;justify-content:space-between;margin:0 0 36px;font-size:14px}
+  .lesson-nav a{color:var(--accent);text-decoration:none} .lesson-nav a:hover{text-decoration:underline}
+  h2{font-family:var(--serif);font-size:22px;margin:36px 0 10px;font-weight:700}
+  p{margin:12px 0} ul,ol{margin:12px 0;padding-left:24px} li{margin:6px 0}
+  strong{color:var(--ink);font-weight:600} em{color:var(--ink-soft)} a{color:var(--accent)}
+  code{font-family:var(--mono);background:var(--code-bg);padding:2px 6px;border-radius:4px;font-size:.9em}
+  .quiz{margin:22px 0;border:1px solid var(--rule);border-radius:12px;padding:22px 24px;background:#fff}
+  .quiz-q{font-weight:600;margin:0 0 6px;font-size:16px}
+  .quiz-q .qnum{color:var(--accent);font-family:var(--mono);margin-right:8px}
+  .quiz-scene{color:var(--ink-soft);font-size:14px;margin:0 0 16px;line-height:1.7}
+  .quiz-options{display:flex;flex-direction:column;gap:10px}
+  .quiz-opt{display:flex;align-items:center;gap:12px;padding:12px 16px;border:1.5px solid var(--rule);border-radius:10px;cursor:pointer;transition:all .15s;user-select:none}
+  .quiz-opt:hover{border-color:var(--accent);background:var(--accent-soft)}
+  .quiz-opt .mark{width:24px;height:24px;border-radius:50%;border:1.5px solid var(--ink-mute);display:inline-flex;align-items:center;justify-content:center;font-size:13px;color:transparent;flex-shrink:0}
+  .quiz-opt.reveal.correct{border-color:var(--key);background:var(--key-soft)}
+  .quiz-opt.reveal.correct .mark{background:var(--key);color:#fff;border-color:var(--key)}
+  .quiz-opt.reveal.wrong{border-color:var(--pit);background:var(--pit-soft)}
+  .quiz-opt.reveal.wrong .mark{background:var(--pit);color:#fff;border-color:var(--pit)}
+  .quiz-feedback{margin-top:16px;font-size:14px;line-height:1.72;display:none;padding:14px 16px;background:var(--code-bg);border-radius:8px}
+  .quiz-feedback.show{display:block}
+  .summary{margin:30px 0;padding:26px 28px;border-radius:14px;display:none}
+  .summary.show{display:block}
+  .summary.good{background:var(--key-soft);border:1.5px solid var(--key)}
+  .summary.mid{background:var(--warn-soft);border:1.5px solid var(--warn)}
+  .summary.low{background:var(--pit-soft);border:1.5px solid var(--pit)}
+  .summary h3{margin-top:0;font-family:var(--serif);font-size:22px}
+  .summary .score-big{font-family:var(--mono);font-size:42px;font-weight:700;line-height:1}
+  .ask-reminder{margin-top:24px;padding:16px 18px;background:var(--accent-soft);border-radius:10px;font-size:14px}
+  @media (max-width:600px){.lesson{padding:28px 18px 64px}.lesson-title{font-size:24px}.quiz-bar{margin:0 -18px 20px;padding-left:18px;padding-right:18px}}
+  </style>
+</head>
+<body>
+<article class="lesson">
+
+  <header class="lesson-header">
+    <div class="course-label">RAG 课程 · 随堂测验</div>
+    <div class="lesson-num">测验 2 / 覆盖 L05–L07</div>
+    <h1 class="lesson-title">检索侧三件套综合测验</h1>
+    <p class="lesson-sub">8 道混合问答 · Embedding / 混合检索 / Rerank · 做完看计分和反馈</p>
+  </header>
+
+  <nav class="lesson-nav">
+    <a href="0007-rerank.html">← 上一节：L07 Rerank</a>
+    <a href="0008-context-prompt.html">下一节：L08 上下文组装 →</a>
+  </nav>
+
+  <div class="quiz-bar">
+    <div class="quiz-bar-row">
+      <span>进度</span>
+      <div class="quiz-bar-track"><div class="quiz-bar-fill" id="q-bar"></div></div>
+      <span class="quiz-bar-score" id="q-progress">0/8</span>
+    </div>
+  </div>
+
+  <p style="color:var(--ink-soft);font-size:14px;margin-bottom:24px">说明：每题答完显示详细反馈（重点解释"为什么不是其他选项"）。全部答完后底部出总分和针对性建议。本测验聚焦 <strong>L07 Rerank + 检索侧综合诊断</strong>，和期中 Q9–Q16 错开角度。先想再点。</p>
+
+  <div class="quiz">
+    <p class="quiz-q"><span class="qnum">Q1</span>cross-encoder 比 bi-encoder 精度高的根本原因（L07）</p>
+    <p class="quiz-scene">同样是 transformer 模型，为什么 cross-encoder（重排）比 bi-encoder（检索）排序更精？</p>
+    <div class="quiz-options">
+      <label class="quiz-opt" data-correct="false"><span class="mark">✗</span><span>cross-encoder 参数量更大</span></label>
+      <label class="quiz-opt" data-correct="true"><span class="mark">✓</span><span>cross 把 query 和 doc 拼一起过模型，注意力让两边词级交互；bi 各自编码成向量，看不到对方</span></label>
+      <label class="quiz-opt" data-correct="false"><span class="mark">✗</span><span>cross-encoder 用了更多训练数据</span></label>
+      <label class="quiz-opt" data-correct="false"><span class="mark">✗</span><span>bi-encoder 不能输出相关性分数</span></label>
+    </div>
+    <div class="quiz-feedback">
+      <strong>✓ B。</strong> 交互是核心。cross 拼成 <code>[CLS] query [SEP] doc [SEP]</code> 喂 transformer，注意力让 query 每个词直接看 doc 每个词，能学到词级关联——哪怕字面无重叠（<code>ORA-01555</code> ↔ <code>快照/回滚段</code>）也能抓到。bi 把 query 和 doc <strong>分别</strong>编码成向量，各自编码时看不到对方，只能靠预训练时的语义联想。<br>
+      <em>为什么不是参数量/训练数据</em>：这是结果不是根因，同参数量下 cross 仍更精，差别在交互。<br>
+      <em>为什么不是 D</em>：bi 能算 cosine 相关性，只是粗。
+    </div>
+  </div>
+
+  <div class="quiz">
+    <p class="quiz-q"><span class="qnum">Q2</span>rerank 在 RAG pipeline 的位置（L07）</p>
+    <p class="quiz-scene">rerank 重排应放在哪一步？</p>
+    <div class="quiz-options">
+      <label class="quiz-opt" data-correct="false"><span class="mark">✗</span><span>检索之前，先 rerank 再检索</span></label>
+      <label class="quiz-opt" data-correct="true"><span class="mark">✓</span><span>检索之后、生成之前，对召回的 Top-K 重排</span></label>
+      <label class="quiz-opt" data-correct="false"><span class="mark">✗</span><span>生成之后，对 LLM 输出排序</span></label>
+      <label class="quiz-opt" data-correct="false"><span class="mark">✗</span><span>和检索并行，同时跑</span></label>
+    </div>
+    <div class="quiz-feedback">
+      <strong>✓ B。</strong> rerank 重排的是<strong>检索召回的结果</strong>，所以在 retrieve 之后、generate 之前。<br>
+      <em>为什么不能在检索之前</em>：没召回就没得排，rerank 依赖检索结果。<br>
+      <em>为什么不在生成之后</em>：rerank 排的是文档不是 LLM 输出。<br>
+      <em>为什么不能并行</em>：rerank 的输入是检索的输出，有依赖关系，不能同时跑。<br>
+      完整链路：<code>query → 检索 Top-K1 → rerank Top-K2 → 喂 LLM</code>。
+    </div>
+  </div>
+
+  <div class="quiz">
+    <p class="quiz-q"><span class="qnum">Q3</span>rerank 的成本与延迟（L07）</p>
+    <p class="quiz-scene">关于 rerank 的成本与延迟，以下说法<strong>正确</strong>的是？（呼应"加一跳"）</p>
+    <div class="quiz-options">
+      <label class="quiz-opt" data-correct="false"><span class="mark">✗</span><span>rerank 对全库文档跑 cross-encoder，延迟极高没法用</span></label>
+      <label class="quiz-opt" data-correct="true"><span class="mark">✓</span><span>rerank 只对检索召回的 Top-K1（如 50 个）跑，延迟可控（GPU 几十 ms），但端到端加一跳</span></label>
+      <label class="quiz-opt" data-correct="false"><span class="mark">✗</span><span>rerank 不增加延迟，因为和检索并行跑</span></label>
+      <label class="quiz-opt" data-correct="false"><span class="mark">✗</span><span>rerank 复用 embedding 模型，不增加部署成本</span></label>
+    </div>
+    <div class="quiz-feedback">
+      <strong>✓ B。</strong> rerank 只对检索召回的 Top-K1（如 50 个）跑 cross-encoder，<strong>不对全库跑</strong>，所以延迟可控（bge-reranker-v2-m3 GPU 30-80ms）。但确实<strong>加一跳</strong>——多一次模型调用，端到端多几十 ms。<br>
+      <em>为什么不对全库跑</em>（A 错）：cross 不能预计算，全库 5 万篇每对都跑模型要几秒甚至几十秒，所以才用两阶段——bi 粗扫全库、cross 只精排 Top-K1。<br>
+      <em>为什么不能并行</em>（C 错）：rerank 的输入是检索的输出（Top-K1），有依赖关系，不能同时跑，必然加一跳。<br>
+      <em>为什么不复用 embedding 模型</em>（D 错）：rerank 模型（cross-encoder）和 embedding 模型（bi-encoder）是<strong>两个独立模型</strong>，各司其职，rerank 要单独部署、多一份显存。<br>
+      <strong>记忆</strong>：rerank = 只跑 Top-K1 + 加一跳 + 独立模型。
+    </div>
+  </div>
+
+  <div class="quiz">
+    <p class="quiz-q"><span class="qnum">Q4</span>诊断：该加什么（综合）</p>
+    <p class="quiz-scene">recall@50=92%（够），但 precision@5=50%（Top-5 一半是噪声）。最该加什么？</p>
+    <div class="quiz-options">
+      <label class="quiz-opt" data-correct="false"><span class="mark">✗</span><span>换更强的 embedding 模型</span></label>
+      <label class="quiz-opt" data-correct="true"><span class="mark">✓</span><span>加 rerank</span></label>
+      <label class="quiz-opt" data-correct="false"><span class="mark">✗</span><span>调大 K1 到 200</span></label>
+      <label class="quiz-opt" data-correct="false"><span class="mark">✗</span><span>加混合检索</span></label>
+    </div>
+    <div class="quiz-feedback">
+      <strong>✓ B 加 rerank。</strong> recall@50=92% 够（相关文档都召回了），问题在<strong>排序</strong>——bi-encoder 粗排把噪声排进了 Top-5。rerank 精排提 precision，正解。<br>
+      <em>为什么不是换 embedding</em>：未诊断就换模型是反模式（L02 优化优先级，换 embedding 最贵放最后），且 recall@50 已够说明 embedding 没大问题。<br>
+      <em>为什么不是调大 K1</em>：recall@50 已够，调大 K1 只多捞噪声，不解决 Top-5 排序问题。<br>
+      <em>为什么不是加混合检索</em>：混合检索提 recall，本题 recall 已够、缺的是 precision。<br>
+      <strong>口诀</strong>：recall 够 precision 不够 → rerank；recall 不够 → 先治检索。
+    </div>
+  </div>
+
+  <div class="quiz">
+    <p class="quiz-q"><span class="qnum">Q5</span>一站式 vs 双系统本质区别（L06）</p>
+    <p class="quiz-scene">BGE-M3 一站式混合 和 双系统（dense + ES BM25）的本质区别是？</p>
+    <div class="quiz-options">
+      <label class="quiz-opt" data-correct="false"><span class="mark">✗</span><span>一站式用两个模型，双系统用一个</span></label>
+      <label class="quiz-opt" data-correct="true"><span class="mark">✓</span><span>一站式是一个模型同时出 dense+sparse、一个库；双系统是 dense 模型 + ES 两个引擎、两套索引</span></label>
+      <label class="quiz-opt" data-correct="false"><span class="mark">✗</span><span>一站式效果一定比双系统好</span></label>
+      <label class="quiz-opt" data-correct="false"><span class="mark">✗</span><span>双系统不需要 embedding 模型</span></label>
+    </div>
+    <div class="quiz-feedback">
+      <strong>✓ B。</strong> <br>
+      • <strong>一站式</strong>（BGE-M3 特有）：一个模型同时输出 dense + sparse，存一个向量库，一次查询两路都出。省事。<br>
+      • <strong>双系统</strong>：dense 用一个 embedding 模型 + 向量库，BM25 用 ES（独立引擎、倒排索引），两套系统分别查再 RRF 融合。<br>
+      <em>为什么 A 错</em>：反了——双系统也只有<strong>一个</strong> embedding 模型（dense 那路），BM25 是 ES 统计算法<strong>不跑模型</strong>；一站式也是一个模型。两边 embedding 模型数量都是 1。<br>
+      <em>为什么 C 错</em>：不一站式一定好——BGE-M3 自带的 sparse 对罕见标识符弱，可能不如双系统里 ES 的真 BM25，所以有"一站式不够再升双系统"的路径（Q&A 0010）。<br>
+      <em>为什么 D 错</em>：双系统 dense 那路必须有 embedding 模型，只有 BM25 那路不跑模型。<br>
+      <strong>记忆</strong>：一站式 = 一模型一库（BGE-M3 福利）；双系统 = 一模型 + ES（两引擎两索引）。
+    </div>
+  </div>
+
+  <div class="quiz">
+    <p class="quiz-q"><span class="qnum">Q6</span>三件套职责对应（综合）</p>
+    <p class="quiz-scene">检索三件套 dense / BM25 / rerank 各管什么？</p>
+    <div class="quiz-options">
+      <label class="quiz-opt" data-correct="false"><span class="mark">✗</span><span>dense 管精确匹配、BM25 管语义、rerank 管召回</span></label>
+      <label class="quiz-opt" data-correct="true"><span class="mark">✓</span><span>dense 管语义、BM25 管字面精确、rerank 管精排</span></label>
+      <label class="quiz-opt" data-correct="false"><span class="mark">✗</span><span>dense 管召回、BM25 管召回、rerank 管召回</span></label>
+      <label class="quiz-opt" data-correct="false"><span class="mark">✗</span><span>dense 管语义、BM25 管语义、rerank 管语义</span></label>
+    </div>
+    <div class="quiz-feedback">
+      <strong>✓ B。</strong> 三件套职责不同、互补：<br>
+      • <strong>dense（稠密向量）</strong>管<strong>语义相似</strong>（慢SQL ↔ SQL性能，字面不重叠但语义近）<br>
+      • <strong>BM25（稀疏）</strong>管<strong>字面精确匹配</strong>（ORA-01555、PGXC_STAT_ACTIVITY 这种标识符）<br>
+      • <strong>rerank（cross-encoder）</strong>管<strong>精排</strong>（对召回的 Top-K 重排，提 precision）<br>
+      <em>为什么 A 错</em>：把 dense 和 BM25 职责搞反了——dense 管语义不管精确，BM25 管精确不管语义。<br>
+      <em>为什么 C/D 错</em>：三者职责不同，不是都管召回或都管语义。<br>
+      <strong>记忆</strong>：dense 管"像不像"、BM25 管"含不含"、rerank 管"准不准"。
+    </div>
+  </div>
+
+  <div class="quiz">
+    <p class="quiz-q"><span class="qnum">Q7</span>K1 和 K2 怎么定（L07）</p>
+    <p class="quiz-scene">两阶段检索有 K1（粗召回数）和 K2（精排输出数）。以下说法<strong>正确</strong>的是？</p>
+    <div class="quiz-options">
+      <label class="quiz-opt" data-correct="false"><span class="mark">✗</span><span>K1 越大越好，K2 越小越好</span></label>
+      <label class="quiz-opt" data-correct="true"><span class="mark">✓</span><span>recall@K1 是 rerank 的天花板，K2 看下游 LLM 上下文，经验起步 K1=50 / K2=5</span></label>
+      <label class="quiz-opt" data-correct="false"><span class="mark">✗</span><span>K1 和 K2 必须相等</span></label>
+      <label class="quiz-opt" data-correct="false"><span class="mark">✗</span><span>K2 决定召回上限</span></label>
+    </div>
+    <div class="quiz-feedback">
+      <strong>✓ B。</strong> <br>
+      • <strong>K1（粗召回）</strong>决定 rerank 的天花板——相关文档没进 Top-K1，rerank 再精也救不回。看 recall@K1 曲线拐点定。<br>
+      • <strong>K2（精排输出）</strong>看下游 LLM 上下文窗口和精度需求。<br>
+      • 经验起步 K1=50、K2=5，按评测调。<br>
+      <em>为什么不是 K1 越大越好</em>：K1 大 → rerank 慢（要跑更多对）+ 噪声多。<br>
+      <em>为什么 K1 K2 不必相等</em>：两者独立，K1 管召回广度，K2 管喂 LLM 的量。<br>
+      <em>为什么 K2 不决定召回上限</em>：召回上限由 K1 定，K2 只决定喂给 LLM 多少。
+    </div>
+  </div>
+
+  <div class="quiz">
+    <p class="quiz-q"><span class="qnum">Q8</span>含 rerank 的优化优先级（综合）</p>
+    <p class="quiz-scene">RAG 效果差，recall@50=70%（不够），precision@5=60%。团队提议：①加 rerank ②换 3072 维 embedding ③加混合检索 ④调切分。正确优先级？</p>
+    <div class="quiz-options">
+      <label class="quiz-opt" data-correct="false"><span class="mark">✗</span><span>①加 rerank → ②换 embedding → ③混合 → ④切分</span></label>
+      <label class="quiz-opt" data-correct="true"><span class="mark">✓</span><span>④调切分 → ③加混合检索 → ①加 rerank → ②换 embedding</span></label>
+      <label class="quiz-opt" data-correct="false"><span class="mark">✗</span><span>②换 embedding → ①rerank → ③混合 → ④切分</span></label>
+      <label class="quiz-opt" data-correct="false"><span class="mark">✗</span><span>①rerank → ③混合 → ④切分 → ②embedding</span></label>
+    </div>
+    <div class="quiz-feedback">
+      <strong>✓ B。</strong> recall@50=70% <strong>不够</strong> → 先治检索提 recall，再谈精排：<br>
+      ④ <strong>调切分</strong>（廉价，重切文档即可）→ ③ <strong>加混合检索</strong>（dense+BM25 互补提 recall）→ recall 上去后，若 precision 不够 → ① <strong>加 rerank</strong>（精排提 precision）→ ② <strong>换 embedding</strong> 最贵最后。<br>
+      <em>为什么不能先 rerank</em>（A/D 错）：recall@50 不够，rerank 救不回漏召，先 rerank 是白费。<br>
+      <em>为什么不能先换 embedding</em>（C 错）：未诊断就换最贵环节，反模式；且 recall 不够的根因可能是切分/检索策略，不一定是 embedding。<br>
+      <strong>口诀</strong>：recall 不够先治检索（切分+混合），recall 够了再 rerank 提 precision，换模型永远最后。
+    </div>
+  </div>
+
+  <div class="summary" id="summary">
+    <h3 id="sum-title">测验完成</h3>
+    <div class="score-big" id="sum-score">0/8</div>
+    <p id="sum-feedback" style="margin-top:10px"></p>
+  </div>
+
+  <div class="ask-reminder">
+    💡 <strong>做完看反馈</strong>：错题的反馈写了"为什么不是其他选项"，最该重看。做完告诉我分数和哪几题错了，我帮你针对性复盘，再进 L08 上下文组装。
+  </div>
+
+  <nav class="lesson-nav" style="margin-top:36px;">
+    <a href="0007-rerank.html">← 上一节：L07 Rerank</a>
+    <a href="0008-context-prompt.html">下一节：L08 上下文组装 →</a>
+  </nav>
+
+</article>
+
+<script>
+  let done = 0, right = 0;
+  const total = 8;
+  const quizzes = document.querySelectorAll('.quiz');
+
+  function updateProgress() {
+    document.getElementById('q-progress').textContent = `${done}/${total}`;
+    document.getElementById('q-bar').style.width = `${done/total*100}%`;
+    if (done === total) showSummary();
+  }
+
+  function showSummary() {
+    const summary = document.getElementById('summary');
+    const pct = Math.round(right/total*100);
+    document.getElementById('sum-score').textContent = `${right}/${total}（${pct}%）`;
+    let fb = '', cls = 'good';
+    if (pct >= 85) {
+      fb = '<strong>检索侧三件套掌握扎实</strong>——embedding / 混合 / rerank 职责清晰，场景诊断到位，rerank 的"窄窗口 recall=precision"和"recall@K1 天花板"这两条核心都吃透了。M3 检索侧稳了，可以进 L08 上下文组装与 Prompt 工程（M4 生成侧）。';
+      cls = 'good';
+    } else if (pct >= 60) {
+      fb = '<strong>检索侧概念掌握，但 rerank / 诊断还有盲点</strong>。重点回看错题：<br>• rerank 提什么、recall@K1 天花板 → 重看 <a href="0007-rerank.html">L07</a>「68%→89% 真相」和「关键前提」<br>• 诊断该加什么（recall 够 vs 不够） → 重看 L07「运维实战」表 + Q&A 0002<br>• K1/K2 含义 → 重看 L07「Top-K 怎么定」<br>把错题反馈里的"为什么不是其他选项"过一遍，再进 L08。';
+      cls = 'mid';
+    } else if (pct >= 35) {
+      fb = '<strong>检索侧概念有印象，但跨环节判断弱</strong>。建议：①重看 <a href="0007-rerank.html">L07</a> 正文（尤其两阶段、bi vs cross、68%→89% 真相三节）；②配合 <a href="quiz-midterm.html">期中 Q9–Q16</a> 一起复习检索侧；③回头再做本测验。别急着进 L08，先把检索侧判断力练出来。';
+      cls = 'low';
+    } else {
+      fb = '<strong>建议先重看 L05–L07 课程正文</strong>。检索侧是 RAG 命中的关键，地基不稳后面生成侧会更吃力。重看重点：L05 embedding 选型与维度、L06 混合检索 RRF、L07 两阶段与 rerank 天花板。配合 <code>reference/hnsw-cheatsheet.md</code> 速查。看完目标至少 60% 再进 L08。';
+      cls = 'low';
+    }
+    document.getElementById('sum-feedback').innerHTML = fb;
+    summary.classList.add('show', cls);
+    summary.scrollIntoView({behavior:'smooth', block:'center'});
+  }
+
+  quizzes.forEach(quiz => {
+    const opts = quiz.querySelectorAll('.quiz-opt');
+    const fb = quiz.querySelector('.quiz-feedback');
+    let answered = false;
+    opts.forEach(opt => {
+      opt.addEventListener('click', () => {
+        if (answered) return;
+        answered = true;
+        const isCorrect = opt.dataset.correct === 'true';
+        opts.forEach(o => {
+          o.classList.remove('correct','wrong');
+          o.classList.add('reveal');
+          if (o.dataset.correct === 'true') o.classList.add('correct');
+          else if (o === opt) o.classList.add('wrong');
+        });
+        fb.classList.add('show');
+        done++; if (isCorrect) right++;
+        updateProgress();
+      });
+    });
+  });
+</script>
+</body>
+</html>

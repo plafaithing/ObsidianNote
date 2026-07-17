@@ -9,6 +9,7 @@
 | 子 agent (subagent) | [subagents](subagents/课程目录.md) | 🟢 进行中 | 从零学会派子 agent |
 | RAG（检索增强生成） | [rag](rag/MISSION.md) | 🟢 进行中 | 运维知识库 RAG，售前/解决方案方向，深度优先 |
 | 术数（六爻 / 梅花 / 六壬 / 奇门）| [shushu](shushu/MISSION.md) | 🟢 进行中 | 四门术数实战断卦，共享基础 + 分门深入，约 40 节 |
+| Harness Engineering 方法论与落地 | [harness-engineering](harness-engineering/MISSION.md) | 🟢 进行中 | 读透 harness 设计 + 定制，主看 Claude Agent SDK，售前方法论驱动 |
 
 ## 状态图例
 - 🟡 定向中 — 正在确认 mission

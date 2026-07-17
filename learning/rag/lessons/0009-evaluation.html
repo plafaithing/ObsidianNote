@@ -1,0 +1,354 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>L09 · RAG 评估</title>
+  <style>
+  :root {
+    --bg: #fafaf7; --ink: #1a1a1a; --ink-soft: #444; --ink-mute: #777;
+    --rule: #e4e3dc; --accent: #2b5a8c; --accent-soft: #e8f0f7;
+    --warn: #b06a00; --warn-soft: #fdf3e3; --key: #2f7d52; --key-soft: #e8f5ee;
+    --pit: #a23a3a; --pit-soft: #fbecec; --code-bg: #f3f3ee;
+    --serif: 'Source Serif Pro','Noto Serif SC',Georgia,'Songti SC',serif;
+    --sans: -apple-system,BlinkMacSystemFont,'Segoe UI','PingFang SC','Microsoft YaHei',sans-serif;
+    --mono: 'SF Mono','JetBrains Mono',Consolas,monospace;
+  }
+  *{box-sizing:border-box} html{scroll-behavior:smooth}
+  body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--sans);font-size:16px;line-height:1.78;-webkit-font-smoothing:antialiased}
+  .lesson{max-width:760px;margin:0 auto;padding:48px 28px 96px}
+  .lesson-header{margin-bottom:36px;border-bottom:1px solid var(--rule);padding-bottom:22px}
+  .course-label{font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--accent);font-weight:700}
+  .lesson-num{font-size:13px;color:var(--ink-mute);margin:8px 0 2px}
+  .lesson-title{font-family:var(--serif);font-size:34px;line-height:1.22;margin:2px 0 8px;font-weight:700}
+  .lesson-sub{color:var(--ink-soft);font-size:15px;margin:0}
+  .lesson-nav{display:flex;justify-content:space-between;margin:0 0 40px;font-size:14px}
+  .lesson-nav a{color:var(--accent);text-decoration:none} .lesson-nav a:hover{text-decoration:underline}
+  h2{font-family:var(--serif);font-size:24px;margin:44px 0 12px;font-weight:700}
+  h3{font-size:17px;margin:26px 0 8px;font-weight:600}
+  p{margin:12px 0} ul,ol{margin:12px 0;padding-left:24px} li{margin:6px 0}
+  strong{color:var(--ink);font-weight:600} em{color:var(--ink-soft)} a{color:var(--accent)}
+  code{font-family:var(--mono);background:var(--code-bg);padding:2px 6px;border-radius:4px;font-size:.9em}
+  pre{background:var(--code-bg);padding:16px;border-radius:8px;overflow-x:auto} pre code{background:none;padding:0}
+  .callout{margin:22px 0;padding:14px 18px;border-left:3px solid;border-radius:0 6px 6px 0}
+  .callout p:first-child{margin-top:0} .callout p:last-child{margin-bottom:0}
+  .callout-title{font-weight:700;font-size:13px;letter-spacing:.03em;margin-bottom:6px;display:block}
+  .callout.info{background:var(--accent-soft);border-color:var(--accent)}
+  .callout.warn{background:var(--warn-soft);border-color:var(--warn)}
+  .callout.key{background:var(--key-soft);border-color:var(--key)}
+  .callout.pit{background:var(--pit-soft);border-color:var(--pit)}
+  .callout.interview{background:var(--accent-soft);border-color:var(--accent)}
+  .callout.interview .callout-title::before{content:"🎤 "}
+  table{width:100%;border-collapse:collapse;margin:18px 0;font-size:14px}
+  th,td{text-align:left;padding:10px 12px;border-bottom:1px solid var(--rule);vertical-align:top}
+  th{font-weight:600;color:var(--ink-soft);background:var(--code-bg)}
+  .quiz{margin:30px 0;border:1px solid var(--rule);border-radius:12px;padding:24px 26px;background:#fff}
+  .quiz-q{font-weight:600;margin:0 0 6px;font-size:16px}
+  .quiz-scene{color:var(--ink-soft);font-size:14px;margin:0 0 16px;line-height:1.7}
+  .quiz-options{display:flex;flex-direction:column;gap:10px}
+  .quiz-opt{display:flex;align-items:center;gap:12px;padding:12px 16px;border:1.5px solid var(--rule);border-radius:10px;cursor:pointer;transition:all .15s;user-select:none}
+  .quiz-opt:hover{border-color:var(--accent);background:var(--accent-soft)}
+  .quiz-opt .mark{width:24px;height:24px;border-radius:50%;border:1.5px solid var(--ink-mute);display:inline-flex;align-items:center;justify-content:center;font-size:13px;color:transparent;flex-shrink:0}
+  .quiz-opt.reveal.correct{border-color:var(--key);background:var(--key-soft)}
+  .quiz-opt.reveal.correct .mark{background:var(--key);color:#fff;border-color:var(--key)}
+  .quiz-opt.reveal.wrong{border-color:var(--pit);background:var(--pit-soft)}
+  .quiz-opt.reveal.wrong .mark{background:var(--pit);color:#fff;border-color:var(--pit)}
+  .quiz-feedback{margin-top:16px;font-size:14px;line-height:1.72;display:none;padding:14px 16px;background:var(--code-bg);border-radius:8px}
+  .quiz-feedback.show{display:block}
+  .win{margin:36px 0 24px;padding:22px 24px;background:var(--key-soft);border-radius:12px;border:1px solid var(--key)}
+  .win h3{margin-top:0;color:var(--key)}
+  .sources{margin-top:32px;padding-top:22px;border-top:1px solid var(--rule);font-size:14px}
+  .sources h3{margin-top:0} .sources ul{padding-left:20px}
+  .ask-reminder{margin-top:20px;padding:16px 18px;background:var(--accent-soft);border-radius:10px;font-size:14px}
+  .cite{font-size:13px;color:var(--ink-mute)}
+  @media print{body{background:#fff}.lesson-nav,.quiz-opt{break-inside:avoid}a{color:var(--ink)}}
+  @media (max-width:600px){.lesson{padding:28px 18px 64px}.lesson-title{font-size:26px}}
+  </style>
+</head>
+<body>
+<article class="lesson">
+
+  <header class="lesson-header">
+    <div class="course-label">RAG 课程 · M4 生成与质量</div>
+    <div class="lesson-num">第 09 节 / 共 12 节</div>
+    <h1 class="lesson-title">RAG 评估：定位瓶颈，而不是凭感觉调参</h1>
+    <p class="lesson-sub">检索准不准、生成忠不忠实——四个指标给 RAG 链路出体检报告</p>
+  </header>
+
+  <nav class="lesson-nav">
+    <a href="0008-context-prompt.html">← 上一节：上下文组装与 Prompt 工程</a>
+    <a href="0010-dify-demo.html">下一节：Dify 搭运维知识库 RAG demo →</a>
+  </nav>
+
+  <h2>动机：不评估就是"凭感觉调参"</h2>
+  <p>L01–L08 把 RAG 全链路走完：ingest → embed → store → retrieve → rerank → 上下文组装 → generate。但效果不好时——用户问"ORA-01555 怎么处理"，答案不对——<strong>错在哪一环</strong>？是切分太碎（L03）？embedding 选错（L05）？rerank 没排好（L07）？还是 prompt 没约束住（L08）？</p>
+  <p>不评估就只能瞎猜着调参：加大 K、换模型、改 prompt……改完也不知道是好是坏。评估的作用就是<strong>把"感觉"变成"数字"</strong>，定位瓶颈在哪一环，再回去精准调。</p>
+  <div class="callout info">
+    <span class="callout-title">本节定位</span>
+    <p>M4 收口，也是整个质量体系的最后一节。两件事：①用<strong>四个核心指标</strong>量化检索和生成质量；②建立<strong>评估驱动优化闭环</strong>——评估 → 定位瓶颈 → 回对应环节调 → 再评估。售前 POC 时，客户问"你怎么证明你的 RAG 有效？"评估指标就是答案。</p>
+  </div>
+
+  <h2>一、为什么评估难：链路长，错在哪不知道</h2>
+  <p>RAG 不是单一模型，是<strong>一条链路</strong>。最终答案错，根因可能在任何一环。两种评估策略：</p>
+  <ul>
+    <li><strong>端到端评估</strong>：直接看最终答案对不对。简单，但<strong>只知道差，不知道哪差</strong>——答案错可能是检索没召回，也可能是召回了但 LLM 没用好。</li>
+    <li><strong>分环节评估</strong>：检索环节单独评估（召回准不准）、生成环节单独评估（忠不忠实、答没答对）。能<strong>定位瓶颈</strong>，售前讲这个显专业。</li>
+  </ul>
+  <div class="callout key">
+    <span class="callout-title">售前关键</span>
+    <p>分环节评估 = L02 木桶效应的落地。RAG 效果上限由最短板决定，评估就是找最短板。客户最怕你"整体看着行，但不知道哪里会崩"——分环节指标让他看到你<strong>知道每个环节的水位</strong>。</p>
+  </div>
+
+  <h2>二、四大核心指标：两大维度 × 两个方向</h2>
+  <p>RAG 评估分两大维度：<strong>检索质量</strong>（L05-L07 的成绩单）和<strong>生成质量</strong>（L08 的成绩单）。每个维度两个核心指标，正好四个——这也是 RAGAS 框架的四个招牌指标。</p>
+
+  <h3>检索侧：召回全不全 + 排序准不准</h3>
+  <table>
+    <thead><tr><th>指标</th><th>看什么</th><th>怎么算</th><th>低了说明</th></tr></thead>
+    <tbody>
+      <tr><td><strong>Context Recall</strong><br>上下文召回</td><td>该召回的信息<strong>漏没漏</strong></td><td>把标准答案（reference）拆成一条条 claim，逐个判断能否被检索到的上下文支撑。能支撑的 / 总 claim 数</td><td>检索召回不足，相关文档没找回来 → 上游（embedding/混合/切分）</td></tr>
+      <tr><td><strong>Context Precision</strong><br>上下文精确</td><td>相关 chunk 有没有<strong>排在前面</strong></td><td>各位置 precision@k 的均值，位置敏感。相关 chunk 在第 1 位比在第 5 位分数高</td><td>排序差，相关 chunk 排在后面 → rerank / ef 调参</td></tr>
+    </tbody>
+  </table>
+
+  <h3>生成侧：有没有编 + 答没答对</h3>
+  <table>
+    <thead><tr><th>指标</th><th>看什么</th><th>怎么算</th><th>低了说明</th></tr></thead>
+    <tbody>
+      <tr><td><strong>Faithfulness</strong><br>忠实度</td><td>答案有没有<strong>编造</strong>（幻觉）</td><td>把 LLM 答案（response）拆成 claim，逐个判断能否被检索上下文支撑。能支撑的 / 总 claim 数</td><td>LLM 在编，防幻觉没做好 → prompt 约束 / 低温 / 结构化（L08 四件套）</td></tr>
+      <tr><td><strong>Response Relevancy</strong><br>答案相关度</td><td>答案有没<strong>回答问题</strong>（不跑题、不啰嗦）</td><td>LLM 反推：从答案反推出可能的问题，看和原问题多相关。啰嗦/跑题扣分</td><td>答非所问或冗长 → prompt / 检索相关度</td></tr>
+    </tbody>
+  </table>
+
+  <div class="callout warn">
+    <span class="callout-title">关键辨析：Context Recall vs Faithfulness</span>
+    <p>这俩结构对称，最容易混：</p>
+    <ul>
+      <li><strong>Context Recall</strong>：拆的是 <code>reference</code>（标准答案）的 claim → 问"检索上下文<strong>够不够</strong>支撑标准答案" → 查<strong>检索</strong>全不全。</li>
+      <li><strong>Faithfulness</strong>：拆的是 <code>response</code>（LLM 生成的答案）的 claim → 问"LLM 答的<strong>有没有</strong>超出上下文" → 查<strong>生成</strong>有没有编。</li>
+    </ul>
+    <p>一个查"该有的有没有"，一个查"有的有没有被乱加"。Faithfulness 就是 L08 防幻觉四件套的体检报告——四件套做得好不好，faithfulness 分数说了算。</p>
+  </div>
+
+  <div class="callout pit">
+    <span class="callout-title">Context Precision ≠ Recall 的"窄窗口"混淆</span>
+    <p>L07 讲 rerank 时提过"窄窗口 recall 其实是 precision"——那是在 K1→K2 窄窗口语境下的口语化说法。本节给<strong>准确定义</strong>：Context Recall 看"该召回的漏没漏"（不漏），Context Precision 看"召回的排没排前"（位置）。运维 RAG 里，Precision 低意味着相关 chunk 召回了但排在第 5 位，LLM 可能根本没看到（Lost in the Middle，L08）——所以 rerank 才重要。</p>
+  </div>
+
+  <h2>三、RAGAS 框架：LLM 当裁判，省掉大规模标注</h2>
+  <p>上面四个指标的"拆 claim、判断能否被支撑"靠谁做？<strong>RAGAS</strong>（Retrieval-Augmented Generation Assessment）这个开源框架的做法是：<strong>用 LLM 当裁判</strong>（LLM-as-a-Judge），自动完成拆 claim 和判断。</p>
+  <h3>核心价值</h3>
+  <ul>
+    <li><strong>弱参考 / 无参考</strong>：传统评估要人工标注每条问题的"标准答案 + 相关文档"，成本极高。RAGAS 部分指标（如 Faithfulness、Response Relevancy）<strong>不需要标准答案</strong>，只要检索上下文 + LLM 答案就能打分；Context Recall 需要参考答案但也是 LLM 自动算。</li>
+    <li><strong>POC 快速迭代</strong>：售前做 POC 时，造 50 条问题跑 RAGAS，几分钟出四指标分数，不用人工逐条评——这是 RAGAS 在 POC 阶段的最大价值。</li>
+  </ul>
+  <h3>输入与输出</h3>
+  <pre><code># RAGAS 评估单条样本需要的输入
+{
+  "user_input":        "ORA-01555 怎么处理？",        # 用户问题
+  "retrieved_contexts": [chunk1, chunk2, ...],        # 检索到的上下文（L05-L07 的输出）
+  "response":          "ORA-01555 是快照过旧...",      # LLM 生成的答案（L08 的输出）
+  "reference":         "ORA-01555 快照过旧，需..."     # 标准答案（部分指标需要，如 Context Recall）
+}
+# 输出：四个指标各一个 0~1 的分数</code></pre>
+  <div class="callout key">
+    <span class="callout-title">售前亮点</span>
+    <p>POC 客户最常问："你这 RAG 准确率多少？"——别只答"感觉不错"。用 RAGAS 跑评估集，给出<strong>"Context Recall 0.87、Faithfulness 0.94、Response Relevancy 0.91"</strong>这样的数字，再讲清楚每个指标对应哪个环节、瓶颈在哪、怎么优化。这是售前和"调 API 的"的分水岭。</p>
+  </div>
+
+  <h2>四、补充：传统检索指标（Recall@K / MRR / NDCG）</h2>
+  <p>RAGAS 的 Context 指标是 <strong>LLM-as-Judge 版</strong>。还有一类<strong>传统检索指标</strong>，需要人工标注的"相关文档 ID"（ground truth），<strong>不调 LLM</strong>，更准更便宜：</p>
+  <table>
+    <thead><tr><th>指标</th><th>看什么</th><th>怎么算</th><th>DBA 类比</th></tr></thead>
+    <tbody>
+      <tr><td><strong>Recall@K</strong></td><td>Top-K 里召回了多少相关文档</td><td>Top-K 中的相关文档数 / 全部相关文档数</td><td>查询返回的行里，命中的目标行占所有目标行的比例</td></tr>
+      <tr><td><strong>Precision@K</strong></td><td>Top-K 里多少是相关的</td><td>Top-K 中的相关文档数 / K</td><td>返回的行里有多少是想要的</td></tr>
+      <tr><td><strong>MRR</strong><br>Mean Reciprocal Rank</td><td>第一个相关文档的位置</td><td>1/第一个相关文档的位置。第 1 位=1.0，第 5 位=0.2。多 query 取平均</td><td>第一条命中的结果在第几行——越靠前越好</td></tr>
+      <tr><td><strong>NDCG</strong></td><td>位置加权的相关性</td><td>前面位置权重高，相关文档越靠前分越高；支持多档相关度</td><td>加权排名评分，前排命中得分高</td></tr>
+    </tbody>
+  </table>
+  <div class="callout info">
+    <span class="callout-title">POC 怎么选</span>
+    <p><strong>有标注（标注了相关文档 ID）</strong> → 用传统指标（Recall@K / MRR），不调 LLM、零成本、确定性。<strong>没标注</strong> → 用 RAGAS 的 LLM-as-Judge 版（Context Precision/Recall），省标注但要花 LLM 调用钱、且有不稳定性。运维 POC 推荐：<strong>先人工标注 50 条的相关文档 ID</strong>，用传统指标评检索（准、便宜），生成侧用 RAGAS 的 Faithfulness/Response Relevancy（这俩本就需要 LLM 判断）。</p>
+  </div>
+
+  <h2>五、评估集怎么造：运维场景实战</h2>
+  <p>评估的<strong>前提是有评估集</strong>（Golden Set）。没有评估集，跑不出指标，调参就是瞎调。<strong>造评估集比调参重要</strong>——这是 POC 第一步。</p>
+  <h3>运维 RAG 评估集设计</h3>
+  <ul>
+    <li><strong>规模</strong>：50-200 条典型问题。POC 阶段 50 条高质量够用，不必贪多。</li>
+    <li><strong>来源</strong>：真实工单（最金贵）、DBA 常见问题、历史故障案例、产品手册目录反推问题。</li>
+    <li><strong>每条标注</strong>：
+      <ul>
+        <li>问题（user_input）</li>
+        <li>相关文档/chunk ID（检索 ground truth，算 Recall@K/MRR 用）</li>
+        <li>标准答案（reference，算 Context Recall/Faithfulness 用，可选）</li>
+      </ul>
+    </li>
+    <li><strong>分层覆盖</strong>（别只出简单题）：
+      <ul>
+        <li>简单事实型："GaussDB 默认端口是多少"</li>
+        <li>多步诊断型："慢SQL + 锁等待同时出现怎么排查"（考多 chunk 召回）</li>
+        <li>边界型（知识库没有的）："Oracle 的 XXX 怎么配"（考"该说不知道"，防幻觉）</li>
+        <li>易混淆型："undo 和 redo 的区别"（考精确排序，rerank 价值在这）</li>
+      </ul>
+    </li>
+  </ul>
+  <div class="callout warn">
+    <span class="callout-title">DBA 类比</span>
+    <p>评估集 = 数据库的<strong>回归测试集</strong>。改索引/调参数前先跑一遍，看是变好还是变坏。RAG 也一样——换 embedding、调 rerank K1、改 prompt 前，先跑评估集，用数字说话，别凭感觉。</p>
+  </div>
+
+  <h2>六、LLM-as-a-Judge 的坑</h2>
+  <p>RAGAS 用 LLM 当裁判，但 LLM 裁判不是金标准，有已知偏差：</p>
+  <ul>
+    <li><strong>偏好长答案</strong>（verbosity bias）：答案越长越容易得高分，哪怕啰嗦。</li>
+    <li><strong>偏好自己风格</strong>（self-enhancement）：用 GPT-4 评 GPT-4 的答案会偏高。</li>
+    <li><strong>位置偏见</strong>：信息在上下文里的位置影响判断（呼应 L08 Lost in the Middle）。</li>
+    <li><strong>不稳定</strong>：同样的输入跑两次，分数可能不同（温度不为 0 时尤其）。</li>
+  </ul>
+  <div class="callout pit">
+    <span class="callout-title">售前要诚实</span>
+    <p>别跟客户吹"LLM 评估全自动、百分百准"。正确说法：<strong>LLM 评估用于大规模快速扫描，人工抽检校准</strong>。具体做法：①评估裁判用更强模型（如 GPT-4 评 GPT-3.5 的生成）；②固定 seed / temperature=0 降不稳定；③人工标注一小撮校准集（50-100 条），和 LLM 分数对比算相关性，校准 LLM 裁判。<strong>客户问起局限性，你能主动讲，反而加分。</strong></p>
+  </div>
+
+  <h2>七、评估驱动优化闭环</h2>
+  <p>评估的目的不是打分，是<strong>定位瓶颈 → 回对应环节调</strong>。这是 L02 木桶效应 + POC 优化优先级的落地：</p>
+  <table>
+    <thead><tr><th>指标低</th><th>瓶颈环节</th><th>回去调什么</th></tr></thead>
+    <tbody>
+      <tr><td>Context Recall 低</td><td>检索召回</td><td>embedding 选型 / 加混合检索（L06）/ 加大 rerank K1 / 切分太碎回 L03</td></tr>
+      <tr><td>Context Precision 低</td><td>检索排序</td><td>上 rerank 或调 rerank（L07）/ 调 HNSW ef（参考速查表）</td></tr>
+      <tr><td>Faithfulness 低</td><td>生成幻觉</td><td>L08 防幻觉四件套：指令约束 + 引用 + 低温 + 结构化输出</td></tr>
+      <tr><td>Response Relevancy 低</td><td>生成相关度</td><td>prompt 改（明确任务）/ 检索相关度（Context Precision 是不是也低）</td></tr>
+    </tbody>
+  </table>
+  <div class="callout info">
+    <span class="callout-title">闭环</span>
+    <p>评估 → 定位瓶颈 → 回对应环节调 → <strong>再评估</strong>（确认指标涨了）→ 看下一个瓶颈。每次改<strong>只改一个变量</strong>，跑评估集对比，才知道改动有效没。和 DBA 调优一个思路——改一个参数跑一次基准，别一次改一堆。</p>
+  </div>
+
+  <h2>八、运维实战：DBA Copilot 评估设计</h2>
+  <p>把上面组装起来，DBA Copilot RAG 部分的评估方案：</p>
+  <ol>
+    <li><strong>造评估集</strong>：50 个 GaussDB 运维问题（慢SQL诊断 / 会话分析 / SQL 限流 / 参数调优），标注相关手册章节 ID + 部分标准答案。分简单/多步/边界/易混淆四类。</li>
+    <li><strong>跑一版基线</strong>：用当前配置（如 BGE-M3 + HNSW + 混合 + rerank K1=50/K2=5）跑 50 条，出四指标分数。</li>
+    <li><strong>定位瓶颈</strong>：假设 Context Recall 0.72（低）、Faithfulness 0.95（高）→ 瓶颈在检索召回，不是生成。</li>
+    <li><strong>回对应环节调</strong>：Context Recall 低 → 查切分（太碎？）、查 embedding（运维语料表现？）、加大 K1、补 BM25 混合。每次改一个，跑评估集对比。</li>
+    <li><strong>迭代到达标</strong>：定目标（如 Context Recall ≥ 0.90、Faithfulness ≥ 0.95），迭代到达标。</li>
+    <li><strong>交付评估报告</strong>：四指标分数 + 瓶颈定位 + 优化路径 + 评估集说明。这是售前 POC 的核心交付物。</li>
+  </ol>
+  <div class="callout key">
+    <span class="callout-title">售前交付物</span>
+    <p>POC 结束别只交个 demo。交<strong>评估报告</strong>：评估集怎么造的、四指标多少分、瓶颈在哪、已优化到什么水平、下一步优化方向。客户看到这个，知道你不只是"调了个 API"，而是<strong>有方法论的解决方案</strong>。这是售前溢价的核心。</p>
+  </div>
+
+  <div class="callout interview">
+    <span class="callout-title">面试视角 · 高频问题</span>
+    <p><strong>Q：RAG 怎么评估？四个核心指标是什么？</strong><br>检索侧：Context Recall（该召回的漏没漏）、Context Precision（相关 chunk 排没排前）。生成侧：Faithfulness（答案有没有编）、Response Relevancy（答没答对问题）。RAGAS 框架把这四个封装好，用 LLM-as-Judge 自动算。</p>
+    <p><strong>Q：Faithfulness 和 Context Recall 区别？</strong><br>结构对称但查的东西不同。Context Recall 拆 reference（标准答案）的 claim，看检索上下文够不够支撑标准答案 → 查检索全不全。Faithfulness 拆 response（LLM 答案）的 claim，看 LLM 有没有超出上下文编造 → 查生成幻觉。一个查"该有的有没有"，一个查"有的有没有被乱加"。</p>
+    <p><strong>Q：为什么要分环节评估，不直接看最终答案？</strong><br>RAG 是链路，最终答案错根因可能在检索也可能在生成。端到端评估只知道差不知道哪差，分环节评估能定位瓶颈——检索召回不足回 embedding/混合/切分，生成幻觉回 prompt/防幻觉。这是精准优化 vs 瞎调参的区别。</p>
+    <p><strong>Q：RAG 评估集怎么造？</strong><br>50-200 条典型问题，来源真实工单/常见问题/历史案例。每条标注问题 + 相关文档 ID（检索 ground truth）+ 标准答案（生成 ground truth，可选）。要分层覆盖：简单事实 / 多步诊断 / 边界（知识库没有的）/ 易混淆。造评估集比调参重要——没评估集，调参是瞎调。</p>
+    <p><strong>Q：LLM-as-a-Judge 有什么局限？</strong><br>偏好长答案、偏好自己风格、位置偏见、不稳定。缓解：用更强模型评、固定 seed/低温、人工标注校准集校准 LLM 裁判。售前要诚实——LLM 评估用于大规模快速扫描，人工抽检兜底，不是金标准。</p>
+    <p><strong>Q：RAG 效果不好怎么排查？</strong><br>评估驱动闭环：先跑评估集出四指标 → 哪个低定位瓶颈 → 回对应环节调（Recall 低调检索召回，Precision 低调排序，Faithfulness 低调防幻觉，Relevancy 低调 prompt）→ 每次只改一个变量，再评估确认。别一次改一堆。</p>
+  </div>
+
+  <h2>小测验</h2>
+
+  <div class="quiz" data-q="1">
+    <p class="quiz-q">Q1</p>
+    <p class="quiz-scene">DBA Copilot RAG 评估，四个指标里<strong>属于生成侧</strong>的是？</p>
+    <div class="quiz-options">
+      <label class="quiz-opt" data-correct="false"><span class="mark">✗</span><span>Context Recall 和 Context Precision</span></label>
+      <label class="quiz-opt" data-correct="true"><span class="mark">✓</span><span>Faithfulness 和 Response Relevancy</span></label>
+      <label class="quiz-opt" data-correct="false"><span class="mark">✗</span><span>Context Recall 和 Faithfulness</span></label>
+      <label class="quiz-opt" data-correct="false"><span class="mark">✗</span><span>Context Precision 和 Response Relevancy</span></label>
+    </div>
+    <div class="quiz-feedback"><strong>✓ Faithfulness 和 Response Relevancy 是生成侧。</strong> 四指标分两维：检索侧（Context Recall 召回全不全 / Context Precision 排序准不准）评 L05-L07；生成侧（Faithfulness 有没有编 / Response Relevancy 答没答对）评 L08。<br><em>为什么不是 Context Recall</em>：Context Recall 查的是检索上下文够不够支撑标准答案，评的是<strong>检索</strong>全不全。<br><em>为什么不是 Context Precision</em>：查相关 chunk 排没排前，评的是<strong>检索</strong>排序。<br><strong>记法</strong>：带 "Context" 的评检索，不带（Faithfulness/Response）的评生成。</div>
+  </div>
+
+  <div class="quiz" data-q="2">
+    <p class="quiz-q">Q2</p>
+    <p class="quiz-scene">跑评估发现 <strong>Faithfulness 只有 0.62</strong>，其他指标都还行。瓶颈最可能在哪？怎么改？</p>
+    <div class="quiz-options">
+      <label class="quiz-opt" data-correct="false"><span class="mark">✗</span><span>检索召回不足，换更大的 embedding 模型</span></label>
+      <label class="quiz-opt" data-correct="true"><span class="mark">✓</span><span>生成侧幻觉，加强 L08 防幻觉四件套（指令约束 + 引用 + 低温 + 结构化输出）</span></label>
+      <label class="quiz-opt" data-correct="false"><span class="mark">✗</span><span>检索排序差，加大 rerank K1</span></label>
+      <label class="quiz-opt" data-correct="false"><span class="mark">✗</span><span>评估集不够大，扩充到 500 条再跑</span></label>
+    </div>
+    <div class="quiz-feedback"><strong>✓ 生成侧幻觉，加强防幻觉四件套。</strong> Faithfulness 低 = LLM 答案里有 claim 无法被检索上下文支撑 = 在编。对应 L08 防幻觉四件套：①指令约束（只依据上下文）②引用要求 ③低温度 ④结构化输出。<br><em>为什么不是换 embedding</em>：那是检索召回（Context Recall）的解法，Faithfulness 是生成侧问题。<br><em>为什么不是 rerank</em>：rerank 调排序（Context Precision），不防幻觉。<br><em>为什么不是扩评估集</em>：扩样本不改变指标反映的瓶颈，0.62 是问题不是噪声。<br><strong>注意</strong>：要先确认 Context Recall 也不低——若检索就没召回相关内容，LLM 巧妇难为无米之炊也会"编"，那时根因其实在检索。但题设"其他指标都还行"，所以是生成侧。</div>
+  </div>
+
+  <div class="quiz" data-q="3">
+    <p class="quiz-q">Q3</p>
+    <p class="quiz-scene">POC 启动，客户催着出效果。以下做法<strong>最合理</strong>的是？</p>
+    <div class="quiz-options">
+      <label class="quiz-opt" data-correct="false"><span class="mark">✗</span><span>先调 embedding 模型和 rerank 参数，跑几个 case 看感觉</span></label>
+      <label class="quiz-opt" data-correct="true"><span class="mark">✓</span><span>先花时间造 50 条高质量评估集（标注相关文档+标准答案），再跑基线、定位瓶颈、迭代</span></label>
+      <label class="quiz-opt" data-correct="false"><span class="mark">✗</span><span>直接上 RAGAS 全自动评估，不用人工标注</span></label>
+      <label class="quiz-opt" data-correct="false"><span class="mark">✗</span><span>先把 demo 界面做好给客户看，评估以后再说</span></label>
+    </div>
+    <div class="quiz-feedback"><strong>✓ 先造评估集，再跑基线迭代。</strong> 评估集是评估的前提——没评估集跑不出指标，调参是瞎调。50 条高质量评估集（标注相关文档 ID + 部分标准答案）是 POC 第一步，比调参重要。<br><em>为什么不能凭感觉调</em>：跑几个 case 看感觉会被 fluency illusion 骗——文字看着通顺但检索可能没命中。要数字说话。<br><em>为什么不能只靠 RAGAS 全自动</em>：RAGAS 的检索指标用 LLM-as-Judge 不够准，有标注用传统指标（Recall@K/MRR）更准更便宜；且 Context Recall 需要标准答案，得人工造。<br><em>为什么不能先做界面</em>：demo 界面好看但效果差更丢人，售前 POC 核心是效果有数字支撑，不是界面。</div>
+  </div>
+
+  <div class="quiz" data-q="4">
+    <p class="quiz-q">Q4</p>
+    <p class="quiz-scene">关于 LLM-as-a-Judge，以下<strong>不是</strong>其已知局限的是？</p>
+    <div class="quiz-options">
+      <label class="quiz-opt" data-correct="false"><span class="mark">✗</span><span>偏好长答案（verbosity bias），啰嗦的答案容易得高分</span></label>
+      <label class="quiz-opt" data-correct="false"><span class="mark">✗</span><span>偏好自己风格，用同款模型评自己生成会偏高</span></label>
+      <label class="quiz-opt" data-correct="true"><span class="mark">✓</span><span>需要大规模人工标注每条问题的标准答案，成本极高</span></label>
+      <label class="quiz-opt" data-correct="false"><span class="mark">✗</span><span>不稳定，同样的输入跑两次分数可能不同</span></label>
+    </div>
+    <div class="quiz-feedback"><strong>✓ "需要大规模人工标注"不是 LLM-as-Judge 的局限，恰恰相反。</strong> LLM-as-Judge 的核心价值就是<strong>省掉大规模人工标注</strong>——用 LLM 自动拆 claim、判断能否被支撑，部分指标（Faithfulness/Response Relevancy）连标准答案都不需要。这才是 RAGAS 在 POC 流行的原因。<br><em>其他三项都是真局限</em>：verbosity bias（偏好长答案）、self-enhancement（偏好自己风格）、不稳定（同输入两次分数不同）。<br><strong>售前要点</strong>：LLM-as-Judge 的真正局限是"判断有偏差和不稳定"，不是"要人工标注"。缓解办法：用更强模型评、固定 seed/低温、人工标注校准集校准。</div>
+  </div>
+
+  <div class="win">
+    <h3>✅ 本节胜利</h3>
+    <p>你现在能讲清楚：<strong>RAG 四大评估指标（Context Recall/Precision + Faithfulness/Response Relevancy）分别查什么、对应哪个环节、低了怎么改；Faithfulness 和 Context Recall 的对称区别；RAGAS 的 LLM-as-Judge 价值与局限；评估集怎么造、为什么比调参重要；评估驱动优化闭环</strong>。M4 生成与质量收口，整个质量体系（L05-L09）闭环完成。下一节进 M5 实战——用 Dify 搭 DBA Copilot RAG demo，把 L01-L09 的概念端到端跑通。</p>
+  </div>
+
+  <div class="ask-reminder">
+    <p>💡 学完这节，有没有想深入的点？比如：<strong>RAGAS 实际怎么跑（代码）</strong>、<strong>人工评估和 LLM 评估怎么对齐</strong>、<strong>A/B 测试怎么做</strong>、<strong>评估集规模怎么定（50 够不够）</strong>、<strong>多轮对话怎么评估</strong>——提出来我展开讲，或沉淀到 Q&A。</p>
+  </div>
+
+  <div class="sources">
+    <h3>来源</h3>
+    <ul>
+      <li><a href="https://docs.ragas.io/">RAGAS 官方文档</a> — Context Precision / Context Recall / Faithfulness / Response Relevancy 定义与计算方式（L09 主源）</li>
+      <li>Es et al. 2023, <em>RAGAS: Automated Evaluation of Retrieval Augmented Generation</em>（RAGAS 原始论文）</li>
+      <li>L02 RAG 全流程：木桶效应 + POC 优化优先级（本节评估驱动闭环的基础）</li>
+      <li>L07 Rerank："窄窗口 recall=precision" 的口语化说法，本节给出 Context Precision/Recall 准确定义</li>
+      <li>L08 上下文组装与 Prompt 工程：Faithfulness 是防幻觉四件套的体检报告</li>
+      <li>传统检索指标（Recall@K / MRR / NDCG）：信息检索经典定义，参考 IR 教材</li>
+    </ul>
+    <p class="cite">M4 收口。下一节 L10 进 M5 实战，用 Dify 把 L01-L09 的概念端到端跑成 demo。</p>
+  </div>
+
+  <nav class="lesson-nav" style="margin-top:40px;">
+    <a href="0008-context-prompt.html">← 上一节：上下文组装与 Prompt 工程</a>
+    <a href="0010-dify-demo.html">下一节：Dify 搭运维知识库 RAG demo →</a>
+  </nav>
+
+</article>
+
+<script>
+  document.querySelectorAll('.quiz').forEach(quiz => {
+    const opts = quiz.querySelectorAll('.quiz-opt');
+    opts.forEach(opt => {
+      opt.addEventListener('click', () => {
+        if (quiz.dataset.answered) return;
+        quiz.dataset.answered = 'true';
+        opts.forEach(o => {
+          o.classList.add('reveal');
+          if (o.dataset.correct === 'true') o.classList.add('correct');
+          else if (o === opt) o.classList.add('wrong');
+        });
+        quiz.querySelector('.quiz-feedback').classList.add('show');
+      });
+    });
+  });
+</script>
+
+</body>
+</html>

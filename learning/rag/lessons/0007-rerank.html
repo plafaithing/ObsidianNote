@@ -1,0 +1,335 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>L07 · Rerank 重排</title>
+  <style>
+  :root {
+    --bg: #fafaf7; --ink: #1a1a1a; --ink-soft: #444; --ink-mute: #777;
+    --rule: #e4e3dc; --accent: #2b5a8c; --accent-soft: #e8f0f7;
+    --warn: #b06a00; --warn-soft: #fdf3e3; --key: #2f7d52; --key-soft: #e8f5ee;
+    --pit: #a23a3a; --pit-soft: #fbecec; --code-bg: #f3f3ee;
+    --serif: 'Source Serif Pro','Noto Serif SC',Georgia,'Songti SC',serif;
+    --sans: -apple-system,BlinkMacSystemFont,'Segoe UI','PingFang SC','Microsoft YaHei',sans-serif;
+    --mono: 'SF Mono','JetBrains Mono',Consolas,monospace;
+  }
+  *{box-sizing:border-box} html{scroll-behavior:smooth}
+  body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--sans);font-size:16px;line-height:1.78;-webkit-font-smoothing:antialiased}
+  .lesson{max-width:760px;margin:0 auto;padding:48px 28px 96px}
+  .lesson-header{margin-bottom:36px;border-bottom:1px solid var(--rule);padding-bottom:22px}
+  .course-label{font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--accent);font-weight:700}
+  .lesson-num{font-size:13px;color:var(--ink-mute);margin:8px 0 2px}
+  .lesson-title{font-family:var(--serif);font-size:34px;line-height:1.22;margin:2px 0 8px;font-weight:700}
+  .lesson-sub{color:var(--ink-soft);font-size:15px;margin:0}
+  .lesson-nav{display:flex;justify-content:space-between;margin:0 0 40px;font-size:14px}
+  .lesson-nav a{color:var(--accent);text-decoration:none} .lesson-nav a:hover{text-decoration:underline}
+  h2{font-family:var(--serif);font-size:24px;margin:44px 0 12px;font-weight:700}
+  h3{font-size:17px;margin:26px 0 8px;font-weight:600}
+  p{margin:12px 0} ul,ol{margin:12px 0;padding-left:24px} li{margin:6px 0}
+  strong{color:var(--ink);font-weight:600} em{color:var(--ink-soft)} a{color:var(--accent)}
+  code{font-family:var(--mono);background:var(--code-bg);padding:2px 6px;border-radius:4px;font-size:.9em}
+  pre{background:var(--code-bg);padding:16px;border-radius:8px;overflow-x:auto} pre code{background:none;padding:0}
+  .callout{margin:22px 0;padding:14px 18px;border-left:3px solid;border-radius:0 6px 6px 0}
+  .callout p:first-child{margin-top:0} .callout p:last-child{margin-bottom:0}
+  .callout-title{font-weight:700;font-size:13px;letter-spacing:.03em;margin-bottom:6px;display:block}
+  .callout.info{background:var(--accent-soft);border-color:var(--accent)}
+  .callout.warn{background:var(--warn-soft);border-color:var(--warn)}
+  .callout.key{background:var(--key-soft);border-color:var(--key)}
+  .callout.pit{background:var(--pit-soft);border-color:var(--pit)}
+  .callout.interview{background:var(--accent-soft);border-color:var(--accent)}
+  .callout.interview .callout-title::before{content:"🎤 "}
+  table{width:100%;border-collapse:collapse;margin:18px 0;font-size:14px}
+  th,td{text-align:left;padding:10px 12px;border-bottom:1px solid var(--rule);vertical-align:top}
+  th{font-weight:600;color:var(--ink-soft);background:var(--code-bg)}
+  .quiz{margin:30px 0;border:1px solid var(--rule);border-radius:12px;padding:24px 26px;background:#fff}
+  .quiz-q{font-weight:600;margin:0 0 6px;font-size:16px}
+  .quiz-scene{color:var(--ink-soft);font-size:14px;margin:0 0 16px;line-height:1.7}
+  .quiz-options{display:flex;flex-direction:column;gap:10px}
+  .quiz-opt{display:flex;align-items:center;gap:12px;padding:12px 16px;border:1.5px solid var(--rule);border-radius:10px;cursor:pointer;transition:all .15s;user-select:none}
+  .quiz-opt:hover{border-color:var(--accent);background:var(--accent-soft)}
+  .quiz-opt .mark{width:24px;height:24px;border-radius:50%;border:1.5px solid var(--ink-mute);display:inline-flex;align-items:center;justify-content:center;font-size:13px;color:transparent;flex-shrink:0}
+  .quiz-opt.reveal.correct{border-color:var(--key);background:var(--key-soft)}
+  .quiz-opt.reveal.correct .mark{background:var(--key);color:#fff;border-color:var(--key)}
+  .quiz-opt.reveal.wrong{border-color:var(--pit);background:var(--pit-soft)}
+  .quiz-opt.reveal.wrong .mark{background:var(--pit);color:#fff;border-color:var(--pit)}
+  .quiz-feedback{margin-top:16px;font-size:14px;line-height:1.72;display:none;padding:14px 16px;background:var(--code-bg);border-radius:8px}
+  .quiz-feedback.show{display:block}
+  .win{margin:36px 0 24px;padding:22px 24px;background:var(--key-soft);border-radius:12px;border:1px solid var(--key)}
+  .win h3{margin-top:0;color:var(--key)}
+  .sources{margin-top:32px;padding-top:22px;border-top:1px solid var(--rule);font-size:14px}
+  .sources h3{margin-top:0} .sources ul{padding-left:20px}
+  .ask-reminder{margin-top:20px;padding:16px 18px;background:var(--accent-soft);border-radius:10px;font-size:14px}
+  .cite{font-size:13px;color:var(--ink-mute)}
+  @media print{body{background:#fff}.lesson-nav,.quiz-opt{break-inside:avoid}a{color:var(--ink)}}
+  @media (max-width:600px){.lesson{padding:28px 18px 64px}.lesson-title{font-size:26px}}
+  </style>
+</head>
+<body>
+<article class="lesson">
+
+  <header class="lesson-header">
+    <div class="course-label">RAG 课程 · M3 检索侧</div>
+    <div class="lesson-num">第 07 节 / 共 12 节</div>
+    <h1 class="lesson-title">Rerank 重排：检索够"全"之后，让它够"精"</h1>
+    <p class="lesson-sub">两阶段检索——bi-encoder 粗召回 + cross-encoder 精排，把噪声踢出 Top-5</p>
+  </header>
+
+  <nav class="lesson-nav">
+    <a href="0006-hybrid-retrieval.html">← 上一节：混合检索</a>
+    <a href="0008-context-prompt.html">下一节：上下文组装 →</a>
+  </nav>
+
+  <h2>动机：recall 够了，precision 还差</h2>
+  <p>L06 混合检索把 recall@5 推到 88%——相关文档基本都捞进来了。但你打开 Top-5 看一眼，里面还混着 1-2 个<strong>噪声 chunk</strong>（字面命中了关键词但答非所问）。问题已经不在"漏捞"（recall 够了），而在<strong>排序不准</strong>——bi-encoder 粗排把无关的排进了 Top-5，LLM 拿到的上下文不够精。</p>
+  <p>Rerank 就来解决这个：用一个<strong>更精的模型</strong>对 Top-50 重新打分排序，把真正相关的挤进 Top-5，噪声踢出去。</p>
+  <div class="callout info">
+    <span class="callout-title">一句话定位</span>
+    <p>检索负责<strong>多捞</strong>（recall，别漏），rerank 负责<strong>精挑</strong>（precision，别杂）。两阶段分工。</p>
+  </div>
+
+  <h2>核心：两阶段检索</h2>
+  <p>RAG 检索拆成两步，用不同模型：</p>
+  <pre><code>query
+  │
+  ▼
+阶段1 检索（粗）  bi-encoder 扫全库 → Top-50     ← 快，可预计算
+  │
+  ▼
+阶段2 Rerank（精） cross-encoder 重排 Top-50 → Top-5  ← 精，只跑50个
+  │
+  ▼
+喂给 LLM</code></pre>
+  <ul>
+    <li><strong>为什么不全用 cross-encoder？</strong> 全库 5 万篇，每对 query-doc 都要跑一次 cross 模型，慢到没法用（秒级起步）。</li>
+    <li><strong>为什么不全用 bi-encoder？</strong> 排序粗，Top-5 混噪声，LLM 上下文不精。</li>
+    <li><strong>两阶段的本质</strong>：便宜模型（bi）干粗活（扫全库），贵模型（cross）干精活（只跑 50 个）。和 DBA 思路一样——先用索引粗捞 50 行，再对 50 行做复杂排序，不可能对全表做复杂排序。</li>
+  </ul>
+
+  <h2>bi-encoder vs cross-encoder：为什么 cross 更精</h2>
+  <p>这是 rerank 的核心原理，面试高频。两者的根本区别在<strong>query 和 doc 有没有"交互"</strong>。</p>
+  <table>
+    <thead><tr><th></th><th>bi-encoder（双塔）</th><th>cross-encoder（交叉）</th></tr></thead>
+    <tbody>
+      <tr><td>架构</td><td>query 和 doc <strong>分别</strong>过 transformer，各自编码成向量</td><td>query 和 doc <strong>拼一起</strong>过同一个 transformer</td></tr>
+      <tr><td>交互</td><td><strong>无</strong>——各自编码时看不到对方</td><td><strong>有</strong>——注意力让 query 每个词看 doc 每个词</td></tr>
+      <tr><td>输出</td><td>两个向量，算 cosine</td><td>直接输出一个相关性分数</td></tr>
+      <tr><td>预计算</td><td>doc 向量<strong>入库时算好</strong>，查询只编码 query</td><td><strong>不能预计算</strong>——query 来了才能拼一起算</td></tr>
+      <tr><td>速度</td><td>快（查询只算 1 个向量 + ANN 检索）</td><td>慢（每对 query-doc 跑一次模型）</td></tr>
+      <tr><td>精度</td><td>粗</td><td>精</td></tr>
+      <tr><td>用在哪</td><td>检索阶段（扫全库）</td><td>Rerank 阶段（只对 Top-50）</td></tr>
+    </tbody>
+  </table>
+  <h3>为什么"交互"这么关键</h3>
+  <p>query = <code>"ORA-01555 怎么处理"</code>，doc = <code>"快照太旧：回滚段不足导致无法构造一致性读"</code>。</p>
+  <ul>
+    <li><strong>bi-encoder</strong>：query 和 doc 各自编码成向量。字面无重叠（"ORA-01555" vs "快照/回滚段"），靠模型预训练时学到的语义联想——如果训练语料没怎么见过 ORA-01555，cosine 就不高，相关 doc 排不进 Top-5。</li>
+    <li><strong>cross-encoder</strong>：拼一起喂模型，注意力机制让 <code>ORA-01555</code> 直接"看到"<code>快照太旧</code>和<code>回滚段</code>，能学到词级关联——哪怕字面不重叠，也能打出高分。</li>
+  </ul>
+  <div class="callout info">
+    <span class="callout-title">类比</span>
+    <p>bi-encoder 像<strong>两人各自写简历给中介匹配</strong>——快（简历可存档），但中介只看简历，匹配粗。cross-encoder 像<strong>两人面对面聊，每句话都能即时反应对方</strong>——精，但慢（必须两人都在场才能聊）。</p>
+  </div>
+
+  <h2>Rerank 模型选型</h2>
+  <p>主流用 BAAI 的 bge-reranker 系列（中文友好、本地可部署，和 BGE-M3 一脉）：</p>
+  <table>
+    <thead><tr><th>模型</th><th>参数量</th><th>语言</th><th>适用</th></tr></thead>
+    <tbody>
+      <tr><td><strong>bge-reranker-v2-m3</strong></td><td>568M</td><td>多语含中文</td><td><strong>运维场景首选</strong>：轻量、中文好、本地可跑</td></tr>
+      <tr><td>bge-reranker-v2-gemma</td><td>2B</td><td>多语</td><td>更强但大，资源充足、精度要求高时</td></tr>
+      <tr><td>bge-reranker-large（v1）</td><td>560M</td><td>多语</td><td>老版，v2-m3 出来后少用</td></tr>
+      <tr><td>bge-reranker-base（v1）</td><td>278M</td><td>多语</td><td>更小，POC 试水</td></tr>
+      <tr><td>LLM-based rerank</td><td>—</td><td>—</td><td>用 LLM 打分，贵且精度不稳，<strong>不推荐生产</strong></td></tr>
+    </tbody>
+  </table>
+  <div class="callout key">
+    <span class="callout-title">选型结论</span>
+    <p>运维 RAG（中文 + 本地 + 轻量）→ <strong>bge-reranker-v2-m3</strong>。和 embedding 模型（BGE-M3）是<strong>两个独立模型</strong>，别混：embedding 入库时用（生成向量），rerank 查询时用（重排打分）。rerank 模型<strong>不入库</strong>，查询时实时跑。</p>
+  </div>
+
+  <h2>Top-K 怎么定：K1 和 K2</h2>
+  <p>两阶段有两个 K，分别管"粗捞多少"和"精排留多少"：</p>
+  <ul>
+    <li><strong>K1（粗召回数）</strong>：检索阶段召回多少。常见 50-100。<strong>recall@K1 是 rerank 的天花板</strong>——相关文档没进 Top-50，rerank 再精也救不回。看 recall@K 曲线拐点定。</li>
+    <li><strong>K2（精排输出）</strong>：rerank 后留多少喂 LLM。常见 5-10。看 LLM 上下文窗口和精度需求。</li>
+  </ul>
+  <div class="callout warn">
+    <span class="callout-title">K1 的陷阱</span>
+    <p>K1 太小 → recall 上限低（相关文档根本没捞进来，rerank 无米下锅）；K1 太大 → rerank 慢（要跑更多对）且噪声多。<strong>经验起步：K1=50, K2=5</strong>，按评测调。</p>
+  </div>
+
+  <h2>和混合检索的配合：三层递进</h2>
+  <p>把 L05-L06-L07 串起来，RAG 检索的完整 pipeline：</p>
+  <pre><code>query
+  │
+  ├─→ dense（BGE-M3 向量）──┐
+  │                          ├─→ RRF 融合 → Top-50
+  └─→ sparse（BM25/BGE-M3）─┘
+                                │
+                                ▼
+                          Rerank（cross-encoder）→ Top-5
+                                │
+                                ▼
+                            喂 LLM</code></pre>
+  <ul>
+    <li><strong>recall 靠混合</strong>（dense + sparse 广召回 50 个，别漏）</li>
+    <li><strong>precision 靠 rerank</strong>（cross-encoder 精排 5 个，别杂）</li>
+    <li>三层递进升级路径：<strong>纯 dense → 混合（提 recall）→ +rerank（提 precision）</strong>，评测驱动逐步加，不要一上来全开。</li>
+  </ul>
+
+  <h2>68% → 89% 的真相（面试高频）</h2>
+  <p>L05 提过"加 rerank 后 recall@5 从 68% 涨到 89%"。这数字怎么来的，必须搞懂——面试必问。</p>
+  <p>假设评测集上：</p>
+  <ul>
+    <li><strong>recall@50 = 95%</strong>：相关文档基本都在 Top-50 里（检索没漏，混合检索干得好）</li>
+    <li><strong>recall@5 = 68%</strong>：但 bi-encoder 排序粗，相关文档虽然进了 Top-50，却没排进 Top-5</li>
+    <li><strong>加 rerank 后 recall@5 = 89%</strong>：cross-encoder 重排，把原本在 Top-50 但没进 Top-5 的相关文档<strong>挤进了 Top-5</strong></li>
+  </ul>
+  <div class="callout key">
+    <span class="callout-title">本质（必背）</span>
+    <p>rerank 提的是<strong>"窄窗口 recall"</strong>——把宽窗口（Top-50）里的好东西排进窄窗口（Top-5）。这等价于提 <strong>precision@5</strong>（窄窗口里相关的比例高了）。<strong>rerank 不增加召回</strong>，只改善窄窗口的排序。它是"排序优化器"，不是"召回扩展器"。</p>
+  </div>
+  <div class="callout pit">
+    <span class="callout-title">关键前提</span>
+    <p>rerank 能提 recall@5 的<strong>前提是 recall@50 够</strong>。如果相关文档压根没进 Top-50（recall@50=60%），rerank 再强也救不回——得先治检索（混合/切分/embedding），别指望 rerank 捞回漏召的。<strong>诊断顺序：先看 recall@K1 够不够，不够治检索；够了再看 recall@5/precision@5，不够才上 rerank。</strong></p>
+  </div>
+
+  <h2>成本与延迟</h2>
+  <ul>
+    <li><strong>延迟</strong>：rerank 50 个 doc，bge-reranker-v2-m3 在 GPU 上约 30-80ms，CPU 上几百 ms。加一跳延迟，换 Top-5 精度。</li>
+    <li><strong>批处理</strong>：rerank 可批量（一次喂多个 query-doc pair 进模型），比逐个跑快得多。</li>
+    <li><strong>部署</strong>：多部署一个模型（rerank 模型独立于 embedding 模型），多一份显存/内存。</li>
+    <li><strong>何时上</strong>（呼应 L02 优化优先级）：rerank 是<strong>中等成本</strong>，排在切分/prompt（廉价）之后、换 embedding（最贵）之前。检索 recall 达标、precision 不够时才上。</li>
+  </ul>
+
+  <h2>运维实战：什么时候上 / 不上 rerank</h2>
+  <table>
+    <thead><tr><th>场景</th><th>动作</th></tr></thead>
+    <tbody>
+      <tr><td>recall@50 够，recall@5 / precision@5 不够</td><td>✅ 上 rerank，正解</td></tr>
+      <tr><td>recall@50 不够（相关文档没召回）</td><td>❌ 先治检索（混合/切分/embedding），rerank 救不回漏召</td></tr>
+      <tr><td>POC 早期，切分/检索还没调好</td><td>❌ 先治廉价环节（切分/prompt），rerank 放后面</td></tr>
+      <tr><td>延迟预算极紧（<50ms 端到端）</td><td>⚠️ rerank 加一跳，权衡或用更小模型</td></tr>
+      <tr><td>精度要求高、延迟可接受</td><td>✅ 上 rerank，甚至用 gemma 大模型</td></tr>
+    </tbody>
+  </table>
+  <div class="callout warn">
+    <span class="callout-title">踩坑提醒</span>
+    <p>① rerank 模型 ≠ embedding 模型，两个独立模型，别混；② rerank 不入库（查询时实时跑，不预计算）；③ rerank 不增加召回，别用它治"漏召"——那是混合检索的活。</p>
+  </div>
+
+  <h2>调参清单</h2>
+  <ul>
+    <li><strong>K1</strong>（粗召回）：50-100，看 recall@K1 曲线拐点</li>
+    <li><strong>K2</strong>（精排输出）：5-10，看 LLM 上下文窗口</li>
+    <li><strong>rerank 模型</strong>：中文场景 bge-reranker-v2-m3，资源紧用 base，精度高用 gemma</li>
+    <li><strong>batch size</strong>：rerank 批处理降延迟，按显存调</li>
+  </ul>
+
+  <div class="callout interview">
+    <span class="callout-title">面试视角 · 高频问题</span>
+    <p><strong>Q：rerank 提 recall 还是 precision？</strong><br>提"窄窗口 recall"（把 Top-50 的好东西排进 Top-5）= 提 precision@5。<strong>不增加召回</strong>，前提是 recall@K1 够。</p>
+    <p><strong>Q：为什么两阶段，不全用 cross-encoder？</strong><br>速度。cross 不能预计算，全库跑不动。bi 可预计算 + ANN 索引，毫秒扫全库。</p>
+    <p><strong>Q：cross-encoder 和 bi-encoder 区别？</strong><br>交互（cross 拼一起有注意力，bi 各自编码无交互）、预计算（bi 可 cross 不可）、精度（cross 高）、速度（bi 快）。</p>
+    <p><strong>Q：rerank 在 pipeline 哪环？</strong><br>retrieve 之后、generate 之前。</p>
+    <p><strong>Q：recall@K1 不够时怎么办？</strong><br>先治检索（混合/切分/embedding），rerank 救不回漏召。</p>
+  </div>
+
+  <h2>小测验</h2>
+
+  <div class="quiz" data-q="1">
+    <p class="quiz-q">Q1</p>
+    <p class="quiz-scene">混合检索 recall@50 = 60%，recall@5 = 55%。团队想加 rerank 把 recall@5 提到 85%。能成吗？</p>
+    <div class="quiz-options">
+      <label class="quiz-opt" data-correct="false"><span class="mark">✗</span><span>能，rerank 精排能提 recall</span></label>
+      <label class="quiz-opt" data-correct="true"><span class="mark">✓</span><span>不能，recall@50=60% 是天花板，相关文档没召回，rerank 无米下锅，先治检索</span></label>
+      <label class="quiz-opt" data-correct="false"><span class="mark">✗</span><span>能，换更大的 rerank 模型就行</span></label>
+      <label class="quiz-opt" data-correct="false"><span class="mark">✗</span><span>能，调大 K1 到 200</span></label>
+    </div>
+    <div class="quiz-feedback"><strong>✓ 不能。</strong>rerank 只能重排已召回的文档，不增加召回。recall@50=60% 意味着 40% 相关文档压根没进 Top-50，rerank 再精也排不进 Top-5。<strong>recall@K1 是 rerank 的天花板</strong>。先治检索（混合/切分/embedding）把 recall@50 提上去，再谈 rerank。</div>
+  </div>
+
+  <div class="quiz" data-q="2">
+    <p class="quiz-q">Q2</p>
+    <p class="quiz-scene">为什么 RAG 检索不全用 cross-encoder（一步到位精排）？</p>
+    <div class="quiz-options">
+      <label class="quiz-opt" data-correct="true"><span class="mark">✓</span><span>cross 不能预计算，全库每对 query-doc 都要跑模型，秒级起步没法用</span></label>
+      <label class="quiz-opt" data-correct="false"><span class="mark">✗</span><span>cross-encoder 精度不够</span></label>
+      <label class="quiz-opt" data-correct="false"><span class="mark">✗</span><span>cross-encoder 不支持中文</span></label>
+      <label class="quiz-opt" data-correct="false"><span class="mark">✗</span><span>cross-encoder 不能算相关性分数</span></label>
+    </div>
+    <div class="quiz-feedback"><strong>✓ 速度问题。</strong>cross-encoder 把 query 和 doc 拼一起过模型，doc 向量不能预计算——query 来了才能算。5 万篇全库跑 cross 要几秒甚至几十秒。所以用两阶段：bi 预计算 + ANN 粗扫全库到 Top-50，cross 只对 50 个精排。<strong>便宜模型干粗活，贵模型干精活。</strong></div>
+  </div>
+
+  <div class="quiz" data-q="3">
+    <p class="quiz-q">Q3</p>
+    <p class="quiz-scene">rerank 上线后 recall@5 从 68% → 89%。这"涨出来的 21%"来自哪？</p>
+    <div class="quiz-options">
+      <label class="quiz-opt" data-correct="false"><span class="mark">✗</span><span>rerank 多召回了一批之前漏掉的相关文档</span></label>
+      <label class="quiz-opt" data-correct="true"><span class="mark">✓</span><span>相关文档本来就在 Top-50 里，只是 bi-encoder 排序粗没排进 Top-5，cross-encoder 把它们挤进去了</span></label>
+      <label class="quiz-opt" data-correct="false"><span class="mark">✗</span><span>rerank 模型重新向量化了文档</span></label>
+      <label class="quiz-opt" data-correct="false"><span class="mark">✗</span><span>rerank 扩大了检索范围</span></label>
+    </div>
+    <div class="quiz-feedback"><strong>✓ 排序优化，不是召回扩展。</strong>前提是 recall@50 够（相关文档在 Top-50 里）。bi-encoder 粗排把相关的排到了 6-50 名，没进 Top-5；cross-encoder 精排把它们重排进了 Top-5，所以 recall@5 涨了。<strong>rerank 是排序优化器，不是召回扩展器</strong>——没多捞任何文档，只改善窄窗口的排序。</div>
+  </div>
+
+  <div class="quiz" data-q="4">
+    <p class="quiz-q">Q4</p>
+    <p class="quiz-scene">运维 RAG，中文文档，本地部署，embedding 用 BGE-M3。rerank 模型选型 + 它和 embedding 模型的关系？</p>
+    <div class="quiz-options">
+      <label class="quiz-opt" data-correct="false"><span class="mark">✗</span><span>用 BGE-M3 自带的 rerank 功能，一个模型两用</span></label>
+      <label class="quiz-opt" data-correct="true"><span class="mark">✓</span><span>选 bge-reranker-v2-m3；它和 BGE-M3 是两个独立模型——embedding 入库用，rerank 查询时用，互不混淆</span></label>
+      <label class="quiz-opt" data-correct="false"><span class="mark">✗</span><span>选 bge-reranker-v2-gemma，越大越好</span></label>
+      <label class="quiz-opt" data-correct="false"><span class="mark">✗</span><span>用 LLM 做 rerank，精度最高</span></label>
+    </div>
+    <div class="quiz-feedback"><strong>✓ bge-reranker-v2-m3，两个独立模型。</strong>中文+本地+轻量 → v2-m3。gemma 更强但 2B 太大，运维场景没必要。LLM rerank 贵且不稳，不推荐生产。<strong>关键认知</strong>：rerank 模型 ≠ embedding 模型。BGE-M3 是 embedding（入库时生成向量），bge-reranker 是 rerank（查询时重排打分），各司其职。rerank 不入库，查询时实时跑。</div>
+  </div>
+
+  <div class="win">
+    <h3>✅ 本节胜利</h3>
+    <p>你现在能讲清楚：<strong>两阶段检索为什么这么设计（速度+精度权衡）、cross 为什么比 bi 精（注意力交互）、rerank 提的是窄窗口 recall 不是召回、recall@K1 是 rerank 天花板</strong>。M3 检索侧三件套（embedding → 混合 → rerank）齐了，接下来 L08 把检索结果喂给 LLM 的上下文组装。</p>
+  </div>
+
+  <div class="ask-reminder">
+    <p>💡 学完这节，有没有想深入的点？比如：<strong>cross-encoder 的注意力机制细节</strong>、<strong>rerank 和 ColBERT 的关系</strong>、<strong>延迟怎么压</strong>、<strong>无标注数据怎么评 rerank 效果</strong>——提出来我展开讲，或沉淀到 Q&A。</p>
+  </div>
+
+  <div class="sources">
+    <h3>来源</h3>
+    <ul>
+      <li>BAAI bge-reranker 官方文档与模型卡（v2-m3 / v2-gemma）</li>
+      <li>L05/L06 课程：<a href="0005-embedding-selection.html">Embedding 选型</a> / <a href="0006-hybrid-retrieval.html">混合检索</a></li>
+      <li>L02 RAG 全流程：rerank 在九环节中的位置、POC 优化优先级</li>
+      <li>Q&A 0002（混合提 recall、rerank 补 precision）、Q&A 0008（三种分数本质）</li>
+    </ul>
+    <p class="cite">HNSW 参数与维度影响见 <code>learning/rag/reference/hnsw-cheatsheet.md</code>（本节配套速查表）。</p>
+  </div>
+
+  <nav class="lesson-nav" style="margin-top:40px;">
+    <a href="0006-hybrid-retrieval.html">← 上一节：混合检索</a>
+    <a href="0008-context-prompt.html">下一节：上下文组装 →</a>
+  </nav>
+
+</article>
+
+<script>
+  document.querySelectorAll('.quiz').forEach(quiz => {
+    const opts = quiz.querySelectorAll('.quiz-opt');
+    opts.forEach(opt => {
+      opt.addEventListener('click', () => {
+        if (quiz.dataset.answered) return;
+        quiz.dataset.answered = 'true';
+        opts.forEach(o => {
+          o.classList.add('reveal');
+          if (o.dataset.correct === 'true') o.classList.add('correct');
+          else if (o === opt) o.classList.add('wrong');
+        });
+        quiz.querySelector('.quiz-feedback').classList.add('show');
+      });
+    });
+  });
+</script>
+
+</body>
+</html>

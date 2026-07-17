@@ -1,7 +1,7 @@
 {
   "lastVersion": "4.0.8",
   "aestheticStyle": "default",
-  "positionStyle": "top",
+  "positionStyle": "following",
   "menuCommands": [
     {
       "id": "editing-toolbar:ai-tools",
@@ -424,7 +424,7 @@
   ],
   "enableMultipleConfig": false,
   "enableTopToolbar": true,
-  "enableFollowingToolbar": false,
+  "enableFollowingToolbar": true,
   "enableFixedToolbar": false,
   "appendMethod": "workspace",
   "shouldShowMenuOnSelect": false,
@@ -446,7 +446,7 @@
   "custom_fc3": "#245BDB",
   "custom_fc4": "#6425D0",
   "custom_fc5": "#646A73",
-  "isLoadOnMobile": false,
+  "isLoadOnMobile": true,
   "horizontalPosition": 0,
   "verticalPosition": 0,
   "formatBrushes": {},

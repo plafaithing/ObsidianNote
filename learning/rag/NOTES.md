@@ -9,6 +9,7 @@
 - **北极星**：运维知识库 RAG（DBA Copilot 的 RAG 部分）
 - **课程格式**：HTML（teach skill 默认，美观可交互测验）。
 - **HTML 渲染兼容（重要）**：Obsidian 能渲染 HTML，但**不加载外部 CSS**（`<link>` 失效），所以课程 HTML 必须**内联 `<style>`**（参考 subagents 课程做法）。`assets/style.css` 仅作样式源参考，HTML 不外链。新建课时把样式内联进 `<head>`。
+- **课程链接格式（重要，踩过坑）**：Q&A / 笔记里链接到 `lessons/*.html` 课程时，**必须用 markdown 标准链接** `[文本](lessons/文件名.html)`，**不要用 wikilink** `[[文件名]]`。原因：Obsidian 的 wikilink 只解析 `.md` 笔记，把 `.html` 当附件，点击会弹"创建新 md"而非跳到 html 课程——即使开 `detectAllFileExtensions` 或装 HTML Reader 插件也救不回来。markdown 标准链接直接指向文件路径，能正确打开 html（装了 HTML Reader 插件则在 Obsidian 内渲染）。待学课程（html 未创建）也用这格式，标"（待学）"。
 - **复习入口**：浏览器收藏 `index.html`，或 Obsidian 内直接点开 .html（内联 CSS 后 Obsidian 也能正常渲染）。每次上完一节，更新 index.html 对应卡片状态为可点 + 已完成。
 
 ## 教学节奏备注
@@ -29,15 +30,15 @@
 
 ### Module 3：检索侧 Retrieve（命中的关键）
 - [x] L05 Embedding 选型 — 中文/运维语料；维度/效率/效果
-- [ ] L06 向量检索 + BM25 混合检索 — RRF 融合；稀疏 vs 稠密
-- [ ] L07 Rerank 重排 — Cross-Encoder 精排；68%→89%；成本/延迟取舍
+- [x] L06 向量检索 + BM25 混合检索 — RRF 融合；稀疏 vs 稠密
+- [x] L07 Rerank 重排 — Cross-Encoder 精排；68%→89%；两阶段检索；成本/延迟取舍
 
 ### Module 4：生成与质量
-- [ ] L08 上下文组装与 Prompt 工程 — 结构化输出/引用/防幻觉；少样本/CoT
-- [ ] L09 RAG 评估 — 检索质量 + 生成质量；RAGAS
+- [x] L08 上下文组装与 Prompt 工程 — 上下文组装/结构化输出/引用/防幻觉四件套；少样本/CoT
+- [x] L09 RAG 评估 — 四指标（Context Recall/Precision + Faithfulness/Response Relevancy）/ RAGAS / 评估集 / 评估驱动闭环
 
 ### Module 5：实战与面试（售前收口）
-- [ ] L10 动手：Dify 搭运维知识库 RAG demo
+- [x] L10 动手：Dify 搭运维知识库 RAG demo — 概念→Dify 配置映射 / 5步搭demo / 混合检索+rerank / 召回测试 / 引用归属 / Dify边界
 - [ ] L11 企业落地痛点与 POC 设计 — 10 万文档踩坑；选型/数据治理/成本/评估
 - [ ] L12 面试聚焦：28 个高频 RAG 问题深度问答
 
@@ -47,8 +48,8 @@
 
 ### 随堂测验
 - [x] quiz-01：L01–L04 综合（M1 地基 + M2 数据侧）— 8 题，场景诊断 + 跨环节边界判断
-- [ ] quiz-02：M3 检索侧后加（L05–L07）
+- [x] quiz-02：M3 检索侧后加（L05–L07）— 8 题，rerank + 检索侧综合诊断
 
 ### 阶段考试（数量适当增加）
-- [ ] 期中：L06 后，覆盖 L01–L06（约 12-15 题）
+- [x] 期中：L06 后，覆盖 L01–L06（20 题，场景诊断 + 跨环节边界 + 选型 + 概念辨析，含计分）— `lessons/quiz-midterm.html`
 - [ ] 期末：L11 后，覆盖 L01–L11（约 20 题，模拟面试问答）

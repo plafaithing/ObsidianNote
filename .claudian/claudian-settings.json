@@ -24,7 +24,7 @@
   "locale": "zh-CN",
   "providerConfigs": {
     "claude": {
-      "safeMode": "acceptEdits",
+      "safeMode": "auto",
       "cliPath": "",
       "cliPathsByHost": {
         "device:42d0eea4-a5da-4b74-bf9c-87b06d10702e": "D:\\software\\nodejs\\node_global\\node_modules\\@anthropic-ai\\claude-code\\bin\\claude.exe"

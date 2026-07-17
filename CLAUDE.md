@@ -9,7 +9,8 @@
   - `MISSION.md` — 学习目标（why / 成功标准 / 约束 / 范围外）。教学核心，每节课都应能追回此文件
   - `NOTES.md` — 偏好与备忘
   - `RESOURCES.md` — 高质量资源清单（知识来源，不依赖参数化记忆）
-  - `lessons/` — 课程（HTML，teach skill 默认，美观可交互）
+  - `courses.md` — 课程总目录（列出全部课程、序号、标题、状态、文件路径；进度看板，与 `MISSION.md` 的课程序列互补）。**每个主题必备**
+  - `lessons/` — 课程（HTML，teach skill 默认，美观可交互）；文件名用 `NN-英文意译短词.html`（如 `01-overview-yinyang-wuxing.html`），**不用中文文件名**
   - `reference/` — 参考文档（速查、术语表等）
   - `learning-records/` — 学习记录（关键洞察/里程碑，编号 `0001-xxx.md`）。与 Q&A 分工：Q&A 存问答事实，learning-records 存里程碑洞察；两者重合时 learning-records 精简并链向 Q&A，不重复内容
   - `archive/` — 对话归档（md 格式）

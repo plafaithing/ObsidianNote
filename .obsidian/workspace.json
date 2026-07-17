@@ -8,57 +8,17 @@
         "type": "tabs",
         "children": [
           {
-            "id": "37832fc5b06fe467",
+            "id": "2d3bb3e7590a810d",
             "type": "leaf",
             "state": {
-              "type": "html-view",
+              "type": "markdown",
               "state": {
-                "file": "learning/rag/lessons/0005-embedding-selection.html"
+                "file": "CLAUDE.md",
+                "mode": "source",
+                "source": false
               },
-              "icon": "code-glyph",
-              "title": "0005-embedding-selection"
-            }
-          },
-          {
-            "id": "a88bf22d88470ce3",
-            "type": "leaf",
-            "state": {
-              "type": "webviewer",
-              "state": {
-                "url": "https://milvus.io/docs/zh/boolean.md",
-                "title": "标量过滤规则 | Milvus 文档",
-                "mode": "webview"
-              },
-              "icon": "globe-2",
-              "title": "标量过滤规则 | Milvus 文档"
-            }
-          },
-          {
-            "id": "fba31a87049910d4",
-            "type": "leaf",
-            "state": {
-              "type": "webviewer",
-              "state": {
-                "url": "https://zhuanlan.zhihu.com/p/2008281994912609286",
-                "title": "深入RAG架构：分块策略、混合检索与重排序的工程实现 - 知乎",
-                "mode": "webview"
-              },
-              "icon": "globe-2",
-              "title": "深入RAG架构：分块策略、混合检索与重排序的工程实现 - 知乎"
-            }
-          },
-          {
-            "id": "c9ae344c4a810295",
-            "type": "leaf",
-            "state": {
-              "type": "webviewer",
-              "state": {
-                "url": "https://zhuanlan.zhihu.com/p/2008281994912609286",
-                "title": "深入RAG架构：分块策略、混合检索与重排序的工程实现 - 知乎",
-                "mode": "webview"
-              },
-              "icon": "globe-2",
-              "title": "深入RAG架构：分块策略、混合检索与重排序的工程实现 - 知乎"
+              "icon": "lucide-file",
+              "title": "CLAUDE"
             }
           }
         ]
@@ -94,7 +54,7 @@
             "state": {
               "type": "search",
               "state": {
-                "query": "",
+                "query": "过滤",
                 "matchingCase": false,
                 "explainSearch": false,
                 "collapseAll": false,
@@ -128,13 +88,13 @@
             "state": {
               "type": "outline",
               "state": {
-                "file": "learning/rag/lessons/0005-embedding-selection.html",
+                "file": "CLAUDE.md",
                 "followCursor": true,
                 "showSearch": false,
                 "searchQuery": ""
               },
               "icon": "lucide-list",
-              "title": "0005-embedding-selection 的大纲"
+              "title": "CLAUDE 的大纲"
             }
           }
         ]
@@ -181,22 +141,12 @@
             }
           },
           {
-            "id": "e61ebe82777c98ae",
-            "type": "leaf",
-            "state": {
-              "type": "claudian-view",
-              "state": {},
-              "icon": "bot",
-              "title": "Claudian"
-            }
-          },
-          {
             "id": "9fddddb71902e55e",
             "type": "leaf",
             "state": {
               "type": "backlink",
               "state": {
-                "file": "learning/liuyao/lessons/01-全景地图与阴阳五行.html",
+                "file": "CLAUDE.md",
                 "collapseAll": false,
                 "extraContext": false,
                 "sortOrder": "alphabetical",
@@ -206,7 +156,7 @@
                 "unlinkedCollapsed": true
               },
               "icon": "links-coming-in",
-              "title": "01-全景地图与阴阳五行 的反向链接列表"
+              "title": "CLAUDE 的反向链接列表"
             }
           },
           {
@@ -215,20 +165,30 @@
             "state": {
               "type": "outgoing-link",
               "state": {
-                "file": "learning/liuyao/lessons/01-全景地图与阴阳五行.html",
+                "file": "learning/rag/Q&A.md",
                 "linksCollapsed": false,
                 "unlinkedCollapsed": true
               },
               "icon": "links-going-out",
-              "title": "01-全景地图与阴阳五行 的出链列表"
+              "title": "Q&A 的出链列表"
+            }
+          },
+          {
+            "id": "aa743e2087484974",
+            "type": "leaf",
+            "state": {
+              "type": "claudian-view",
+              "state": {},
+              "icon": "bot",
+              "title": "Claudian"
             }
           }
         ],
-        "currentTab": 2
+        "currentTab": 4
       }
     ],
     "direction": "horizontal",
-    "width": 476.5
+    "width": 754.5
   },
   "left-ribbon": {
     "hiddenItems": {
@@ -239,52 +199,52 @@
       "templates:插入模板": false,
       "command-palette:打开命令面板": false,
       "bases:新建数据库": false,
-      "terminal:Open terminal": false,
-      "realclaudian:Open Claudian": false,
-      "obsidian-excalidraw-plugin:新建绘图文件": false,
       "pdf-plus:PDF++: Toggle auto-copy": false,
       "pdf-plus:PDF++: Toggle auto-focus": false,
-      "pdf-plus:PDF++: Toggle auto-paste": false
+      "pdf-plus:PDF++: Toggle auto-paste": false,
+      "realclaudian:Open Claudian": false,
+      "obsidian-excalidraw-plugin:新建绘图文件": false,
+      "terminal:Open terminal": false
     }
   },
-  "active": "37832fc5b06fe467",
+  "active": "2d3bb3e7590a810d",
   "lastOpenFiles": [
-    "CCLearningRecord/cc安装指导.md",
-    "CCLearningRecord",
-    "ObsidianNote",
-    "learning/rag/lessons/0005-embedding-selection.html",
-    "learning/rag/Q&A.md.tmp.27484.1791fa2fdc6d",
-    "learning/rag/lessons/quiz-01-foundations.html",
-    "learning/rag/NOTES.md.tmp.27484.a6e301935f81",
-    "learning/rag/Q&A.md.tmp.27484.cae889901442",
-    "learning/rag/lessons/0004-metadata-extraction.html",
-    "learning/rag/index.html.tmp.27484.2b90e6c92b21",
-    "learning/rag/Q&A.md.tmp.27484.05359b080d49",
-    "learning/rag/Q&A.md",
-    "learning/shushu/Q&A.md",
-    "learning/shushu/reference/cheatsheet.md",
-    "learning/shushu/reference/glossary.md",
+    "learning/rag/lessons/0010-dify-demo.html",
+    "learning/rag/demo-docs/04-parameter-tuning.md",
+    "learning/rag/demo-docs/03-connection-pooling.md",
+    "learning/rag/demo-docs/02-session-lock-analysis.md",
+    "learning/rag/demo-docs/01-slow-sql-diagnosis.md",
+    "learning/rag/demo-docs",
+    "learning/rag/Q&A.md.tmp.68512.3d633fe90872",
+    "learning/shushu/shared/lessons/03-bagua-64hexagrams.html",
+    "learning/shushu/shared/lessons/02-ganzhi-chonghe.html",
+    "learning/shushu/shared/lessons/01-overview-yinyang-wuxing.html",
+    "learning/shushu/courses.md",
+    "learning/shushu/courses.md.tmp.70420.023f9c4db18a",
+    "learning/rag/lessons/0006-hybrid-retrieval.html",
     "learning/shushu/MISSION.md",
-    "learning/shushu/RESOURCES.md",
-    "learning/shushu/NOTES.md",
-    "learning/rag/RESOURCES.md",
-    "learning/liuyao/NOTES.md",
-    "learning/liuyao/RESOURCES.md",
-    "learning/liuyao/MISSION.md",
-    "learning/rag/NOTES.md",
-    "learning/rag/MISSION.md",
-    "CLAUDE.md",
-    "learning/INDEX.md",
+    "learning/rag/lessons/0002-rag-pipeline.html",
+    "learning/rag/lessons/0002-practice-troubleshooting.html",
+    "learning/rag/lessons/0005-embedding-selection.html",
     "learning/subagents/课程目录.md",
-    "简历/简历沟通.md",
-    "简历/张恺暄-简历.md",
-    "learning/subagents/MISSION.md",
-    "cc使用记录/cc安装指导.md",
-    "Excalidraw/Drawing 2026-06-20 01.26.28.excalidraw.md",
-    "learning/subagents/learning-records/0002-how-subagents-get-triggered.md",
-    "learning/subagents/Q&A.md",
-    "learning/subagents/NOTES.md",
-    "learning/subagents/reference/术语表.md",
+    "learning/rag/MISSION.md",
+    "learning/harness-engineering/课程目录.md",
+    "learning/INDEX.md",
+    "未命名.md",
+    "learning/harness-engineering/reference/harness各层速查.md",
+    "learning/harness-engineering/reference/术语表.md",
+    "CCLearningRecord/cc安装指导.md",
+    "tasks/todo.md",
+    "learning/harness-engineering/RESOURCES.md",
+    "learning/harness-engineering/NOTES.md",
+    "learning/harness-engineering/MISSION.md",
+    "learning/rag/NOTES.md",
+    "learning/rag/Q&A.md",
+    "learning/rag/reference/hnsw-cheatsheet.md",
+    "0004-metadata-extraction.md",
+    "0002-rag-pipeline.md",
+    "0005-embedding-selection.md",
+    "learning/shushu/Q&A.md",
     "Pasted image 20260523205829.png",
     "Pasted image 20260523205827.png",
     "Pasted image 20260523205348.png",

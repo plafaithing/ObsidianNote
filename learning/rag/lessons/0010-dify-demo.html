@@ -1,0 +1,329 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>L10 · Dify 搭运维知识库 RAG demo</title>
+  <style>
+  :root {
+    --bg: #fafaf7; --ink: #1a1a1a; --ink-soft: #444; --ink-mute: #777;
+    --rule: #e4e3dc; --accent: #2b5a8c; --accent-soft: #e8f0f7;
+    --warn: #b06a00; --warn-soft: #fdf3e3; --key: #2f7d52; --key-soft: #e8f5ee;
+    --pit: #a23a3a; --pit-soft: #fbecec; --code-bg: #f3f3ee;
+    --serif: 'Source Serif Pro','Noto Serif SC',Georgia,'Songti SC',serif;
+    --sans: -apple-system,BlinkMacSystemFont,'Segoe UI','PingFang SC','Microsoft YaHei',sans-serif;
+    --mono: 'SF Mono','JetBrains Mono',Consolas,monospace;
+  }
+  *{box-sizing:border-box} html{scroll-behavior:smooth}
+  body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--sans);font-size:16px;line-height:1.78;-webkit-font-smoothing:antiased}
+  .lesson{max-width:780px;margin:0 auto;padding:48px 28px 96px}
+  .lesson-header{margin-bottom:36px;border-bottom:1px solid var(--rule);padding-bottom:22px}
+  .course-label{font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--accent);font-weight:700}
+  .lesson-num{font-size:13px;color:var(--ink-mute);margin:8px 0 2px}
+  .lesson-title{font-family:var(--serif);font-size:34px;line-height:1.22;margin:2px 0 8px;font-weight:700}
+  .lesson-sub{color:var(--ink-soft);font-size:15px;margin:0}
+  .lesson-nav{display:flex;justify-content:space-between;margin:0 0 40px;font-size:14px}
+  .lesson-nav a{color:var(--accent);text-decoration:none} .lesson-nav a:hover{text-decoration:underline}
+  h2{font-family:var(--serif);font-size:24px;margin:44px 0 12px;font-weight:700}
+  h3{font-size:17px;margin:26px 0 8px;font-weight:600}
+  p{margin:12px 0} ul,ol{margin:12px 0;padding-left:24px} li{margin:6px 0}
+  strong{color:var(--ink);font-weight:600} em{color:var(--ink-soft)} a{color:var(--accent)}
+  code{font-family:var(--mono);background:var(--code-bg);padding:2px 6px;border-radius:4px;font-size:.9em}
+  pre{background:var(--code-bg);padding:16px;border-radius:8px;overflow-x:auto} pre code{background:none;padding:0}
+  .callout{margin:22px 0;padding:14px 18px;border-left:3px solid;border-radius:0 6px 6px 0}
+  .callout p:first-child{margin-top:0} .callout p:last-child{margin-bottom:0}
+  .callout-title{font-weight:700;font-size:13px;letter-spacing:.03em;margin-bottom:6px;display:block}
+  .callout.info{background:var(--accent-soft);border-color:var(--accent)}
+  .callout.warn{background:var(--warn-soft);border-color:var(--warn)}
+  .callout.key{background:var(--key-soft);border-color:var(--key)}
+  .callout.pit{background:var(--pit-soft);border-color:var(--pit)}
+  .callout.interview{background:var(--accent-soft);border-color:var(--accent)}
+  .callout.interview .callout-title::before{content:"🎤 "}
+  table{width:100%;border-collapse:collapse;margin:18px 0;font-size:14px}
+  th,td{text-align:left;padding:10px 12px;border-bottom:1px solid var(--rule);vertical-align:top}
+  th{font-weight:600;color:var(--ink-soft);background:var(--code-bg)}
+  .quiz{margin:30px 0;border:1px solid var(--rule);border-radius:12px;padding:24px 26px;background:#fff}
+  .quiz-q{font-weight:600;margin:0 0 6px;font-size:16px}
+  .quiz-scene{color:var(--ink-soft);font-size:14px;margin:0 0 16px;line-height:1.7}
+  .quiz-options{display:flex;flex-direction:column;gap:10px}
+  .quiz-opt{display:flex;align-items:center;gap:12px;padding:12px 16px;border:1.5px solid var(--rule);border-radius:10px;cursor:pointer;transition:all .15s;user-select:none}
+  .quiz-opt:hover{border-color:var(--accent);background:var(--accent-soft)}
+  .quiz-opt .mark{width:24px;height:24px;border-radius:50%;border:1.5px solid var(--ink-mute);display:inline-flex;align-items:center;justify-content:center;font-size:13px;color:transparent;flex-shrink:0}
+  .quiz-opt.reveal.correct{border-color:var(--key);background:var(--key-soft)}
+  .quiz-opt.reveal.correct .mark{background:var(--key);color:#fff;border-color:var(--key)}
+  .quiz-opt.reveal.wrong{border-color:var(--pit);background:var(--pit-soft)}
+  .quiz-opt.reveal.wrong .mark{background:var(--pit);color:#fff;border-color:var(--pit)}
+  .quiz-feedback{margin-top:16px;font-size:14px;line-height:1.72;display:none;padding:14px 16px;background:var(--code-bg);border-radius:8px}
+  .quiz-feedback.show{display:block}
+  .win{margin:36px 0 24px;padding:22px 24px;background:var(--key-soft);border-radius:12px;border:1px solid var(--key)}
+  .win h3{margin-top:0;color:var(--key)}
+  .sources{margin-top:32px;padding-top:22px;border-top:1px solid var(--rule);font-size:14px}
+  .sources h3{margin-top:0} .sources ul{padding-left:20px}
+  .ask-reminder{margin-top:20px;padding:16px 18px;background:var(--accent-soft);border-radius:10px;font-size:14px}
+  .cite{font-size:13px;color:var(--ink-mute)}
+  @media print{body{background:#fff}.lesson-nav,.quiz-opt{break-inside:avoid}a{color:var(--ink)}}
+  @media (max-width:600px){.lesson{padding:28px 18px 64px}.lesson-title{font-size:26px}}
+  </style>
+</head>
+<body>
+<article class="lesson">
+
+  <header class="lesson-header">
+    <div class="course-label">RAG 课程 · M5 实战与面试</div>
+    <div class="lesson-num">第 10 节 / 共 12 节</div>
+    <h1 class="lesson-title">动手：用 Dify 搭 DBA Copilot RAG demo</h1>
+    <p class="lesson-sub">把 L01–L09 的概念在 Dify 里端到端跑通——低代码出 demo，售前 POC 最快路径</p>
+  </header>
+
+  <nav class="lesson-nav">
+    <a href="0009-evaluation.html">← 上一节：RAG 评估</a>
+    <a href="0011-enterprise-poc.html">下一节：企业落地痛点与 POC 设计 →</a>
+  </nav>
+
+  <h2>动机：概念到 demo 的最后一公里</h2>
+  <p>L01–L09 学完了 RAG 全链路概念：切分、embedding、混合检索、rerank、上下文组装、prompt、评估。但概念不会自己变成能演示的东西。这节用 <strong>Dify</strong>（低代码 LLM 应用平台）把它们<strong>端到端跑通</strong>成一个 DBA Copilot RAG demo——不用写代码，拖拽配置就能把上面所有概念对上号。</p>
+  <div class="callout info">
+    <span class="callout-title">本节定位</span>
+    <p>M5 实战第一节。<strong>你已用过 Dify</strong>（NOTES 确认），所以不讲基础 UI，重点是把 L01–L09 每个概念<strong>对应到 Dify 哪个配置项</strong>，给一个可照做的最小 demo 流程 + 踩坑 + 售前边界。这是北极星 demo（运维知识库 RAG）的落地。</p>
+  </div>
+
+  <h2>一、准备清单</h2>
+  <ul>
+    <li><strong>Dify 环境</strong>：<code>cloud.dify.ai</code> 免费试（最快），或 Docker Compose 自部署（社区版，可控）</li>
+    <li><strong>生成用 LLM 的 API key</strong>：DeepSeek / 通义千问 / GPT-4o-mini 任一（DBA Copilot 生成答案用）</li>
+    <li><strong>Embedding 模型</strong>：Dify 自带若干；中文运维语料推荐接入 BGE-M3（via Xinference / Ollama / SiliconFlow）</li>
+    <li><strong>Rerank 模型 API</strong>：Cohere / Jina，或本地 <code>bge-reranker-v2-m3</code>（L07 推荐的运维首选）。<strong>注意：embedding 模型和 rerank 模型是两个独立模型，都要配</strong>（L07 易混点）</li>
+    <li><strong>运维文档</strong>：准备 4 个主题的手册片段（markdown/pdf）——慢SQL诊断、会话分析、SQL限流、参数调优，每个 3-5 页。这是知识库的料。</li>
+  </ul>
+  <div class="callout warn">
+    <span class="callout-title">售前 tip</span>
+    <p>POC 阶段用 <code>cloud.dify.ai</code> 最快，半小时出 demo。要给客户私有化部署演示时再用 Docker 自部署。文档料不用多，4 个主题 × 3-5 页 = 12-20 页够 demo 了，重点是覆盖典型问题。</p>
+  </div>
+
+  <h2>二、概念 → Dify 配置项映射表（核心）</h2>
+  <p>这张表是本节的灵魂——学完 9 节概念，现在每个概念在 Dify 哪里配，一目了然：</p>
+  <table>
+    <thead><tr><th>L01–L09 概念</th><th>Dify 配置项</th><th>在哪配</th></tr></thead>
+    <tbody>
+      <tr><td>L03 切分策略</td><td>分段模式（自动/自定义）+ 分段最大长度 + overlap</td><td>建知识库第 2 步</td></tr>
+      <tr><td>L04 元数据</td><td>元数据（metadata）</td><td>知识库元数据功能</td></tr>
+      <tr><td>L05 Embedding 选型</td><td>Embedding 模型</td><td>建知识库第 3 步 / 模型供应商</td></tr>
+      <tr><td>L06 混合检索</td><td>检索模式选「混合检索」</td><td>检索设置</td></tr>
+      <tr><td>L07 Rerank</td><td>Rerank 模型（混合检索<strong>必配</strong>）</td><td>检索设置</td></tr>
+      <tr><td>L07 K1→K2</td><td>TopK（设了 rerank 后仅在 rerank 步骤生效）</td><td>检索设置</td></tr>
+      <tr><td>L08 上下文组装 + 引用</td><td>应用「上下文」关联知识库 + 开「引用与归属」</td><td>应用编排</td></tr>
+      <tr><td>L08 系统提示 / 防幻觉</td><td>应用的系统提示词（prompt 编排）</td><td>应用编排</td></tr>
+      <tr><td>L08 低温度</td><td>模型温度（0.2）</td><td>应用编排</td></tr>
+      <tr><td>L09 召回测试</td><td>知识库「召回测试」</td><td>知识库页</td></tr>
+      <tr><td>L09 四指标评估</td><td>Dify 不内置 RAGAS，需外接</td><td>外接（见第六节）</td></tr>
+    </tbody>
+  </table>
+  <div class="callout key">
+    <span class="callout-title">为什么要这张表</span>
+    <p>售前面谈时，面试官/客户问"你这些概念在工程里到底怎么落地"——你能指着这张表说"切分在 Dify 建库第 2 步、混合检索和 rerank 在检索设置、引用在应用编排开"。概念能落到具体配置项，是"懂"和"背过"的分水岭。</p>
+  </div>
+
+  <h2>三、5 步搭 demo（可照做）</h2>
+
+  <h3>步骤 1：建知识库 + 上传文档</h3>
+  <p>知识库 → 创建知识库 → 上传 4 个主题的运维文档（md/pdf）。Dify 会用 ETL 解析（SaaS 版默认 Unstructured ETL，社区版可选 Dify ETL）。</p>
+
+  <h3>步骤 2：分段（L03 落地）</h3>
+  <ul>
+    <li><strong>分段模式</strong>：选「自定义」（运维文档有结构，自定义比自动好）</li>
+    <li><strong>分段最大长度</strong>：500-800 token（运维操作步骤要完整，别太碎）</li>
+    <li><strong>分段标识符</strong>：按 <code>\n\n</code> + 标题</li>
+    <li><strong>overlap</strong>：50-100（避免操作步骤被截断）</li>
+    <li><strong>预览分段</strong>：确认没把一个操作步骤切成两段——这是 L03 强调的"切分要保语义完整"</li>
+  </ul>
+
+  <h3>步骤 3：索引 + 检索设置（L05/L06/L07 落地）</h3>
+  <ul>
+    <li><strong>Embedding 模型</strong>：选中文好的（接入的 BGE-M3，或 Dify 自带中文模型）</li>
+    <li><strong>检索模式</strong>：选「混合检索」——运维场景既有语义问题（"数据库慢怎么排查"）又有精确问题（"pg_stat_statements 视图"），混合最合适（L06）</li>
+    <li><strong>Rerank 模型</strong>：选 <code>bge-reranker-v2-m3</code>（中文+本地，L07 推荐）。<strong>混合检索强制要配 rerank</strong>，因为要融合两路结果</li>
+    <li><strong>TopK</strong>：先设 5（rerank 后喂 LLM 的数量，对应 L07 的 K2）</li>
+    <li><strong>Score 阈值</strong>：先关（POC 先看全召回，再调）</li>
+    <li>等待分段嵌入完成</li>
+  </ul>
+  <div class="callout info">
+    <span class="callout-title">TopK 在 rerank 前后的含义（Dify 关键细节）</span>
+    <p>Dify 文档明确：<strong>设置了 Rerank 模型后，TopK 和 Score 阈值仅在 Rerank 步骤生效</strong>。即向量/全文两路各自召回一批（K1，Dify 内部定），rerank 后再按 TopK 取前 N（K2）喂 LLM。你配的 TopK 是 K2（最终喂 LLM 的数量），不是 K1。这正好对应 L07 的两阶段 K1→K2。</p>
+  </div>
+
+  <h3>步骤 4：召回测试（L09 落地，肉眼体检）</h3>
+  <ul>
+    <li>知识库 → 召回测试</li>
+    <li>输入典型问题：「ORA-01555 怎么处理」「慢SQL怎么定位」「pg_stat_statements 怎么查」</li>
+    <li>看召回的区块 + <strong>右上角分数</strong>：相关文档排前面没？分数合理没？</li>
+    <li>点区块可看引用详情和来源文档，判断分段合不合理</li>
+  </ul>
+  <div class="callout key">
+    <span class="callout-title">这就是 L09 说的"最朴素检索体检"</span>
+    <p>召回测试 = 肉眼看召回对不对，不用跑 RAGAS。POC 初筛够用：相关文档没召回 → 检索侧问题（embedding/切分）；召回了但排后面 → rerank 或 TopK 问题。对应 L09 的"评估驱动定位瓶颈"，只是用眼睛代替 RAGAS。</p>
+  </div>
+
+  <h3>步骤 5：建应用 + 关联知识库 + prompt（L08 落地）</h3>
+  <ol>
+    <li>创建「聊天助手」应用</li>
+    <li><strong>上下文</strong> → 关联刚建的知识库</li>
+    <li>开「<strong>引用与归属</strong>」开关（L08 引用机制落地）——LLM 回答下方会显示引用段落（原始分段文本、分段序号、匹配度），点引用可跳转知识库</li>
+    <li><strong>系统提示词</strong>（直接用 L08 的 DBA Copilot prompt）：
+      <pre><code>你是 GaussDB 资深 DBA，基于知识库回答故障诊断问题。
+规则：①只依据上下文 ②不足就说"无法诊断，建议联系..." ③标注引用 ④步骤具体可执行。</code></pre>
+    </li>
+    <li><strong>模型温度</strong>：0.2（L08 防幻觉四件套之低温度）</li>
+    <li>保存 → 测试几个问题，看引用对不对、有没有幻觉</li>
+  </ol>
+
+  <div class="callout pit">
+    <span class="callout-title">demo 跑通检查清单</span>
+    <p>✅ 问"ORA-01555 怎么处理"，答案引用了正确的故障手册段落<br>
+    ✅ 答案下方有引用归属（[1] 来源：xxx手册），点开能看到原文<br>
+    ✅ 问知识库没有的问题（如"Oracle 的 xxx"），AI 说"无法诊断"而不是编<br>
+    ✅ 召回测试里相关文档排在前面、分数合理<br>
+    四条都过，demo 就能演示了。</p>
+  </div>
+
+  <h2>四、踩坑提示</h2>
+  <ul>
+    <li><strong>混合检索不配 rerank 会出问题</strong>：Dify 混合检索强制要 rerank 模型（两路结果要融合）。没配 API key 会报错或效果差。</li>
+    <li><strong>TopK 默认 3 太小</strong>：运维多步诊断常需多文档，3 个不够。调到 5-8。但别太大（Lost in the Middle，L08）。</li>
+    <li><strong>分段太碎</strong>：操作步骤被切断，召回半句话没意义——加大分段长度 / overlap，或换分段标识符。预览时就要发现。</li>
+    <li><strong>embedding 和 rerank 是两个模型</strong>：都要配 API key，别只配一个（L07 易混点）。</li>
+    <li><strong>引用与归属要在应用里开</strong>：知识库建好 ≠ 应用能看到引用。要在应用编排的"添加功能"里开。</li>
+    <li><strong>中文文档别用英文 embedding</strong>：运维语料中文为主，用英文 embedding 召回会很差（L05）。BGE-M3 是安全选择。</li>
+  </ul>
+
+  <h2>五、从 demo 到 POC：评估闭环（L09 落地）</h2>
+  <p>Dify <strong>不内置 RAGAS</strong>，四指标自动评估要外接。POC 闭环这么搭：</p>
+  <ul>
+    <li><strong>检索侧（Dify 内）</strong>：用召回测试做肉眼评估，调 embedding/切分/TopK/rerank——POC 初筛够用</li>
+    <li><strong>生成侧（外接）</strong>：把应用跑的问答记录导出，用 RAGAS 代码（Q&A 0013）评 faithfulness / response relevancy</li>
+    <li><strong>监测（Dify 集成）</strong>：Dify 支持接 <strong>Langfuse / LangSmith / Opik</strong>（文档目录里有），线上问答自动记录，可追溯每条的检索上下文和生成答案——这正是 Q&A 0012 说的"记录中间产物"</li>
+  </ul>
+  <div class="callout info">
+    <span class="callout-title">售前闭环</span>
+    <p>召回测试调检索 → 改 prompt 调生成 → 导出问答评 RAGAS → 定位瓶颈（L09 闭环）→ 回 Dify 调对应配置。Dify 搞定 demo 和检索调试，RAGAS/Langfuse 搞定评估和监测，分工清楚。</p>
+  </div>
+
+  <h2>六、Dify 能做什么 / 不能做什么（售前边界）</h2>
+  <table>
+    <thead><tr><th></th><th>具体</th></tr></thead>
+    <tbody>
+      <tr><td><strong>能</strong></td><td>低代码搭 RAG demo、混合检索+rerank、引用展示、召回测试、多轮对话、元数据基础过滤、接 Langfuse 监测</td></tr>
+      <tr><td><strong>不能（要外接/迁框架）</strong></td><td>RAGAS 自动评估、复杂查询重写（多轮，L09 Q&A 0014）、元数据高级过滤、生产级定制逻辑、复杂工作流编排（要用 ChatFlow）</td></tr>
+    </tbody>
+  </table>
+  <div class="callout key">
+    <span class="callout-title">售前话术</span>
+    <p>Dify 是 <strong>POC 出 demo 的最快路径</strong>——半小时搭出能演示的 DBA Copilot RAG。但生产级定制（复杂查询重写、定制评估管线、深度监控）可能要迁 <strong>LangChain/LlamaIndex</strong> 写代码（你的路径 C：能读改 LangChain）。售前讲清这条边界，显得懂落地节奏：先 Dify 验证效果，再决定是否迁代码框架。</p>
+  </div>
+
+  <div class="callout interview">
+    <span class="callout-title">面试视角 · 高频问题</span>
+    <p><strong>Q：Dify 的混合检索和 rerank 怎么配？</strong><br>建知识库第 3 步检索设置里，检索模式选「混合检索」（向量+全文），它强制要配 Rerank 模型（两路结果要融合）。rerank 选 bge-reranker-v2-m3（中文运维）。设了 rerank 后，TopK 仅在 rerank 步骤生效（即 K2，最终喂 LLM 的数量）。</p>
+    <p><strong>Q：Dify 里 TopK 在 rerank 前后分别什么意思？</strong><br>不设 rerank 时，TopK 是向量/全文检索直接召回的数量（K1=K2）。设了 rerank 后，Dify 文档明确 TopK 和 Score 阈值仅在 rerank 步骤生效——即两路各自召回一批（K1，内部定），rerank 后按 TopK 取前 N（K2）喂 LLM。对应 L07 两阶段 K1→K2。</p>
+    <p><strong>Q：怎么在 Dify 里做检索评估？</strong><br>用知识库的「召回测试」：输入典型问题，看召回的区块和分数，相关文档排前面没、分数合理没。这是 L09 说的"最朴素检索体检"，肉眼代替 RAGAS，POC 初筛够用。四指标自动评估要外接 RAGAS（Dify 不内置）。</p>
+    <p><strong>Q：Dify 搭 RAG demo 的局限？</strong><br>RAGAS 自动评估、复杂查询重写（多轮）、生产级定制逻辑要外接或迁 LangChain/LlamaIndex。Dify 是 POC 出 demo 最快路径，生产定制可能要迁代码框架。售前要讲清这条边界。</p>
+    <p><strong>Q：运维 RAG 在 Dify 里分段怎么配？</strong><br>自定义分段（运维文档有结构），分段最大长度 500-800 token（操作步骤要完整），overlap 50-100（避免步骤截断），按 <code>\n\n</code>+标题分段。预览确认没把一个操作步骤切成两段——切分要保语义完整（L03）。</p>
+  </div>
+
+  <h2>小测验</h2>
+
+  <div class="quiz" data-q="1">
+    <p class="quiz-q">Q1</p>
+    <p class="quiz-scene">在 Dify 配混合检索时，为什么<strong>必须</strong>配 Rerank 模型？</p>
+    <div class="quiz-options">
+      <label class="quiz-opt" data-correct="false"><span class="mark">✗</span><span>不配 rerank 会报内存错误</span></label>
+      <label class="quiz-opt" data-correct="true"><span class="mark">✓</span><span>混合检索要融合向量+全文两路结果，需要 rerank 重新排序选最佳</span></label>
+      <label class="quiz-opt" data-correct="false"><span class="mark">✗</span><span>rerank 能提升召回率，不配会漏文档</span></label>
+      <label class="quiz-opt" data-correct="false"><span class="mark">✗</span><span>这只是推荐，不配也能跑</span></label>
+    </div>
+    <div class="quiz-feedback"><strong>✓ 混合检索要融合两路结果，必须 rerank。</strong> 向量和全文两路各自召回一批，结果要合并重新排序选最佳——这步就是 rerank 干的（L06 RRF / L07 rerank）。没 rerank 两路结果没法融合，Dify 强制要求配。<br><em>为什么不是"提升召回率"</em>：rerank 提的是排序精度（precision），不增加召回（L07）。混合检索本身已通过两路互补提了召回。<br><em>为什么不是"推荐"</em>：Dify 混合检索模式强制要 rerank 模型 API，不配会报错。</div>
+  </div>
+
+  <div class="quiz" data-q="2">
+    <p class="quiz-q">Q2</p>
+    <p class="quiz-scene">Dify 检索设置里 TopK 默认 3，运维 RAG 场景该怎么调？</p>
+    <div class="quiz-options">
+      <label class="quiz-opt" data-correct="false"><span class="mark">✗</span><span>保持 3，越小越精确</span></label>
+      <label class="quiz-opt" data-correct="true"><span class="mark">✓</span><span>调到 5-8，运维多步诊断常需多个文档片段</span></label>
+      <label class="quiz-opt" data-correct="false"><span class="mark">✗</span><span>调到 30-50，喂越多 LLM 越好</span></label>
+      <label class="quiz-opt" data-correct="false"><span class="mark">✗</span><span>设为 1，只要最相关的</span></label>
+    </div>
+    <div class="quiz-feedback"><strong>✓ 调到 5-8。</strong> 运维多步诊断（如慢SQL+锁+参数）常需多个文档片段拼起来答，3 个不够。但别太大——Lost in the Middle（L08），喂太多 LLM 反而忽略中间的，还挤占生成空间。5-8 是运维甜点。<br><em>为什么不是保持 3</em>：运维诊断常跨多个手册章节，3 个易漏关键文档。<br><em>为什么不是 30-50</em>：Lost in the Middle + token 预算，喂太多反降质量（L08）。<br><strong>注意</strong>：设了 rerank 后这个 TopK 是 K2（rerank 后喂 LLM 的数量）。</div>
+  </div>
+
+  <div class="quiz" data-q="3">
+    <p class="quiz-q">Q3</p>
+    <p class="quiz-scene">Dify 的「召回测试」功能能看到什么？对应 L09 评估流程的哪一步？</p>
+    <div class="quiz-options">
+      <label class="quiz-opt" data-correct="false"><span class="mark">✗</span><span>能看到 faithfulness 分数，对应生成侧评估</span></label>
+      <label class="quiz-opt" data-correct="true"><span class="mark">✓</span><span>能看到召回的文档区块和匹配分数，对应检索侧的"肉眼体检"</span></label>
+      <label class="quiz-opt" data-correct="false"><span class="mark">✗</span><span>能看到 LLM 最终答案的对错，对应端到端评估</span></label>
+      <label class="quiz-opt" data-correct="false"><span class="mark">✗</span><span>能看到四指标平均分，对应 RAGAS 评估</span></label>
+    </div>
+    <div class="quiz-feedback"><strong>✓ 看召回的区块和分数，对应检索侧肉眼体检。</strong> 召回测试输入问题后，显示召回的文档区块（按分数排序）+ 右上角匹配分数 + 来源。这是 L09 说的"最朴素检索体检"——肉眼看召回对不对，不用跑 RAGAS，POC 初筛够用。<br><em>为什么不是 faithfulness</em>：faithfulness 是生成侧指标（查 LLM 有没有编），召回测试只看检索不看生成。<br><em>为什么不是四指标</em>：Dify 不内置 RAGAS，召回测试只给原始召回结果，不给四指标分数。四指标要外接 RAGAS。</div>
+  </div>
+
+  <div class="quiz" data-q="4">
+    <p class="quiz-q">Q4</p>
+    <p class="quiz-scene">想让 DBA Copilot 的回答带引用来源（用户能点开看原文），在 Dify 哪里开？对应 L08 的什么？</p>
+    <div class="quiz-options">
+      <label class="quiz-opt" data-correct="false"><span class="mark">✗</span><span>建知识库时开，对应 L08 token 预算</span></label>
+      <label class="quiz-opt" data-correct="false"><span class="mark">✗</span><span>检索设置里开，对应 L08 上下文顺序</span></label>
+      <label class="quiz-opt" data-correct="true"><span class="mark">✓</span><span>应用编排的「添加功能」里开「引用与归属」，对应 L08 引用机制</span></label>
+      <label class="quiz-opt" data-correct="false"><span class="mark">✗</span><span>系统提示词里写"请带引用"，对应 L08 指令约束</span></label>
+    </div>
+    <div class="quiz-feedback"><strong>✓ 应用编排「添加功能」开「引用与归属」。</strong> 知识库建好 ≠ 应用能看到引用。要在应用编排的"上下文"关联知识库后，在"添加功能"里开「引用与归属」开关，LLM 回答下方才会显示引用段落（原始分段文本、序号、匹配度），点引用可跳转知识库。对应 L08 的引用机制（可追溯 + 防幻觉 + 评估用）。<br><em>为什么不是检索设置</em>：引用展示是应用层功能，不是检索层配置。<br><em>为什么不能只靠 prompt</em>：prompt 里写"请带引用"只能让 LLM 输出 [1] 文字，真正的"点引用跳原文"要靠引用与归属功能渲染——这是 L08 说的"引用机制落地"。</div>
+  </div>
+
+  <div class="win">
+    <h3>✅ 本节胜利</h3>
+    <p>你现在能：<strong>把 L01–L09 每个概念对应到 Dify 配置项（映射表）；照 5 步搭出 DBA Copilot RAG demo（建库→分段→检索设置→召回测试→建应用+prompt）；讲清 Dify 混合检索强制 rerank、TopK 是 K2、引用归属在哪开；知道 Dify 的边界（不内置 RAGAS，生产定制要迁 LangChain）</strong>。北极星 demo 落地了。下一节 L11 讲企业落地 10 万文档的真实痛点 + POC 设计，把"能搭 demo"升级到"能为企业客户设计方案"。</p>
+  </div>
+
+  <div class="ask-reminder">
+    <p>💡 学完这节，有没有想深入的点？比如：<strong>Dify 工作流（ChatFlow）做复杂 RAG</strong>、<strong>Dify 接 Langfuse 做线上监测</strong>、<strong>Dify API 二次开发</strong>、<strong>从 Dify 迁 LangChain 的时机和路径</strong>、<strong>本地部署 BGE-M3 + reranker 接入 Dify</strong>——提出来我展开讲，或沉淀到 Q&A。</p>
+  </div>
+
+  <div class="sources">
+    <h3>来源</h3>
+    <ul>
+      <li><a href="https://docs.dify.ai/zh-hans/guides/knowledge-base/create-knowledge-and-upload-documents">Dify 官方文档 · 创建知识库</a>（5 步流程、ETL、分段）</li>
+      <li><a href="https://docs.dify.ai/zh-hans/learn-more/extended-reading/retrieval-augment/hybrid-search">Dify 官方文档 · 混合检索</a>（三种检索模式、TopK/Score、Rerank 模型、设 rerank 后 TopK 仅在 rerank 步骤生效）</li>
+      <li><a href="https://docs.dify.ai/zh-hans/guides/knowledge-base/retrieval-test-and-citation">Dify 官方文档 · 召回测试/引用归属</a>（召回测试、引用与归属开关）</li>
+      <li>L03 切分策略 / L05 Embedding 选型 / L06 混合检索 / L07 Rerank / L08 上下文组装与 Prompt / L09 评估 — 概念到配置的映射依据</li>
+      <li>Q&A 0013（RAGAS 代码）/ 0014（多轮场景）— 评估外接依据</li>
+    </ul>
+    <p class="cite">M5 实战第一节。下一节 L11 企业落地痛点与 POC 设计，从"能搭 demo"到"能设计方案"。</p>
+  </div>
+
+  <nav class="lesson-nav" style="margin-top:40px;">
+    <a href="0009-evaluation.html">← 上一节：RAG 评估</a>
+    <a href="0011-enterprise-poc.html">下一节：企业落地痛点与 POC 设计 →</a>
+  </nav>
+
+</article>
+
+<script>
+  document.querySelectorAll('.quiz').forEach(quiz => {
+    const opts = quiz.querySelectorAll('.quiz-opt');
+    opts.forEach(opt => {
+      opt.addEventListener('click', () => {
+        if (quiz.dataset.answered) return;
+        quiz.dataset.answered = 'true';
+        opts.forEach(o => {
+          o.classList.add('reveal');
+          if (o.dataset.correct === 'true') o.classList.add('correct');
+          else if (o === opt) o.classList.add('wrong');
+        });
+        quiz.querySelector('.quiz-feedback').classList.add('show');
+      });
+    });
+  });
+</script>
+
+</body>
+</html>

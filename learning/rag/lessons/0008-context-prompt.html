@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>L08 · 上下文组装与 Prompt 工程</title>
+  <style>
+  :root {
+    --bg: #fafaf7; --ink: #1a1a1a; --ink-soft: #444; --ink-mute: #777;
+    --rule: #e4e3dc; --accent: #2b5a8c; --accent-soft: #e8f0f7;
+    --warn: #b06a00; --warn-soft: #fdf3e3; --key: #2f7d52; --key-soft: #e8f5ee;
+    --pit: #a23a3a; --pit-soft: #fbecec; --code-bg: #f3f3ee;
+    --serif: 'Source Serif Pro','Noto Serif SC',Georgia,'Songti SC',serif;
+    --sans: -apple-system,BlinkMacSystemFont,'Segoe UI','PingFang SC','Microsoft YaHei',sans-serif;
+    --mono: 'SF Mono','JetBrains Mono',Consolas,monospace;
+  }
+  *{box-sizing:border-box} html{scroll-behavior:smooth}
+  body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--sans);font-size:16px;line-height:1.78;-webkit-font-smoothing:antialiased}
+  .lesson{max-width:760px;margin:0 auto;padding:48px 28px 96px}
+  .lesson-header{margin-bottom:36px;border-bottom:1px solid var(--rule);padding-bottom:22px}
+  .course-label{font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--accent);font-weight:700}
+  .lesson-num{font-size:13px;color:var(--ink-mute);margin:8px 0 2px}
+  .lesson-title{font-family:var(--serif);font-size:34px;line-height:1.22;margin:2px 0 8px;font-weight:700}
+  .lesson-sub{color:var(--ink-soft);font-size:15px;margin:0}
+  .lesson-nav{display:flex;justify-content:space-between;margin:0 0 40px;font-size:14px}
+  .lesson-nav a{color:var(--accent);text-decoration:none} .lesson-nav a:hover{text-decoration:underline}
+  h2{font-family:var(--serif);font-size:24px;margin:44px 0 12px;font-weight:700}
+  h3{font-size:17px;margin:26px 0 8px;font-weight:600}
+  p{margin:12px 0} ul,ol{margin:12px 0;padding-left:24px} li{margin:6px 0}
+  strong{color:var(--ink);font-weight:600} em{color:var(--ink-soft)} a{color:var(--accent)}
+  code{font-family:var(--mono);background:var(--code-bg);padding:2px 6px;border-radius:4px;font-size:.9em}
+  pre{background:var(--code-bg);padding:16px;border-radius:8px;overflow-x:auto} pre code{background:none;padding:0}
+  .callout{margin:22px 0;padding:14px 18px;border-left:3px solid;border-radius:0 6px 6px 0}
+  .callout p:first-child{margin-top:0} .callout p:last-child{margin-bottom:0}
+  .callout-title{font-weight:700;font-size:13px;letter-spacing:.03em;margin-bottom:6px;display:block}
+  .callout.info{background:var(--accent-soft);border-color:var(--accent)}
+  .callout.warn{background:var(--warn-soft);border-color:var(--warn)}
+  .callout.key{background:var(--key-soft);border-color:var(--key)}
+  .callout.pit{background:var(--pit-soft);border-color:var(--pit)}
+  .callout.interview{background:var(--accent-soft);border-color:var(--accent)}
+  .callout.interview .callout-title::before{content:"🎤 "}
+  table{width:100%;border-collapse:collapse;margin:18px 0;font-size:14px}
+  th,td{text-align:left;padding:10px 12px;border-bottom:1px solid var(--rule);vertical-align:top}
+  th{font-weight:600;color:var(--ink-soft);background:var(--code-bg)}
+  .quiz{margin:30px 0;border:1px solid var(--rule);border-radius:12px;padding:24px 26px;background:#fff}
+  .quiz-q{font-weight:600;margin:0 0 6px;font-size:16px}
+  .quiz-scene{color:var(--ink-soft);font-size:14px;margin:0 0 16px;line-height:1.7}
+  .quiz-options{display:flex;flex-direction:column;gap:10px}
+  .quiz-opt{display:flex;align-items:center;gap:12px;padding:12px 16px;border:1.5px solid var(--rule);border-radius:10px;cursor:pointer;transition:all .15s;user-select:none}
+  .quiz-opt:hover{border-color:var(--accent);background:var(--accent-soft)}
+  .quiz-opt .mark{width:24px;height:24px;border-radius:50%;border:1.5px solid var(--ink-mute);display:inline-flex;align-items:center;justify-content:center;font-size:13px;color:transparent;flex-shrink:0}
+  .quiz-opt.reveal.correct{border-color:var(--key);background:var(--key-soft)}
+  .quiz-opt.reveal.correct .mark{background:var(--key);color:#fff;border-color:var(--key)}
+  .quiz-opt.reveal.wrong{border-color:var(--pit);background:var(--pit-soft)}
+  .quiz-opt.reveal.wrong .mark{background:var(--pit);color:#fff;border-color:var(--pit)}
+  .quiz-feedback{margin-top:16px;font-size:14px;line-height:1.72;display:none;padding:14px 16px;background:var(--code-bg);border-radius:8px}
+  .quiz-feedback.show{display:block}
+  .win{margin:36px 0 24px;padding:22px 24px;background:var(--key-soft);border-radius:12px;border:1px solid var(--key)}
+  .win h3{margin-top:0;color:var(--key)}
+  .sources{margin-top:32px;padding-top:22px;border-top:1px solid var(--rule);font-size:14px}
+  .sources h3{margin-top:0} .sources ul{padding-left:20px}
+  .ask-reminder{margin-top:20px;padding:16px 18px;background:var(--accent-soft);border-radius:10px;font-size:14px}
+  .cite{font-size:13px;color:var(--ink-mute)}
+  @media print{body{background:#fff}.lesson-nav,.quiz-opt{break-inside:avoid}a{color:var(--ink)}}
+  @media (max-width:600px){.lesson{padding:28px 18px 64px}.lesson-title{font-size:26px}}
+  </style>
+</head>
+<body>
+<article class="lesson">
+
+  <header class="lesson-header">
+    <div class="course-label">RAG 课程 · M4 生成与质量</div>
+    <div class="lesson-num">第 08 节 / 共 12 节</div>
+    <h1 class="lesson-title">上下文组装与 Prompt 工程：把检索结果喂好</h1>
+    <p class="lesson-sub">检索 Top-5 精排好了，怎么拼、怎么约束 LLM 不乱编——生成侧第一关</p>
+  </header>
+
+  <nav class="lesson-nav">
+    <a href="0007-rerank.html">← 上一节：Rerank 重排</a>
+    <a href="0009-evaluation.html">下一节：RAG 评估 →</a>
+  </nav>
+
+  <h2>动机：检索满分，生成翻车</h2>
+  <p>L05–L07 把检索侧三件套（embedding → 混合 → rerank）打磨好，Top-5 精排到位。但这 5 个 chunk <strong>怎么拼成上下文喂给 LLM</strong>、<strong>用什么 prompt 约束它</strong>，决定了检索成果能不能转化成好答案。喂不好——LLM 无视上下文乱编（幻觉）、漏看中间的 chunk（Lost in the Middle）、输出格式没法接下游系统——前面白干。</p>
+  <div class="callout info">
+    <span class="callout-title">本节定位</span>
+    <p>生成侧第一节。两件事：①<strong>上下文组装</strong>（Context Assembly）——把 Top-K chunk 拼好；②<strong>Prompt 工程</strong>——约束 LLM 用好上下文、不乱编。下一节 L09 讲怎么评估生成质量。</p>
+  </div>
+
+  <h2>一、上下文组装（Context Assembly）</h2>
+  <p>rerank 输出的 Top-K2（如 5 个 chunk）不能直接一锅炖喂 LLM，要处理四件事：</p>
+
+  <h3>1. 顺序：Lost in the Middle</h3>
+  <p>研究表明，LLM 对长上下文<strong>中间位置的信息利用差</strong>——呈 U 型曲线，头尾记得清、中间易忽略（Liu et al. 2023, <em>Lost in the Middle</em>）。</p>
+  <ul>
+    <li><strong>简单做法（POC 够用）</strong>：按 rerank 分数降序拼，最相关的放最前面。首位效应最强。</li>
+    <li><strong>精细做法</strong>：最相关的放<strong>开头</strong>，次相关的放<strong>结尾</strong>，把可能被忽略的中间位置留给分数低的。</li>
+  </ul>
+  <div class="callout warn">
+    <span class="callout-title">DBA 类比</span>
+    <p>像写 SQL 给领导看——最重要的结论放开头和结尾，中间塞细节。LLM 的"注意力"也一样，中间容易走神。</p>
+  </div>
+
+  <h3>2. 去重与截断</h3>
+  <ul>
+    <li><strong>去重</strong>：同一段内容可能被多个 chunk 召回（尤其 overlap 切分时），重复喂浪费 token 还可能让 LLM 过度加权。按内容哈希或语义去重。</li>
+    <li><strong>截断</strong>：context 超 LLM 窗口时，按相关性分数从低到高砍，保留头部。别从中间砍（破坏 chunk 完整性）。</li>
+  </ul>
+
+  <h3>3. 元数据附带 + 引用编号</h3>
+  <p>每个 chunk 拼进 context 时带上<strong>来源元数据</strong>（文档名/产品/版本/章节），并编上号 <code>[1][2]...</code>。两好处：①LLM 可以在答案里标注引用 <code>[1]</code>，可追溯防幻觉；②用户能点引用跳转原文（运维场景关键，DBA 要看原手册确认）。</p>
+  <pre><code>[1] 来源：GaussDB v8.0 故障处理手册 · 慢SQL章节
+    {chunk1 内容}
+
+[2] 来源：GaussDB v8.0 参数调优指南 · 第3章
+    {chunk2 内容}</code></pre>
+
+  <h3>4. Token 预算</h3>
+  <p>LLM 窗口有限（8k / 16k / 32k / 128k 不等），要算账：</p>
+  <pre><code>窗口 = system prompt + few-shot 示例 + context(Top-K) + 用户问题 + 生成预留</code></pre>
+  <p>运维 RAG 的 chunk 一般不大（500-1500 token），Top-5 约 2-5k token，多数窗口够用。但加 few-shot 和长 chunk 时要算清，别把生成空间挤没。</p>
+
+  <h2>二、Prompt 工程</h2>
+
+  <h3>1. 系统提示：角色 + 任务 + 防幻觉约束</h3>
+  <p>系统提示（system prompt）定调子，三要素：角色、任务约束、防幻觉指令。</p>
+  <pre><code>你是 GaussDB 资深 DBA，负责基于知识库回答故障诊断问题。
+
+【规则】
+1. 只依据下面提供的上下文回答，不要编造未在上下文中出现的内容。
+2. 若上下文不足以回答，直接说"根据现有知识库无法诊断，建议联系..."，不要猜。
+3. 答案中引用的信息要标注来源编号，如 [1]。
+4. 处理步骤要具体可执行，不要泛泛而谈。</code></pre>
+
+  <h3>2. 结构化输出：JSON 约束格式</h3>
+  <p>让 LLM 按固定 JSON 结构输出，方便下游系统（工单、UI）解析，也<strong>减少自由发挥导致的幻觉</strong>。运维故障诊断天然适合结构化：</p>
+  <pre><code>请按以下 JSON 格式输出（不要输出其他内容）：
+{
+  "诊断": "一句话说明问题",
+  "原因": "根因分析",
+  "处理步骤": ["1. ...", "2. ...", "3. ..."],
+  "风险提示": "操作风险或前置条件",
+  "引用": [1, 2]
+}</code></pre>
+  <div class="callout key">
+    <span class="callout-title">售前亮点</span>
+    <p>结构化输出是 RAG 对接企业系统的关键——答案能直接进工单系统的字段、能渲染成 UI 卡片。售前讲"RAG 不是聊天机器人，是能对接业务系统的知识引擎"，靠的就是这步。</p>
+  </div>
+
+  <h3>3. 引用机制</h3>
+  <p>要求 LLM 在答案里标注 <code>[1][2]</code> 引用编号，对应 context 里的 chunk 序号。好处：①可追溯（用户点 [1] 看原文）；②防幻觉（LLM 要引用就得真有依据）；③便于评估（L09 的 faithfulness 指标）。</p>
+
+  <h3>4. Few-shot vs CoT：何时用</h3>
+  <table>
+    <thead><tr><th>技巧</th><th>是什么</th><th>何时用</th><th>运维 RAG</th></tr></thead>
+    <tbody>
+      <tr><td><strong>Zero-shot</strong></td><td>只给指令 + 上下文，不给示例</td><td>任务简单、格式不复杂</td><td><strong>多数场景够用</strong>（系统提示 + 结构化输出）</td></tr>
+      <tr><td><strong>Few-shot</strong></td><td>给 1-3 个输入-输出示例</td><td>要引导固定格式/风格/边界行为</td><td>需要统一诊断格式时，给 1-2 个标准示例</td></tr>
+      <tr><td><strong>CoT</strong>（Chain of Thought）</td><td>让模型分步推理（"逐步分析"）</td><td>复杂推理（数学、根因链路）</td><td>复杂故障根因分析可用；简单问答<strong>不要用</strong>——多花 token 和延迟</td></tr>
+    </tbody>
+  </table>
+  <div class="callout warn">
+    <span class="callout-title">别滥用 CoT</span>
+    <p>运维 RAG 多数是"检索到 → 直接答"，零样本 + 结构化输出就够。CoT 用于需要多步推理的复杂诊断（如"现象 A + 现象 B → 推导根因"），简单事实问答用 CoT 只会增加延迟和 token 成本，还可能让模型绕弯子。</p>
+  </div>
+
+  <h2>三、防幻觉四件套</h2>
+  <p>RAG 本身是防幻觉的基础（给 LLM 依据），但 LLM 仍可能：①无视上下文编 ②过度推断 ③混淆多文档。四层防御：</p>
+  <table>
+    <thead><tr><th>层</th><th>手段</th><th>作用</th></tr></thead>
+    <tbody>
+      <tr><td>①指令约束</td><td>"只依据上下文""不知道就说不知道"</td><td>明确边界，禁止编造</td></tr>
+      <tr><td>②引用要求</td><td>答案标注 [1][2] 来源</td><td>强制有据可循，可追溯</td></tr>
+      <tr><td>③低温度</td><td><code>temperature=0~0.3</code></td><td>降随机性，减少"创造"</td></tr>
+      <tr><td>④结构化输出</td><td>JSON 固定格式 + 兜底字段</td><td>约束表达空间，减少自由发挥</td></tr>
+    </tbody>
+  </table>
+  <div class="callout pit">
+    <span class="callout-title">防幻觉不是靠单一手段</span>
+    <p>四层叠加才稳。只给指令"别乱编"不够——LLM 照编；只降温度不够——低温也会一本正经胡说。指令 + 引用 + 低温 + 结构化，组合拳。<strong>评估</strong>防幻觉效果靠 faithfulness 指标（生成内容是否忠于上下文），L09 讲。</p>
+  </div>
+
+  <h2>四、运维实战：DBA Copilot 完整 prompt</h2>
+  <p>把上面组装起来，一个运维 RAG 的完整 prompt 长这样：</p>
+  <pre><code>【系统提示】
+你是 GaussDB 资深 DBA，基于知识库回答故障诊断问题。
+规则：①只依据上下文 ②不足就说"无法诊断，建议联系..." ③标注引用[1] ④步骤具体可执行。
+
+【上下文】
+[1] 来源：GaussDB v8.0 故障处理手册 · 慢SQL章节
+    {rerank Top-1 chunk}
+[2] 来源：GaussDB v8.0 参数调优指南 · 第3章
+    {rerank Top-2 chunk}
+...（按分数降序，Top-5）
+
+【用户问题】
+{query}
+
+【输出要求】
+按 JSON 输出：{诊断, 原因, 处理步骤, 风险提示, 引用}</code></pre>
+  <p>这个 prompt 涵盖了本节所有要点：角色约束、防幻觉指令、上下文带引用编号、按分数降序、结构化 JSON 输出。售前做 demo 直接能用。</p>
+
+  <div class="callout interview">
+    <span class="callout-title">面试视角 · 高频问题</span>
+    <p><strong>Q：Lost in the Middle 是什么？怎么应对？</strong><br>LLM 对长上下文中间信息利用差（U 型曲线）。应对：相关内容放开头（或头尾），按 rerank 分数降序拼；或压缩上下文别太长。</p>
+    <p><strong>Q：RAG 怎么防幻觉？</strong><br>四件套：指令约束（只依据上下文）+ 引用要求 + 低温度 + 结构化输出。RAG 本身给依据是基础，这四层是加固。</p>
+    <p><strong>Q：few-shot 和 CoT 什么时候用？</strong><br>few-shot 用于引导固定格式/风格；CoT 用于复杂多步推理。简单 RAG 问答零样本就够，别滥用 CoT（增延迟和成本）。</p>
+    <p><strong>Q：上下文超 LLM 窗口怎么办？</strong><br>按相关性分数从低到高砍，保留头部；或回到上游缩小 K2；或换更大窗口模型。别从中间砍破坏 chunk。</p>
+    <p><strong>Q：为什么 RAG 答案要带引用？</strong><br>可追溯（用户看原文）、防幻觉（强制有据）、便于评估（faithfulness）、企业场景合规要求。</p>
+  </div>
+
+  <h2>小测验</h2>
+
+  <div class="quiz" data-q="1">
+    <p class="quiz-q">Q1</p>
+    <p class="quiz-scene">rerank 输出 Top-5 chunk，要拼成 context 喂 LLM。关于拼接顺序，以下<strong>最合理</strong>的是？</p>
+    <div class="quiz-options">
+      <label class="quiz-opt" data-correct="false"><span class="mark">✗</span><span>随机拼，LLM 能自己找重点</span></label>
+      <label class="quiz-opt" data-correct="true"><span class="mark">✓</span><span>按 rerank 分数降序拼，最相关的放最前（或最相关放开头、次相关放结尾）</span></label>
+      <label class="quiz-opt" data-correct="false"><span class="mark">✗</span><span>把最相关的放中间，让 LLM 仔细看</span></label>
+      <label class="quiz-opt" data-correct="false"><span class="mark">✗</span><span>按 chunk 在原文的页码顺序拼</span></label>
+    </div>
+    <div class="quiz-feedback"><strong>✓ 降序拼，最相关在前。</strong> Lost in the Middle 研究表明 LLM 对中间位置信息利用差（U 型曲线），头尾记得清。最相关的放开头（首位效应最强），简单做法就按 rerank 分数降序；精细做法把次相关放结尾。<br><em>为什么不能随机</em>：LLM 注意力不均，随机拼可能让最相关的掉到中间被忽略。<em>为什么不能放中间</em>：中间最易被忽略，反着来。<em>为什么按页码</em>：原文顺序 ≠ 相关性顺序，检索排序白做了。</div>
+  </div>
+
+  <div class="quiz" data-q="2">
+    <p class="quiz-q">Q2</p>
+    <p class="quiz-scene">以下哪项<strong>不是</strong> RAG 防幻觉的有效手段？</p>
+    <div class="quiz-options">
+      <label class="quiz-opt" data-correct="false"><span class="mark">✗</span><span>系统提示加"只依据上下文，不知道就说不知道"</span></label>
+      <label class="quiz-opt" data-correct="false"><span class="mark">✗</span><span>要求答案标注引用编号 [1][2]</span></label>
+      <label class="quiz-opt" data-correct="false"><span class="mark">✗</span><span>temperature 调到 0~0.3</span></label>
+      <label class="quiz-opt" data-correct="true"><span class="mark">✓</span><span>把 K2 从 5 调到 50，喂更多 chunk 给 LLM</span></label>
+    </div>
+    <div class="quiz-feedback"><strong>✓ 调大 K2 喂更多 chunk 不是防幻觉手段。</strong> 喂太多 chunk 反而加重 Lost in the Middle、挤占生成空间、增加噪声，可能<strong>加剧</strong>幻觉。防幻觉四件套是：①指令约束 ②引用要求 ③低温度 ④结构化输出。调大 K2 是检索侧动作，且要看窗口预算，不是防幻觉手段。</div>
+  </div>
+
+  <div class="quiz" data-q="3">
+    <p class="quiz-q">Q3</p>
+    <p class="quiz-scene">运维 RAG，用户问"ORA-01555 怎么处理"，检索 Top-5 已拿到相关 chunk。要 LLM 输出标准格式答案。该用？</p>
+    <div class="quiz-options">
+      <label class="quiz-opt" data-correct="false"><span class="mark">✗</span><span>CoT（让模型分步推理"逐步分析"）</span></label>
+      <label class="quiz-opt" data-correct="true"><span class="mark">✓</span><span>Zero-shot + 结构化 JSON 输出（诊断/原因/步骤/引用）</span></label>
+      <label class="quiz-opt" data-correct="false"><span class="mark">✗</span><span>不给任何指令，让 LLM 自由回答</span></label>
+      <label class="quiz-opt" data-correct="false"><span class="mark">✗</span><span>只给 few-shot 不给上下文</span></label>
+    </div>
+    <div class="quiz-feedback"><strong>✓ Zero-shot + 结构化 JSON。</strong> 这是简单事实问答 + 固定格式需求，零样本（系统提示 + 上下文 + JSON 要求）就够，结构化输出方便下游解析。<br><em>为什么不用 CoT</em>：CoT 用于复杂多步推理（如根因链路推导），简单"检索到→直接答"用 CoT 只增延迟和 token，还可能绕弯。<br><em>为什么不能自由回答</em>：没约束易幻觉、格式不统一没法接下游。<br><em>为什么不能只给 few-shot 不给上下文</em>：RAG 的核心就是给检索上下文，不给上下文等于退化成纯 LLM。</div>
+  </div>
+
+  <div class="quiz" data-q="4">
+    <p class="quiz-q">Q4</p>
+    <p class="quiz-scene">context 拼好后发现超了 LLM 窗口。以下处理<strong>最合理</strong>的是？</p>
+    <div class="quiz-options">
+      <label class="quiz-opt" data-correct="false"><span class="mark">✗</span><span>从中间截断 chunk，保留头尾</span></label>
+      <label class="quiz-opt" data-correct="true"><span class="mark">✓</span><span>按相关性分数从低到高砍掉 chunk，保留头部高分的</span></label>
+      <label class="quiz-opt" data-correct="false"><span class="mark">✗</span><span>全部喂进去，让 LLM 自己处理</span></label>
+      <label class="quiz-opt" data-correct="false"><span class="mark">✗</span><span>把每个 chunk 截成一半再拼</span></label>
+    </div>
+    <div class="quiz-feedback"><strong>✓ 按分数从低到高砍，保留头部。</strong> rerank 已按相关性排序，砍掉低分的 chunk 损失最小。保留头部高分 chunk。<br><em>为什么不能从中间截断 chunk</em>：破坏 chunk 语义完整性（L03 讲过切分要保完整），截断的 chunk 半句话没意义。<br><em>为什么不能全喂</em>：超窗口会报错或被强行截断（不可控）。<br><em>为什么不能每个 chunk 截一半</em>：同样破坏完整性，且损失关键信息。<br><strong>根本解</strong>：若常超窗口，回到上游缩小 K2，或换更大窗口模型。</div>
+  </div>
+
+  <div class="win">
+    <h3>✅ 本节胜利</h3>
+    <p>你现在能讲清楚：<strong>上下文组装四件事（顺序/去重截断/元数据引用/token 预算）、Lost in the Middle 应对、防幻觉四件套、few-shot/CoT 何时用、结构化输出的售前价值</strong>。检索侧（L05-L07）+ 生成侧入口（L08）串起来了。下一节 L09 讲怎么评估这套系统的检索和生成质量。</p>
+  </div>
+
+  <div class="ask-reminder">
+    <p>💡 学完这节，有没有想深入的点？比如：<strong>JSON 输出怎么保证 LLM 不破坏格式</strong>（JSON mode / 函数调用）、<strong>引用机制怎么落地</strong>、<strong>多轮对话的上下文管理</strong>、<strong>prompt 注入防御</strong>——提出来我展开讲，或沉淀到 Q&A。</p>
+  </div>
+
+  <div class="sources">
+    <h3>来源</h3>
+    <ul>
+      <li>Liu et al. 2023, <em>Lost in the Middle: How Language Models Use Long Contexts</em>（长上下文 U 型曲线）</li>
+      <li>Wei et al. 2022, <em>Chain-of-Thought Prompting</em>（CoT 原始论文）</li>
+      <li>OpenAI / Anthropic Prompt Engineering 指南（系统提示、few-shot、结构化输出最佳实践）</li>
+      <li>L02 RAG 全流程：上下文组装与生成在九环节中的位置</li>
+      <li>L07 Rerank：Top-K2 是本节的输入</li>
+    </ul>
+    <p class="cite">下一节 L09 评估（faithfulness / answer relevance / Recall@K）会回来检验本节的防幻觉和组装效果。</p>
+  </div>
+
+  <nav class="lesson-nav" style="margin-top:40px;">
+    <a href="0007-rerank.html">← 上一节：Rerank 重排</a>
+    <a href="0009-evaluation.html">下一节：RAG 评估 →</a>
+  </nav>
+
+</article>
+
+<script>
+  document.querySelectorAll('.quiz').forEach(quiz => {
+    const opts = quiz.querySelectorAll('.quiz-opt');
+    opts.forEach(opt => {
+      opt.addEventListener('click', () => {
+        if (quiz.dataset.answered) return;
+        quiz.dataset.answered = 'true';
+        opts.forEach(o => {
+          o.classList.add('reveal');
+          if (o.dataset.correct === 'true') o.classList.add('correct');
+          else if (o === opt) o.classList.add('wrong');
+        });
+        quiz.querySelector('.quiz-feedback').classList.add('show');
+      });
+    });
+  });
+</script>
+
+</body>
+</html>

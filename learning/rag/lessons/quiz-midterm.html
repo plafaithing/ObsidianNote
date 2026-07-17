@@ -1,0 +1,391 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>期中考试 · L01–L06</title>
+  <style>
+  :root {
+    --bg: #fafaf7; --ink: #1a1a1a; --ink-soft: #444; --ink-mute: #777;
+    --rule: #e4e3dc; --accent: #2b5a8c; --accent-soft: #e8f0f7;
+    --warn: #b06a00; --warn-soft: #fdf3e3; --key: #2f7d52; --key-soft: #e8f5ee;
+    --pit: #a23a3a; --pit-soft: #fbecec; --code-bg: #f3f3ee;
+    --serif: 'Source Serif Pro','Noto Serif SC',Georgia,'Songti SC',serif;
+    --sans: -apple-system,BlinkMacSystemFont,'Segoe UI','PingFang SC','Microsoft YaHei',sans-serif;
+    --mono: 'SF Mono','JetBrains Mono',Consolas,monospace;
+  }
+  *{box-sizing:border-box} html{scroll-behavior:smooth}
+  body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--sans);font-size:16px;line-height:1.78;-webkit-font-smoothing:antialiased}
+  .scorebar{position:sticky;top:0;z-index:10;background:var(--ink);color:#fff;padding:10px 20px;display:flex;justify-content:center;align-items:center;gap:20px;font-size:14px;box-shadow:0 2px 8px rgba(0,0,0,.1)}
+  .scorebar .score-inner{max-width:760px;width:100%;display:flex;justify-content:space-between;align-items:center;gap:16px}
+  .scorebar .score-label{font-weight:600}
+  .scorebar .score-val{font-family:var(--mono);color:var(--key-soft)}
+  .scorebar .score-bar{flex:1;height:5px;background:rgba(255,255,255,.2);border-radius:3px;overflow:hidden;max-width:200px}
+  .scorebar .score-fill{height:100%;background:var(--key);transition:width .3s;width:0}
+  .lesson{max-width:760px;margin:0 auto;padding:36px 28px 96px}
+  .lesson-header{margin-bottom:28px;border-bottom:1px solid var(--rule);padding-bottom:22px}
+  .course-label{font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--accent);font-weight:700}
+  .lesson-num{font-size:13px;color:var(--ink-mute);margin:8px 0 2px}
+  .lesson-title{font-family:var(--serif);font-size:32px;line-height:1.22;margin:2px 0 8px;font-weight:700}
+  .lesson-sub{color:var(--ink-soft);font-size:15px;margin:0}
+  .lesson-nav{display:flex;justify-content:space-between;margin:0 0 32px;font-size:14px}
+  .lesson-nav a{color:var(--accent);text-decoration:none} .lesson-nav a:hover{text-decoration:underline}
+  .intro{background:var(--accent-soft);border-radius:10px;padding:16px 20px;margin:0 0 28px;font-size:14px;line-height:1.7}
+  .intro p{margin:6px 0}
+  h2.module-h{font-family:var(--serif);font-size:18px;margin:32px 0 14px;color:var(--ink-soft);font-weight:600;border-bottom:1px solid var(--rule);padding-bottom:6px}
+  .quiz{margin:18px 0;border:1px solid var(--rule);border-radius:12px;padding:20px 24px;background:#fff}
+  .quiz-q{font-weight:600;margin:0 0 6px;font-size:15px}
+  .quiz-q .qnum{font-family:var(--mono);color:var(--accent);margin-right:8px}
+  .quiz-scene{color:var(--ink-soft);font-size:14px;margin:0 0 14px;line-height:1.7}
+  .quiz-options{display:flex;flex-direction:column;gap:9px}
+  .quiz-opt{display:flex;align-items:center;gap:12px;padding:11px 15px;border:1.5px solid var(--rule);border-radius:10px;cursor:pointer;transition:all .15s;user-select:none;font-size:14px}
+  .quiz-opt:hover{border-color:var(--accent);background:var(--accent-soft)}
+  .quiz-opt .mark{width:22px;height:22px;border-radius:50%;border:1.5px solid var(--ink-mute);display:inline-flex;align-items:center;justify-content:center;font-size:12px;color:transparent;flex-shrink:0}
+  .quiz-opt.reveal.correct{border-color:var(--key);background:var(--key-soft)}
+  .quiz-opt.reveal.correct .mark{background:var(--key);color:#fff;border-color:var(--key)}
+  .quiz-opt.reveal.wrong{border-color:var(--pit);background:var(--pit-soft)}
+  .quiz-opt.reveal.wrong .mark{background:var(--pit);color:#fff;border-color:var(--pit)}
+  .quiz-opt.locked{cursor:default}
+  .quiz-feedback{margin-top:14px;font-size:13.5px;line-height:1.72;display:none;padding:13px 15px;background:var(--code-bg);border-radius:8px}
+  .quiz-feedback.show{display:block}
+  .summary{margin-top:40px;padding:28px 28px;background:var(--key-soft);border-radius:14px;border:1px solid var(--key);display:none}
+  .summary.show{display:block}
+  .summary h3{margin-top:0;color:var(--key);font-size:22px;font-family:var(--serif)}
+  .summary .score-big{font-size:36px;font-weight:700;color:var(--key);font-family:var(--mono);margin:8px 0}
+  .summary .grade{font-size:16px;margin:8px 0}
+  .summary .advice{font-size:14px;color:var(--ink-soft);margin-top:12px;line-height:1.7}
+  .sources{margin-top:32px;padding-top:22px;border-top:1px solid var(--rule);font-size:14px;color:var(--ink-mute)}
+  .cite{font-size:13px;color:var(--ink-mute)}
+  @media (max-width:600px){.lesson{padding:24px 16px 64px}.lesson-title{font-size:24px}.scorebar{font-size:12px;gap:10px}.scorebar .score-bar{max-width:100px}}
+  </style>
+</head>
+<body>
+
+<div class="scorebar">
+  <div class="score-inner">
+    <span class="score-label">期中进度</span>
+    <div class="score-bar"><div class="score-fill" id="scoreFill"></div></div>
+    <span class="score-val" id="scoreText">0 / 20</span>
+  </div>
+</div>
+
+<article class="lesson">
+
+  <header class="lesson-header">
+    <div class="course-label">RAG 课程 · 期中考试</div>
+    <div class="lesson-num">覆盖 L01–L06 + Q&A 0006–0010</div>
+    <h1 class="lesson-title">期中诊断：地基 / 数据侧 / 检索侧</h1>
+    <p class="lesson-sub">20 题 · 场景诊断 + 跨环节边界 + 选型 + 概念辨析</p>
+  </header>
+
+  <div class="intro">
+    <p><strong>用法</strong>：每题点一个选项即时显示对错和解析，该题答完锁定。顶部实时计分。</p>
+    <p><strong>目的</strong>：诊断 L01–L06 哪些点还没牢固，错题回看对应课程/Q&A。别猜——场景诊断题想清楚根因再选。</p>
+    <p><strong>计分</strong>：20 题每题 5 分，满分 100。≥85 优秀，70–84 合格，&lt;70 建议回看错题对应章节。</p>
+  </div>
+
+  <nav class="lesson-nav">
+    <a href="0006-hybrid-retrieval.html">← L06 混合检索</a>
+    <a href="0007-rerank.html">L07 Rerank 重排 →</a>
+  </nav>
+
+  <h2 class="module-h">M1 地基（L01–L02）</h2>
+
+  <div class="quiz" data-q="1">
+    <p class="quiz-q"><span class="qnum">Q1</span>团队用 LLM 做数据库运维问答，担心三件事：①模型乱编故障处理步骤 ②新版本参数文档模型没学过 ③内部故障手册是私密的。这三个分别对应 RAG 解决的哪三个痛点？</p>
+    <div class="quiz-options">
+      <label class="quiz-opt" data-correct="true"><span class="mark">✓</span><span>①幻觉 ②时效 ③领域</span></label>
+      <label class="quiz-opt" data-correct="false"><span class="mark">✗</span><span>①时效 ②幻觉 ③领域</span></label>
+      <label class="quiz-opt" data-correct="false"><span class="mark">✗</span><span>①幻觉 ②领域 ③时效</span></label>
+      <label class="quiz-opt" data-correct="false"><span class="mark">✗</span><span>①领域 ②时效 ③幻觉</span></label>
+    </div>
+    <div class="quiz-feedback"><strong>✓ ①幻觉 ②时效 ③领域。</strong>幻觉=乱编（L01）；时效=训练截止后新文档没学过；领域=私域知识模型不掌握。RAG 用检索把外部知识喂给 LLM，三痛同治。<br><em>记忆</em>：幻觉（乱说）、时效（过时）、领域（不懂私域）。</div>
+  </div>
+
+  <div class="quiz" data-q="2">
+    <p class="quiz-q"><span class="qnum">Q2</span>客户需求：一份 50 页公开产品手册让 LLM 问答，手册不涉密、不会更新。最经济的方案？</p>
+    <div class="quiz-options">
+      <label class="quiz-opt" data-correct="false"><span class="mark">✗</span><span>RAG（向量库 + 检索 + rerank）</span></label>
+      <label class="quiz-opt" data-correct="false"><span class="mark">✗</span><span>微调一个领域模型</span></label>
+      <label class="quiz-opt" data-correct="true"><span class="mark">✓</span><span>长上下文（50 页直接塞进 prompt）</span></label>
+      <label class="quiz-opt" data-correct="false"><span class="mark">✗</span><span>RAG + 微调</span></label>
+    </div>
+    <div class="quiz-feedback"><strong>✓ 长上下文。</strong>手册公开（不涉密）、静态（不更新）、量小（50 页塞得下）——长上下文最经济，无需建向量库。<br><em>RAG 适合</em>：文档量大 / 动态更新 / 私域需检索过滤。L01 的 RAG vs 微调 vs 长上下文取舍：能塞就塞，塞不下或要更新才 RAG。</div>
+  </div>
+
+  <div class="quiz" data-q="3">
+    <p class="quiz-q"><span class="qnum">Q3</span>RAG 答非所问。排查发现：检索召回的 chunk 明明是相关的，但 LLM 生成的答案没用这些 chunk，而是自己编了一套。问题最可能在哪环？</p>
+    <div class="quiz-options">
+      <label class="quiz-opt" data-correct="false"><span class="mark">✗</span><span>切分策略（L03）</span></label>
+      <label class="quiz-opt" data-correct="false"><span class="mark">✗</span><span>检索 / Embedding（L05–L06）</span></label>
+      <label class="quiz-opt" data-correct="true"><span class="mark">✓</span><span>上下文组装 / Prompt 工程（L08）</span></label>
+      <label class="quiz-opt" data-correct="false"><span class="mark">✗</span><span>评估环节（L09）</span></label>
+    </div>
+    <div class="quiz-feedback"><strong>✓ 上下文组装 / Prompt。</strong>检索对了（chunk 相关）但生成没用 → 问题在把检索结果喂给 LLM 的环节：prompt 没要求"只依据上下文回答"、没给引用约束、上下文没组装好。这是 L02 木桶效应的环节定位——检索桶板OK，生成桶板漏。</div>
+  </div>
+
+  <div class="quiz" data-q="4">
+    <p class="quiz-q"><span class="qnum">Q4</span>POC 阶段 RAG 效果差，团队提议：①换更强 embedding ②调切分策略 ③加 rerank ④改 prompt。按"廉价优先、先治低成本环节"的正确排查顺序？</p>
+    <div class="quiz-options">
+      <label class="quiz-opt" data-correct="false"><span class="mark">✗</span><span>①换 embedding → ②切分 → ③rerank → ④prompt</span></label>
+      <label class="quiz-opt" data-correct="true"><span class="mark">✓</span><span>④prompt → ②切分 → ③rerank → ①换 embedding</span></label>
+      <label class="quiz-opt" data-correct="false"><span class="mark">✗</span><span>③rerank → ②切分 → ④prompt → ①换 embedding</span></label>
+      <label class="quiz-opt" data-correct="false"><span class="mark">✗</span><span>①换 embedding → ④prompt → ②切分 → ③rerank</span></label>
+    </div>
+    <div class="quiz-feedback"><strong>✓ ④prompt → ②切分 → ③rerank → ①换 embedding。</strong>L02 POC 优化优先级：先治廉价环节（改 prompt、调切分——零成本快试），rerank 中等成本，换 embedding 最贵（要重新向量化整个知识库，L02 说放最后）。<br><em>口诀</em>：先廉后贵，先治能快速验证的。</div>
+  </div>
+
+  <h2 class="module-h">M2 数据侧 Ingest（L03–L04）</h2>
+
+  <div class="quiz" data-q="5">
+    <p class="quiz-q"><span class="qnum">Q5</span>运维文档是 Markdown 写的，有清晰标题层级（## 故障诊断 / ### 慢SQL / #### 诊断步骤）。切分策略首选？</p>
+    <div class="quiz-options">
+      <label class="quiz-opt" data-correct="false"><span class="mark">✗</span><span>固定 500 字切分</span></label>
+      <label class="quiz-opt" data-correct="true"><span class="mark">✓</span><span>按 Markdown 标题结构化切分</span></label>
+      <label class="quiz-opt" data-correct="false"><span class="mark">✗</span><span>递归字符切分（无脑按分隔符）</span></label>
+      <label class="quiz-opt" data-correct="false"><span class="mark">✗</span><span>语义切分（用模型判断边界）</span></label>
+    </div>
+    <div class="quiz-feedback"><strong>✓ 按 Markdown 标题结构化切分。</strong>L03：文档有明确结构（标题层级）就用结构化切分，保留语义边界——一个 chunk 对应一个故障/步骤，完整且自包含。固定字数会劈断故障步骤；递归字符次之；语义切分成本高留给无结构文档。</div>
+  </div>
+
+  <div class="quiz" data-q="6">
+    <p class="quiz-q"><span class="qnum">Q6</span>切分时设 overlap（重叠，如 chunk 间重叠 50 字）的作用是？</p>
+    <div class="quiz-options">
+      <label class="quiz-opt" data-correct="false"><span class="mark">✗</span><span>提高检索速度</span></label>
+      <label class="quiz-opt" data-correct="true"><span class="mark">✓</span><span>防止关键句被切边界劈成两半，让它在某个 chunk 完整出现</span></label>
+      <label class="quiz-opt" data-correct="false"><span class="mark">✗</span><span>减少 chunk 总数省存储</span></label>
+      <label class="quiz-opt" data-correct="false"><span class="mark">✗</span><span>提升 embedding 维度</span></label>
+    </div>
+    <div class="quiz-feedback"><strong>✓ 防边界信息丢失。</strong>L03：overlap 让相邻 chunk 共享一段文本，关键句若被切分边界劈断，仍能在前/后某个 chunk 完整出现，检索时能命中完整语义。代价是存储略增。</div>
+  </div>
+
+  <div class="quiz" data-q="7">
+    <p class="quiz-q"><span class="qnum">Q7</span>运维 RAG，用户问"GaussDB v8.0 的慢SQL诊断"，却返回了 OpenGauss v3.0 的慢SQL文档。最直接的解法？</p>
+    <div class="quiz-options">
+      <label class="quiz-opt" data-correct="false"><span class="mark">✗</span><span>换更强的中文 embedding</span></label>
+      <label class="quiz-opt" data-correct="false"><span class="mark">✗</span><span>加 rerank 精排</span></label>
+      <label class="quiz-opt" data-correct="true"><span class="mark">✓</span><span>给 chunk 抽 product/version 元数据，检索时按元数据过滤</span></label>
+      <label class="quiz-opt" data-correct="false"><span class="mark">✗</span><span>调大 Top-K 多召回</span></label>
+    </div>
+    <div class="quiz-feedback"><strong>✓ 元数据过滤。</strong>L04：跨产品/版本混淆是元数据过滤的典型场景。embedding 分不清 GaussDB v8.0 和 OpenGauss v3.0（语义都是"慢SQL诊断"），但元数据能精确区分。从文档路径/标题抽 product、version，检索时 <code>WHERE product='gaussdb' AND version='v8.0'</code> 过滤。</div>
+  </div>
+
+  <div class="quiz" data-q="8">
+    <p class="quiz-q"><span class="qnum">Q8</span>元数据抽取"规则抽取优先于 LLM 抽取"，根本原因？</p>
+    <div class="quiz-options">
+      <label class="quiz-opt" data-correct="true"><span class="mark">✓</span><span>规则抽取零成本零误差（从路径/标题/frontmatter 读），LLM 抽取每 chunk 调一次模型，贵且可能出错</span></label>
+      <label class="quiz-opt" data-correct="false"><span class="mark">✗</span><span>LLM 不能抽元数据</span></label>
+      <label class="quiz-opt" data-correct="false"><span class="mark">✗</span><span>规则抽取效果一定比 LLM 好</span></label>
+      <label class="quiz-opt" data-correct="false"><span class="mark">✗</span><span>规则抽取能抽任意字段</span></label>
+    </div>
+    <div class="quiz-feedback"><strong>✓ 规则零成本零误差，LLM 贵且会错。</strong>L04：文档自带结构（路径/标题/frontmatter）用规则读，免费且准。LLM 兜底无结构文档（扫描件 OCR、纯文本），但要每 chunk 调一次模型（贵）且需 JSON mode + 白名单校验防出错。能用规则就别用 LLM。</div>
+  </div>
+
+  <h2 class="module-h">M3 检索侧（L05–L06 + Q&A 0006–0010）</h2>
+
+  <div class="quiz" data-q="9">
+    <p class="quiz-q"><span class="qnum">Q9</span>中文运维 RAG，文档含大量错误码（ORA-01555）、视图名（PGXC_STAT_ACTIVITY）、参数名。要求本地部署（数据不出域）。embedding 选型？</p>
+    <div class="quiz-options">
+      <label class="quiz-opt" data-correct="false"><span class="mark">✗</span><span>OpenAI text-embedding-3-large（3072 维，API）</span></label>
+      <label class="quiz-opt" data-correct="true"><span class="mark">✓</span><span>BGE-M3（1024 维，本地部署）</span></label>
+      <label class="quiz-opt" data-correct="false"><span class="mark">✗</span><span>bge-small-en-v1.5（英文，384 维）</span></label>
+      <label class="quiz-opt" data-correct="false"><span class="mark">✗</span><span>换 3072 维的任意更强模型</span></label>
+    </div>
+    <div class="quiz-feedback"><strong>✓ BGE-M3。</strong>L05：中文+本地部署+标识符多 → BGE-M3。中文优化、C-MTEB 高分、1024 维平衡、本地部署数据不出域。OpenAI 中文一般、贵、数据出境（运维敏感）。BGE-M3 还自带稀疏向量，一站式混合检索（L06）。bge-small-en 是英文模型，直接排除。</div>
+  </div>
+
+  <div class="quiz" data-q="10">
+    <p class="quiz-q"><span class="qnum">Q10</span>关于 embedding 维度，以下正确的是？</p>
+    <div class="quiz-options">
+      <label class="quiz-opt" data-correct="false"><span class="mark">✗</span><span>维度越高效果越好，运维场景也应选 3072</span></label>
+      <label class="quiz-opt" data-correct="true"><span class="mark">✓</span><span>维度由模型架构决定，选了 BGE-M3 就是 1024 维，不能给模型"调"维度</span></label>
+      <label class="quiz-opt" data-correct="false"><span class="mark">✗</span><span>768 维一定比 1024 维差，不能用</span></label>
+      <label class="quiz-opt" data-correct="false"><span class="mark">✗</span><span>维度是检索时可调的参数，像 SQL 的 LIMIT</span></label>
+    </div>
+    <div class="quiz-feedback"><strong>✓ 维度模型架构定死，不可调。</strong>Q&A 0004：维度是模型架构决定的输出维度，选了 BGE-M3 就是 1024、OpenAI large 就是 3072。能"选哪个维度的模型"，不能"给模型调维度"。1024 是运维甜点（Q&A 0007 验证）。768 POC 够用，不是"一定差"。</div>
+  </div>
+
+  <div class="quiz" data-q="11">
+    <p class="quiz-q"><span class="qnum">Q11</span>HNSW 向量检索 Recall@5 不够，调参顺序（从最便宜到最贵）？</p>
+    <div class="quiz-options">
+      <label class="quiz-opt" data-correct="false"><span class="mark">✗</span><span>先调 M（图连接数）→ 再 efConstruction → 再 ef</span></label>
+      <label class="quiz-opt" data-correct="true"><span class="mark">✓</span><span>先调 ef（检索时搜索广度）→ 再 efConstruction → 再 M</span></label>
+      <label class="quiz-opt" data-correct="false"><span class="mark">✗</span><span>先换 3072 维 embedding → 再调 HNSW</span></label>
+      <label class="quiz-opt" data-correct="false"><span class="mark">✗</span><span>先调 efConstruction → 再 M → 再 ef</span></label>
+    </div>
+    <div class="quiz-feedback"><strong>✓ ef → efConstruction → M。</strong>Q&A 0007：ef（ef_search）检索时动态调，无需重建索引，最便宜，先调；efConstruction 建索引时定，改要重建；M 影响最大也要重建，最后动。都不够才退回查维度/切分。<em>DB 类比</em>：先调查询扫描范围，再动索引结构。</div>
+  </div>
+
+  <div class="quiz" data-q="12">
+    <p class="quiz-q"><span class="qnum">Q12</span>embedding 维度从 1024 升到 3072，对 HNSW 检索的影响？</p>
+    <div class="quiz-options">
+      <label class="quiz-opt" data-correct="false"><span class="mark">✗</span><span>只影响存储大小，不影响 recall 和延迟</span></label>
+      <label class="quiz-opt" data-correct="false"><span class="mark">✗</span><span>检索更快（高维更精确）</span></label>
+      <label class="quiz-opt" data-correct="true"><span class="mark">✓</span><span>存储翻 3 倍 + 延迟线性涨 + 维度灾难可能逼大 M/ef，真实代价比"存储翻 3 倍"更大</span></label>
+      <label class="quiz-opt" data-correct="false"><span class="mark">✗</span><span>无任何影响，只是数字多了</span></label>
+    </div>
+    <div class="quiz-feedback"><strong>✓ 三重代价。</strong>Q&A 0007：①内存翻 3 倍（向量存储线性涨 + HNSW 图开销跟涨）；②延迟线性涨（距离计算 O(维度)）；③<strong>维度灾难</strong>——高维空间稀疏，同 M 下邻居覆盖不足，recall 掉，要保 recall 得加大 M/ef，成本雪上加霜。L05 只算"存储翻 3 倍"是低估。</div>
+  </div>
+
+  <div class="quiz" data-q="13">
+    <p class="quiz-q"><span class="qnum">Q13</span>关于 RRF 融合分数，正确的是？</p>
+    <div class="quiz-options">
+      <label class="quiz-opt" data-correct="false"><span class="mark">✗</span><span>RRF 分数 0.033 表示文档 3.3% 相关</span></label>
+      <label class="quiz-opt" data-correct="false"><span class="mark">✗</span><span>RRF 分数高 = 检索系统整体够好，可以上线了</span></label>
+      <label class="quiz-opt" data-correct="true"><span class="mark">✓</span><span>RRF 分数没有绝对物理意义，只用于排序；"够不够"看 Recall@K，不看分数</span></label>
+      <label class="quiz-opt" data-correct="false"><span class="mark">✗</span><span>RRF 分数和 cosine 一样是语义相似度</span></label>
+    </div>
+    <div class="quiz-feedback"><strong>✓ RRF 无绝对意义，只排序。</strong>Q&A 0008：RRF 是"多路排名共识分"（Σ 1/(k+rank)），0.033 不代表 33% 相关——纯粹排序依据。和 cosine（语义相似度）、BM25（字面统计分）本质不同。"够不够"看 Recall@5 ≥ 90%，不看 RRF 分高低。RRF 像 SQL 的 <code>ORDER BY</code> 排序键，Recall 像查全率。</div>
+  </div>
+
+  <div class="quiz" data-q="14">
+    <p class="quiz-q"><span class="qnum">Q14</span>纯 dense Recall@5 = 65%，分析测试集：含错误码/视图名的查询几乎全漏，语义类查询（"慢SQL诊断"）召回正常。第一步改进？</p>
+    <div class="quiz-options">
+      <label class="quiz-opt" data-correct="false"><span class="mark">✗</span><span>换 3072 维更强 embedding</span></label>
+      <label class="quiz-opt" data-correct="false"><span class="mark">✗</span><span>调大 dense 的 Top-K（K=5 → 50）</span></label>
+      <label class="quiz-opt" data-correct="false"><span class="mark">✗</span><span>直接上双系统（dense + ES BM25）</span></label>
+      <label class="quiz-opt" data-correct="true"><span class="mark">✓</span><span>开 BGE-M3 一站式（dense + sparse）混合，评测</span></label>
+    </div>
+    <div class="quiz-feedback"><strong>✓ 先开 BGE-M3 一站式。</strong>Q&A 0010 升级路径：纯 dense recall 不够 → <strong>先试省事的一站式</strong>（BGE-M3 dense+sparse，一个模型一个库），达标就停。不达标（BGE-M3 sparse 对罕见标识符弱）再升双系统。<br><em>不是换 3072</em>：维度不解决标识符匹配（embedding 本质边界）；<em>不是调大 K</em>：dense 对标识符排不到前面，K 再大捞不到；<em>不是直接双系统</em>：过度工程，先试轻量的。</div>
+  </div>
+
+  <div class="quiz" data-q="15">
+    <p class="quiz-q"><span class="qnum">Q15</span>为什么 RRF 不能直接把 dense 的 cosine 分数和 BM25 分数相加？</p>
+    <div class="quiz-options">
+      <label class="quiz-opt" data-correct="false"><span class="mark">✗</span><span>相加计算太慢，影响检索延迟</span></label>
+      <label class="quiz-opt" data-correct="true"><span class="mark">✓</span><span>量纲不同（cosine∈[-1,1]，BM25∈[0,+∞) 无上界），直接加 BM25 会碾压 dense，等于只用 BM25</span></label>
+      <label class="quiz-opt" data-correct="false"><span class="mark">✗</span><span>程序不支持浮点数相加</span></label>
+      <label class="quiz-opt" data-correct="false"><span class="mark">✗</span><span>RRF 比 加权求和更精确，所以不用相加</span></label>
+    </div>
+    <div class="quiz-feedback"><strong>✓ 量纲不同。</strong>L06：cosine 范围 [-1,1]，BM25 无上界（能到几十）。直接加：BM25 的 18.3 碾压 cosine 的 0.85 → dense 那路等于没用。所以要么归一化后加权（有调 α 的坑），要么用 RRF 只看排名（量纲无关，主流）。</div>
+  </div>
+
+  <div class="quiz" data-q="16">
+    <p class="quiz-q"><span class="qnum">Q16</span>团队用 GTE-Qwen2 做 dense 检索，发现标识符检索弱要上混合。可行的做法？</p>
+    <div class="quiz-options">
+      <label class="quiz-opt" data-correct="false"><span class="mark">✗</span><span>直接开 GTE-Qwen2 的一站式混合（dense + sparse）</span></label>
+      <label class="quiz-opt" data-correct="true"><span class="mark">✓</span><span>上双系统（GTE-Qwen2 dense + ES BM25），因为 GTE-Qwen2 没有自带 sparse</span></label>
+      <label class="quiz-opt" data-correct="false"><span class="mark">✗</span><span>加 rerank 就能解决标识符问题</span></label>
+      <label class="quiz-opt" data-correct="false"><span class="mark">✗</span><span>换成 OpenAI embedding 就有 sparse 了</span></label>
+    </div>
+    <div class="quiz-feedback"><strong>✓ 双系统。</strong>Q&A 0010：<strong>一站式是 BGE-M3 特有福利</strong>（一个模型同时出 dense+sparse）。GTE-Qwen2、bge-large-zh 等没有自带 sparse，要混合只能上双系统（dense 模型 + ES BM25）。<em>不是 rerank</em>：rerank 不增加召回，标识符漏召是 recall 问题不是排序问题。</div>
+  </div>
+
+  <h2 class="module-h">综合 · 跨环节边界与实战</h2>
+
+  <div class="quiz" data-q="17">
+    <p class="quiz-q"><span class="qnum">Q17</span>用户问"ORA-01555 怎么处理"，纯向量 RAG 返回了无关的"备份恢复"文档，真正相关的"快照太旧"文档没召回。最可能根因？</p>
+    <div class="quiz-options">
+      <label class="quiz-opt" data-correct="false"><span class="mark">✗</span><span>切分太碎，关键信息丢了</span></label>
+      <label class="quiz-opt" data-correct="true"><span class="mark">✓</span><span>纯向量对精确标识符弱——ORA-01555 是无语义字符串，embedding 理解不了它和"快照太旧"的关联</span></label>
+      <label class="quiz-opt" data-correct="false"><span class="mark">✗</span><span>rerank 没加</span></label>
+      <label class="quiz-opt" data-correct="false"><span class="mark">✗</span><span>prompt 工程没做好</span></label>
+    </div>
+    <div class="quiz-feedback"><strong>✓ 纯向量对精确标识符弱。</strong>Q&A 0001/L05：ORA-01555 是无语义标识符，embedding 模型理解不了它和"快照太旧"的语义关联（除非训练语料见过），所以相关文档排不到前面。这是混合检索的根本动机——BM25 字面匹配 ORA-01555 最稳。<em>不是切分/prompt</em>：根因在检索环节对标识符的盲区。</div>
+  </div>
+
+  <div class="quiz" data-q="18">
+    <p class="quiz-q"><span class="qnum">Q18</span>混合检索上线后，Recall@5 从 65% → 88%，但 Precision@5 从 80% → 70%。这说明？</p>
+    <div class="quiz-options">
+      <label class="quiz-opt" data-correct="false"><span class="mark">✗</span><span>混合检索失败，应立即回退纯 dense</span></label>
+      <label class="quiz-opt" data-correct="true"><span class="mark">✓</span><span>正常——混合提 recall 不提 precision（多捞了噪声），precision 靠 rerank 补</span></label>
+      <label class="quiz-opt" data-correct="false"><span class="mark">✗</span><span>RRF 的 k 调错了，应改 k 值</span></label>
+      <label class="quiz-opt" data-correct="false"><span class="mark">✗</span><span>embedding 模型选错了</span></label>
+    </div>
+    <div class="quiz-feedback"><strong>✓ 正常，靠 rerank 补。</strong>Q&A 0002：混合检索取两路并集，recall↑（漏的少了），但可能混入更多噪声 precision↓。这正是 L07 rerank 的逻辑——<strong>recall 靠混合广召回，precision 靠 rerank 精排</strong>。口诀"漏了多捞（混合），杂了精排（rerank）"。recall 88% 接近达标，下一步上 rerank 提 precision。</div>
+  </div>
+
+  <div class="quiz" data-q="19">
+    <p class="quiz-q"><span class="qnum">Q19</span>双系统（dense + ES BM25）架构里，有几个 embedding 模型？BM25 那路跑模型吗？</p>
+    <div class="quiz-options">
+      <label class="quiz-opt" data-correct="false"><span class="mark">✗</span><span>2 个 embedding 模型，dense 和 BM25 各跑一个</span></label>
+      <label class="quiz-opt" data-correct="true"><span class="mark">✓</span><span>1 个 embedding 模型（dense 那路）；BM25 是 ES 的统计算法，不跑任何模型</span></label>
+      <label class="quiz-opt" data-correct="false"><span class="mark">✗</span><span>0 个模型，两路都是统计算法</span></label>
+      <label class="quiz-opt" data-correct="false"><span class="mark">✗</span><span>2 个模型，BM25 那路跑 BGE-M3 的 sparse</span></label>
+    </div>
+    <div class="quiz-feedback"><strong>✓ 1 个 embedding 模型，BM25 不跑模型。</strong>Q&A 0009：双系统的"双"指两类检索引擎（向量库 + ES），<strong>不是两个 embedding 模型</strong>。dense 那路用一个 embedding 模型向量化；BM25 是 ES 内置的 TF-IDF 改进统计算法，直接对原文建倒排索引，<strong>不跑任何模型</strong>。常见误解：以为双系统要跑两个模型。</div>
+  </div>
+
+  <div class="quiz" data-q="20">
+    <p class="quiz-q"><span class="qnum">Q20</span>运维 RAG POC：5 万篇中文文档，大量错误码/视图名/参数名，要求本地部署。从选型到检索的最佳路径？</p>
+    <div class="quiz-options">
+      <label class="quiz-opt" data-correct="false"><span class="mark">✗</span><span>OpenAI embedding + 纯 dense + rerank</span></label>
+      <label class="quiz-opt" data-correct="true"><span class="mark">✓</span><span>BGE-M3 纯 dense 基线 → 一站式（dense+sparse）评测 → 不达标再双系统（BGE-M3 dense + ES BM25）+ rerank</span></label>
+      <label class="quiz-opt" data-correct="false"><span class="mark">✗</span><span>直接上双系统 + 3072 维 embedding</span></label>
+      <label class="quiz-opt" data-correct="false"><span class="mark">✗</span><span>BGE-M3 一站式 + 3072 维 + 双系统</span></label>
+    </div>
+    <div class="quiz-feedback"><strong>✓ 递进升级，评测驱动。</strong>综合 L05/L06/Q&A 0010：①本地+中文+标识符多 → BGE-M3（L05）；②先纯 dense 跑基线 Recall@5；③recall 不够 → 开一站式（省事）评测；④一站式不够（sparse 对罕见标识符弱）→ 升双系统（dense + ES 真 BM25）；⑤precision 不够 → 加 rerank（L07）。<br><em>不是 OpenAI</em>：数据出境+贵+中文一般；<em>不是直接双系统/3072</em>：过度工程，先试轻量的；<em>不是 3072</em>：BGE-M3 就是 1024，维度不可调，且 3072 代价大（Q&A 0007）。</div>
+  </div>
+
+  <div class="summary" id="summary">
+    <h3>期中诊断完成</h3>
+    <div class="score-big" id="finalScore">— / 100</div>
+    <div class="grade" id="finalGrade"></div>
+    <div class="advice" id="finalAdvice"></div>
+  </div>
+
+  <div class="sources">
+    <p>错题回看：<strong>L01–L02</strong> → <a href="0001-what-is-rag.html">L01</a> / <a href="0002-rag-pipeline.html">L02</a>；<strong>L03–L04</strong> → <a href="0003-chunking-strategies.html">L03</a> / <a href="0004-metadata-extraction.html">L04</a>；<strong>L05–L06</strong> → <a href="0005-embedding-selection.html">L05</a> / <a href="0006-hybrid-retrieval.html">L06</a>。Q&A 0006–0010 在 <code>learning/rag/Q&A.md</code>。</p>
+    <p class="cite">期中覆盖 L01–L06。M3 检索侧还差 L07 Rerank，学完后做 quiz-02。</p>
+  </div>
+
+  <nav class="lesson-nav" style="margin-top:40px;">
+    <a href="0006-hybrid-retrieval.html">← L06 混合检索</a>
+    <a href="0007-rerank.html">L07 Rerank 重排 →</a>
+  </nav>
+
+</article>
+
+<script>
+  const quizzes = document.querySelectorAll('.quiz');
+  const total = quizzes.length;
+  let answered = 0, correct = 0;
+  const scoreText = document.getElementById('scoreText');
+  const scoreFill = document.getElementById('scoreFill');
+
+  function updateScore() {
+    scoreText.textContent = answered + ' / ' + total;
+    scoreFill.style.width = (answered / total * 100) + '%';
+    if (answered === total) {
+      const score = Math.round(correct / total * 100);
+      document.getElementById('finalScore').textContent = score + ' / 100';
+      let grade, advice;
+      if (score >= 85) {
+        grade = '🏆 优秀（' + score + ' 分）';
+        advice = 'L01–L06 掌握扎实，可以进 L07 Rerank，然后做 quiz-02 收口 M3 检索侧。';
+      } else if (score >= 70) {
+        grade = '✅ 合格（' + score + ' 分）';
+        advice = '整体 OK，但有薄弱点。回看错题对应课程/Q&A，重点补 Q11–Q16（检索侧 + Q&A 深挖）。';
+      } else {
+        grade = '⚠️ 需巩固（' + score + ' 分）';
+        advice = '基础还不牢。建议按模块回看：错题集中的模块重读对应课程 + Q&A，再来一次。别急着进 L07。';
+      }
+      document.getElementById('finalGrade').textContent = grade;
+      document.getElementById('finalAdvice').textContent = advice;
+      document.getElementById('summary').classList.add('show');
+      document.getElementById('summary').scrollIntoView({behavior:'smooth', block:'center'});
+    }
+  }
+
+  quizzes.forEach(quiz => {
+    const opts = quiz.querySelectorAll('.quiz-opt');
+    opts.forEach(opt => {
+      opt.addEventListener('click', () => {
+        if (quiz.dataset.answered === 'true') return;
+        quiz.dataset.answered = 'true';
+        answered++;
+        opts.forEach(o => {
+          o.classList.add('reveal', 'locked');
+          if (o.dataset.correct === 'true') o.classList.add('correct');
+          else if (o === opt) o.classList.add('wrong');
+        });
+        if (opt.dataset.correct === 'true') correct++;
+        quiz.querySelector('.quiz-feedback').classList.add('show');
+        updateScore();
+      });
+    });
+  });
+</script>
+
+</body>
+</html>

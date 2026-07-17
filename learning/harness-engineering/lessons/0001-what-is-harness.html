@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>L01 · harness 是什么 & agent 解剖图</title>
+  <style>
+  /* Harness Engineering 课程样式 — Tufte 风格，内联以保证 Obsidian 渲染兼容 */
+  :root {
+    --bg: #fafaf7; --ink: #1a1a1a; --ink-soft: #444; --ink-mute: #777;
+    --rule: #e4e3dc; --accent: #2b5a8c; --accent-soft: #e8f0f7;
+    --warn: #b06a00; --warn-soft: #fdf3e3; --key: #2f7d52; --key-soft: #e8f5ee;
+    --pit: #a23a3a; --pit-soft: #fbecec; --code-bg: #f3f3ee;
+    --serif: 'Source Serif Pro','Noto Serif SC',Georgia,'Songti SC',serif;
+    --sans: -apple-system,BlinkMacSystemFont,'Segoe UI','PingFang SC','Microsoft YaHei',sans-serif;
+    --mono: 'SF Mono','JetBrains Mono',Consolas,monospace;
+  }
+  *{box-sizing:border-box} html{scroll-behavior:smooth}
+  body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--sans);font-size:16px;line-height:1.78;-webkit-font-smoothing:antialiased}
+  .lesson{max-width:760px;margin:0 auto;padding:48px 28px 96px}
+  .lesson-header{margin-bottom:36px;border-bottom:1px solid var(--rule);padding-bottom:22px}
+  .course-label{font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--accent);font-weight:700}
+  .lesson-num{font-size:13px;color:var(--ink-mute);margin:8px 0 2px}
+  .lesson-title{font-family:var(--serif);font-size:34px;line-height:1.22;margin:2px 0 8px;font-weight:700}
+  .lesson-sub{color:var(--ink-soft);font-size:15px;margin:0}
+  .lesson-nav{display:flex;justify-content:space-between;margin:0 0 40px;font-size:14px}
+  .lesson-nav a{color:var(--accent);text-decoration:none} .lesson-nav a:hover{text-decoration:underline}
+  .lesson-nav .disabled{color:var(--ink-mute);opacity:.4;pointer-events:none}
+  h2{font-family:var(--serif);font-size:24px;margin:44px 0 12px;font-weight:700}
+  h3{font-size:17px;margin:26px 0 8px;font-weight:600}
+  p{margin:12px 0} ul,ol{margin:12px 0;padding-left:24px} li{margin:6px 0}
+  strong{color:var(--ink);font-weight:600} em{color:var(--ink-soft)} a{color:var(--accent)}
+  code{font-family:var(--mono);background:var(--code-bg);padding:2px 6px;border-radius:4px;font-size:.9em}
+  pre{background:var(--code-bg);padding:16px;border-radius:8px;overflow-x:auto} pre code{background:none;padding:0}
+  .callout{margin:22px 0;padding:14px 18px;border-left:3px solid;border-radius:0 6px 6px 0}
+  .callout p:first-child{margin-top:0} .callout p:last-child{margin-bottom:0}
+  .callout-title{font-weight:700;font-size:13px;letter-spacing:.03em;margin-bottom:6px;display:block}
+  .callout.info{background:var(--accent-soft);border-color:var(--accent)}
+  .callout.warn{background:var(--warn-soft);border-color:var(--warn)}
+  .callout.key{background:var(--key-soft);border-color:var(--key)}
+  .callout.pit{background:var(--pit-soft);border-color:var(--pit)}
+  table{width:100%;border-collapse:collapse;margin:18px 0;font-size:14px}
+  th,td{text-align:left;padding:10px 12px;border-bottom:1px solid var(--rule);vertical-align:top}
+  th{font-weight:600;color:var(--ink-soft);background:var(--code-bg)}
+  .pipeline{display:flex;flex-wrap:wrap;align-items:center;gap:6px;margin:20px 0;font-size:13px}
+  .pipeline .stage{background:#fff;border:1px solid var(--rule);border-radius:6px;padding:8px 12px;white-space:nowrap}
+  .pipeline .stage.core{border-color:var(--accent);color:var(--accent);font-weight:600}
+  .pipeline .stage.plus{color:var(--ink-mute);border-style:dashed}
+  .pipeline .stage.result{border-color:var(--key);color:var(--key);font-weight:600;background:var(--key-soft)}
+  .pipeline .arrow{color:var(--ink-mute)}
+  .quiz{margin:30px 0;border:1px solid var(--rule);border-radius:12px;padding:24px 26px;background:#fff}
+  .quiz-q{font-weight:600;margin:0 0 16px;font-size:16px}
+  .quiz-options{display:flex;flex-direction:column;gap:10px}
+  .quiz-opt{display:flex;align-items:center;gap:12px;padding:12px 16px;border:1.5px solid var(--rule);border-radius:10px;cursor:pointer;transition:all .15s;user-select:none}
+  .quiz-opt:hover{border-color:var(--accent);background:var(--accent-soft)}
+  .quiz-opt .mark{width:24px;height:24px;border-radius:50%;border:1.5px solid var(--ink-mute);display:inline-flex;align-items:center;justify-content:center;font-size:13px;color:transparent;flex-shrink:0}
+  .quiz-opt.reveal.correct{border-color:var(--key);background:var(--key-soft)}
+  .quiz-opt.reveal.correct .mark{background:var(--key);color:#fff;border-color:var(--key)}
+  .quiz-opt.reveal.wrong{border-color:var(--pit);background:var(--pit-soft)}
+  .quiz-opt.reveal.wrong .mark{background:var(--pit);color:#fff;border-color:var(--pit)}
+  .quiz-explain{margin-top:14px;font-size:14px;color:var(--ink-soft);display:none}
+  .quiz-explain.show{display:block}
+  .source-box{margin:30px 0 0;padding:18px 20px;background:var(--code-bg);border-radius:10px;font-size:14px}
+  .source-box .label{font-size:12px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-mute);font-weight:700;display:block;margin-bottom:6px}
+  .followup{margin:24px 0 0;padding:16px 20px;border:1px dashed var(--accent);border-radius:10px;background:var(--accent-soft);font-size:15px}
+  .followup .label{font-weight:700;color:var(--accent);display:block;margin-bottom:4px}
+  </style>
+</head>
+<body>
+<article class="lesson">
+  <header class="lesson-header">
+    <span class="course-label">Harness Engineering · 模块 0</span>
+    <div class="lesson-num">第 01 课</div>
+    <h1 class="lesson-title">harness 是什么 & agent 解剖图</h1>
+    <p class="lesson-sub">从"会用 Claude Code"到"看见它里面的脚手架"——建立分层总图，后续每节课拆一层。</p>
+  </header>
+
+  <nav class="lesson-nav">
+    <span class="disabled">← 上一课</span>
+    <a href="0002-agentic-loop.html">下一课：agentic loop →</a>
+  </nav>
+
+  <h2>从一个问题开始</h2>
+  <p>你天天用 Claude Code：让它读文件、改代码、跑命令、调试。但<strong>模型本身只会一问一答</strong>——它没有手，看不见你的硬盘，记不住上一轮对话之外的事。那它是怎么变成"能动手干活"的 agent 的？</p>
+  <p>答案是：模型外面裹了一层工程脚手架。这层脚手架，叫 <strong>harness</strong>（字面是"线束 / 马具"，引申为"套在模型身上的那套装备"）。Claude Code，就是一个完整 harness。</p>
+  <div class="callout key">
+    <span class="callout-title">一句话定义</span>
+    <p><strong>harness</strong> = 包裹基础模型的那层工程，把"会聊天的模型"变成"能可靠干活的 agent"。本课程要做的，就是把它从黑盒拆成透明结构。</p>
+  </div>
+
+  <h2>第一步：裸模型 → 增强 LLM</h2>
+  <p>Anthropic 在 <em>Building Effective Agents</em> 里给了一个基础构建块——<strong>augmented LLM（增强 LLM）</strong>：在裸模型上加上三样东西。</p>
+  <div class="pipeline">
+    <span class="stage core">基础模型</span>
+    <span class="plus">+ 检索</span>
+    <span class="plus">+ 工具</span>
+    <span class="plus">+ 记忆</span>
+    <span class="arrow">=</span>
+    <span class="stage result">增强 LLM</span>
+  </div>
+  <ul>
+    <li><strong>检索</strong>：能去外部找信息（搜网、查知识库），不是只靠训练时记的。</li>
+    <li><strong>工具</strong>：能调函数/命令真正"动手"（读文件、跑脚本、改代码）。</li>
+    <li><strong>记忆</strong>：能保留上下文与状态，不是每轮从零开始。</li>
+  </ul>
+  <p>增强 LLM 是 harness 的起点，但还不是完整的 harness——还缺"怎么循环、怎么管权限、怎么编排"这些工程层。下面把它们补齐。</p>
+
+  <h2>agent 解剖图：harness 的七层</h2>
+  <p>一个成熟 harness（以 Claude Code 为样本）大致由这些层组成。先建立总图，<strong>后续每节课深入一层</strong>：</p>
+  <table>
+    <thead><tr><th>层</th><th>干什么</th><th>在 Claude Code 里的样子</th></tr></thead>
+    <tbody>
+      <tr><td>① 系统提示词</td><td>塑造行为：身份、规则、约束、格式</td><td>CC 启动时注入的超长 system prompt</td></tr>
+      <tr><td>② 工具 + 工具循环</td><td>给模型"手脚"，并循环：决策→调工具→喂回→再决策</td><td>Read/Write/Edit/Bash/Glob/Grep… + agentic loop</td></tr>
+      <tr><td>③ 上下文管理</td><td>管窗口：什么进上下文、什么压缩/丢弃</td><td>CC 的上下文自动压缩</td></tr>
+      <tr><td>④ 记忆 / 状态</td><td>跨轮/跨会话持久化上下文</td><td><code>CLAUDE.md</code>、session</td></tr>
+      <tr><td>⑤ 权限与安全</td><td>约束能做什么、防越界</td><td>allow/deny/ask 权限规则、hooks</td></tr>
+      <tr><td>⑥ 编排</td><td>组织工作流：单 agent 还是多 agent 协作</td><td>subagents（<code>.claude/agents/</code>）</td></tr>
+      <tr><td>⑦ 可观测性</td><td>让 agent 可被观察、可恢复</td><td>日志、成本追踪、中断恢复</td></tr>
+    </tbody>
+  </table>
+  <div class="callout info">
+    <span class="callout-title">关键事实</span>
+    <p>这七层不是抽象理论——<strong>Claude Agent SDK 就是 Claude Code 的开源内核</strong>（官方原话："the same tools, agent loop, and context management that power Claude Code"）。也就是说，读 Agent SDK 的代码，就是读 Claude Code 这七层的实现。本课程中后期会逐层对照源码。</p>
+  </div>
+
+  <h2>这跟你的两个目标有什么关系</h2>
+  <p>你学这门课有两个落点，它们都建立在"分层"视角上：</p>
+  <ul>
+    <li><strong>定制 Claude Code</strong>：你日常配的 <code>CLAUDE.md</code>、hooks、权限规则、subagents，<em>每一个都是在改 harness 的某一层</em>。看清改的是哪层，才知道效果和副作用。</li>
+    <li><strong>售前定制 agent</strong>：客户要一个 agent，本质是"帮 ta 决策这七层各自怎么做"。有这张总图，你就有切入点，而不是无从下手。</li>
+  </ul>
+
+  <div class="quiz">
+    <p class="quiz-q">小练习：在 Claude Code 里，<code>CLAUDE.md</code> 文件最属于 harness 的哪一层？</p>
+    <div class="quiz-options">
+      <div class="quiz-opt" data-correct="true"><span class="mark">✓</span>上下文与记忆层</div>
+      <div class="quiz-opt"><span class="mark">✓</span>权限与安全层</div>
+      <div class="quiz-opt"><span class="mark">✓</span>工具与循环层</div>
+      <div class="quiz-opt"><span class="mark">✓</span>编排与分发层</div>
+    </div>
+    <p class="quiz-explain"><strong>答案：上下文与记忆层。</strong><code>CLAUDE.md</code> 是项目级记忆——Claude 每次启动都读它，把里面的指令/偏好注入上下文，塑造行为。它不直接控制权限、不定义工具、也不派 agent。带上这个"归层"习惯，后面每学一个 CC 功能，都问一句：它改的是哪层？</p>
+  </div>
+
+  <div class="followup">
+    <span class="label">带着这个进下一课</span>
+    想一个你用 Claude Code 时观察到的"行为"（比如：它有时候会自动压缩历史、有时候会停下来问你确认、有时候会自己派子 agent）。猜猜它属于七层里的哪一层？把你的猜测带着走——后续课程会逐一验证或推翻。
+  </div>
+
+  <div class="source-box">
+    <span class="label">本课主要来源（建议读）</span>
+    <a href="https://www.anthropic.com/engineering/building-effective-agents">Building Effective AI Agents — Anthropic</a>　这是本课"增强 LLM / workflow vs agent"概念的源头。现在只需读开头"What are agents?"一节，建立直觉即可，不必全读。
+  </div>
+
+  <div class="callout warn" style="margin-top:24px">
+    <span class="callout-title">有问题随时问</span>
+    <p>这节课是总图，难免有"先记着、后面才懂"的点。任何一层想多问一句、或对定义有疑问，直接问老师——别带着模糊进下一课。</p>
+  </div>
+
+  <nav class="lesson-nav" style="margin-top:48px">
+    <span class="disabled">← 上一课</span>
+    <a href="0002-agentic-loop.html">下一课：agentic loop（agent 的心跳）→</a>
+  </nav>
+</article>
+
+<script>
+document.querySelectorAll('.quiz-opt').forEach(opt=>{
+  opt.addEventListener('click',()=>{
+    const box=opt.closest('.quiz');
+    box.querySelectorAll('.quiz-opt').forEach(o=>o.classList.remove('reveal','correct','wrong'));
+    const isCorrect=opt.dataset.correct==='true';
+    opt.classList.add('reveal',isCorrect?'correct':'wrong');
+    box.querySelector('.quiz-explain').classList.add('show');
+  });
+});
+</script>
+</body>
+</html>

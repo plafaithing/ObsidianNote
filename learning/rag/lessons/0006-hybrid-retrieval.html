@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>L06 · 混合检索</title>
+  <style>
+  :root {
+    --bg: #fafaf7; --ink: #1a1a1a; --ink-soft: #444; --ink-mute: #777;
+    --rule: #e4e3dc; --accent: #2b5a8c; --accent-soft: #e8f0f7;
+    --warn: #b06a00; --warn-soft: #fdf3e3; --key: #2f7d52; --key-soft: #e8f5ee;
+    --pit: #a23a3a; --pit-soft: #fbecec; --code-bg: #f3f3ee;
+    --serif: 'Source Serif Pro','Noto Serif SC',Georgia,'Songti SC',serif;
+    --sans: -apple-system,BlinkMacSystemFont,'Segoe UI','PingFang SC','Microsoft YaHei',sans-serif;
+    --mono: 'SF Mono','JetBrains Mono',Consolas,monospace;
+  }
+  *{box-sizing:border-box} html{scroll-behavior:smooth}
+  body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--sans);font-size:16px;line-height:1.78;-webkit-font-smoothing:antialiased}
+  .lesson{max-width:760px;margin:0 auto;padding:48px 28px 96px}
+  .lesson-header{margin-bottom:36px;border-bottom:1px solid var(--rule);padding-bottom:22px}
+  .course-label{font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--accent);font-weight:700}
+  .lesson-num{font-size:13px;color:var(--ink-mute);margin:8px 0 2px}
+  .lesson-title{font-family:var(--serif);font-size:34px;line-height:1.22;margin:2px 0 8px;font-weight:700}
+  .lesson-sub{color:var(--ink-soft);font-size:15px;margin:0}
+  .lesson-nav{display:flex;justify-content:space-between;margin:0 0 40px;font-size:14px}
+  .lesson-nav a{color:var(--accent);text-decoration:none} .lesson-nav a:hover{text-decoration:underline}
+  h2{font-family:var(--serif);font-size:24px;margin:44px 0 12px;font-weight:700}
+  h3{font-size:17px;margin:26px 0 8px;font-weight:600}
+  p{margin:12px 0} ul,ol{margin:12px 0;padding-left:24px} li{margin:6px 0}
+  strong{color:var(--ink);font-weight:600} em{color:var(--ink-soft)} a{color:var(--accent)}
+  code{font-family:var(--mono);background:var(--code-bg);padding:2px 6px;border-radius:4px;font-size:.9em}
+  pre{background:var(--code-bg);padding:16px;border-radius:8px;overflow-x:auto} pre code{background:none;padding:0}
+  .callout{margin:22px 0;padding:14px 18px;border-left:3px solid;border-radius:0 6px 6px 0}
+  .callout p:first-child{margin-top:0} .callout p:last-child{margin-bottom:0}
+  .callout-title{font-weight:700;font-size:13px;letter-spacing:.03em;margin-bottom:6px;display:block}
+  .callout.info{background:var(--accent-soft);border-color:var(--accent)}
+  .callout.warn{background:var(--warn-soft);border-color:var(--warn)}
+  .callout.key{background:var(--key-soft);border-color:var(--key)}
+  .callout.pit{background:var(--pit-soft);border-color:var(--pit)}
+  .callout.interview{background:var(--accent-soft);border-color:var(--accent)}
+  .callout.interview .callout-title::before{content:"🎤 "}
+  table{width:100%;border-collapse:collapse;margin:18px 0;font-size:14px}
+  th,td{text-align:left;padding:10px 12px;border-bottom:1px solid var(--rule);vertical-align:top}
+  th{font-weight:600;color:var(--ink-soft);background:var(--code-bg)}
+  .quiz{margin:30px 0;border:1px solid var(--rule);border-radius:12px;padding:24px 26px;background:#fff}
+  .quiz-q{font-weight:600;margin:0 0 6px;font-size:16px}
+  .quiz-scene{color:var(--ink-soft);font-size:14px;margin:0 0 16px;line-height:1.7}
+  .quiz-options{display:flex;flex-direction:column;gap:10px}
+  .quiz-opt{display:flex;align-items:center;gap:12px;padding:12px 16px;border:1.5px solid var(--rule);border-radius:10px;cursor:pointer;transition:all .15s;user-select:none}
+  .quiz-opt:hover{border-color:var(--accent);background:var(--accent-soft)}
+  .quiz-opt .mark{width:24px;height:24px;border-radius:50%;border:1.5px solid var(--ink-mute);display:inline-flex;align-items:center;justify-content:center;font-size:13px;color:transparent;flex-shrink:0}
+  .quiz-opt.reveal.correct{border-color:var(--key);background:var(--key-soft)}
+  .quiz-opt.reveal.correct .mark{background:var(--key);color:#fff;border-color:var(--key)}
+  .quiz-opt.reveal.wrong{border-color:var(--pit);background:var(--pit-soft)}
+  .quiz-opt.reveal.wrong .mark{background:var(--pit);color:#fff;border-color:var(--pit)}
+  .quiz-feedback{margin-top:16px;font-size:14px;line-height:1.72;display:none;padding:14px 16px;background:var(--code-bg);border-radius:8px}
+  .quiz-feedback.show{display:block}
+  .win{margin:36px 0 24px;padding:22px 24px;background:var(--key-soft);border-radius:12px;border:1px solid var(--key)}
+  .win h3{margin-top:0;color:var(--key)}
+  .sources{margin-top:32px;padding-top:22px;border-top:1px solid var(--rule);font-size:14px}
+  .sources h3{margin-top:0} .sources ul{padding-left:20px}
+  .ask-reminder{margin-top:20px;padding:16px 18px;background:var(--accent-soft);border-radius:10px;font-size:14px}
+  .cite{font-size:13px;color:var(--ink-mute)}
+  @media print{body{background:#fff}.lesson-nav,.quiz-opt{break-inside:avoid}a{color:var(--ink)}}
+  @media (max-width:600px){.lesson{padding:28px 18px 64px}.lesson-title{font-size:26px}}
+  </style>
+</head>
+<body>
+<article class="lesson">
+
+  <header class="lesson-header">
+    <div class="course-label">RAG 课程 · M3 检索侧</div>
+    <div class="lesson-num">第 06 节 / 共 12 节</div>
+    <h1 class="lesson-title">向量 + BM25 混合检索：稠密管语义，稀疏管精确</h1>
+    <p class="lesson-sub">两路召回 + RRF 融合——检索 recall 的最后一块拼图</p>
+  </header>
+
+  <nav class="lesson-nav">
+    <a href="0005-embedding-selection.html">← 上一节：Embedding 选型</a>
+    <a href="0007-rerank.html">下一节：Rerank 重排 →</a>
+  </nav>
+
+  <h2>为什么需要混合（一句话带过）</h2>
+  <p>L05 讲了 embedding 的边界：擅长<strong>语义相似</strong>（慢SQL ↔ SQL性能），不擅长<strong>精确匹配</strong>（ORA-01555 这种标识符）。Q&A 0001/0005 已铺透——纯向量对罕见标识符弱，BM25 字面匹配最稳。所以<strong>混合检索 = 稠密（语义）+ 稀疏（精确）互补</strong>，提 recall。本节聚焦：<strong>怎么混、怎么融合分数</strong>。</p>
+  <div class="callout info">
+    <span class="callout-title">前置知识（已学，不重讲）</span>
+    <p>"为什么要混合"和"BGE-M3 稀疏 vs BM25 本质区别"见 <a href="0005-embedding-selection.html">L05 Embedding 选型</a> 和 Q&A 0001 / 0005。本节假设你已知：稠密=语义、稀疏=精确，两者互补。前置还涉及 BGE-M3 三合一用法和 HNSW 参数——见 Q&A 0006 / 0007。</p>
+  </div>
+
+  <h2>稠密 vs 稀疏：互补而非替代</h2>
+  <p>两路各有强项，<strong>不重叠的领域</strong>正是混合的价值：</p>
+  <table>
+    <thead><tr><th></th><th>稠密（Dense）</th><th>稀疏（BM25）</th></tr></thead>
+    <tbody>
+      <tr><td><strong>匹配方式</strong></td><td>语义相似（向量距离）</td><td>字面匹配（词频统计）</td></tr>
+      <tr><td><strong>强项</strong></td><td>同义 / 改写 / 跨语言</td><td>精确标识符、罕见词</td></tr>
+      <tr><td><strong>弱项</strong></td><td>罕见标识符、无语义字符串</td><td>同义词、语义改写</td></tr>
+      <tr><td><strong>运维例子</strong></td><td>"慢SQL诊断" ↔ "SQL性能排查"</td><td>"ORA-01555" 精确命中</td></tr>
+    </tbody>
+  </table>
+  <p><strong>互补关系</strong>：稠密管"意思像"，稀疏管"字面有"。一个查询两路都跑，合并结果——语义相关的和精确匹配的都能召回。</p>
+  <div class="callout key">
+    <span class="callout-title">混合提 Recall 不提 Precision</span>
+    <p>混合让两路召回取并集——漏的少了（recall↑），但可能混入更多噪声（precision 可能↓）。所以混合后通常接 <strong>rerank 精排</strong>（L07）把噪声压下去。口诀（Q&A 0002）：<strong>漏了多捞（混合），杂了精排（rerank）</strong>。</p>
+  </div>
+
+  <h2>三种混合架构</h2>
+  <table>
+    <thead><tr><th>架构</th><th>组成</th><th>适用</th><th>代价</th></tr></thead>
+    <tbody>
+      <tr><td><strong>一站式</strong></td><td>BGE-M3（dense+sparse）</td><td>省事，文档量中等</td><td>sparse 对罕见标识符不如 BM25 稳</td></tr>
+      <tr><td><strong>经典混合</strong> ⭐</td><td>dense（任意模型）+ BM25</td><td>⭐ 最常见，运维场景首选</td><td>要维护两套索引（向量库 + ES）</td></tr>
+      <tr><td><strong>三路融合</strong></td><td>dense + BM25 + colbert/sparse</td><td>高精度场景</td><td>复杂，性价比低，少见</td></tr>
+    </tbody>
+  </table>
+  <div class="callout pit">
+    <span class="callout-title">选型决策（运维场景）</span>
+    <p>标识符多且罕见（错误码/视图名/参数名）→ <strong>经典混合（dense + BM25）</strong>最稳，BM25 字面匹配不怕没见过。想简化架构、文档量不大 → BGE-M3 一站式够用。不确定 → 评测对比 Recall@5。<br>
+    （BGE-M3 稀疏 ≠ BM25 的本质区别见 Q&A 0005——稀疏是"学"的神经稀疏，对没见过的标识符弱；BM25 是"算"的字面统计，字面命中稳。）</p>
+  </div>
+
+  <h2>分数融合：为什么不能直接相加</h2>
+  <p>两路各返回一个分数，要合并排序。直觉是直接相加——但<strong>量纲不同</strong>：</p>
+  <pre><code>稠密 cosine 分数：  0.85, 0.82, 0.78, 0.75, 0.71   ← 范围 [-1, 1]
+BM25 分数：        18.3, 15.7, 12.1,  9.8,  7.4     ← 范围 [0, ∞)，无上界
+
+直接相加：BM25 的 18.3 碾压 dense 的 0.85 → 等于只用 BM25</code></pre>
+  <p>所以必须用<strong>融合策略</strong>。两种主流方法：</p>
+
+  <h3>方法一：加权融合（Weighted Sum）</h3>
+  <p>归一化后加权：<code>score = α · dense_norm + (1-α) · bm25_norm</code></p>
+  <ul>
+    <li><strong>归一化</strong>：min-max 或 z-score，把两路分数压到 [0,1]</li>
+    <li><strong>α 难调</strong>：α=0.5 平均？还是 dense 更重要？不同查询最优 α 不同</li>
+    <li>BGE-M3 的 <code>compute_score(weights_for_different_modes=[0.4,0.2,0.4])</code> 就是这种</li>
+  </ul>
+  <div class="callout warn">
+    <span class="callout-title">加权融合的坑</span>
+    <p>①归一化方式影响结果（min-max 对离群值敏感）；②α 是全局常数，但有的查询该信 dense、有的该信 BM25——一刀切的 α 不灵活；③要调参。所以工程上更常用下面的 RRF。</p>
+  </div>
+
+  <h3>方法二：RRF（Reciprocal Rank Fusion）⭐</h3>
+  <p><strong>只看排名，不看分数</strong>。公式：</p>
+  <pre><code>RRF_score(d) = Σ  1 / (k + rank_r(d))
+                r∈R
+
+# R = 检索系统集合（dense, BM25）
+# rank_r(d) = 文档 d 在系统 r 中的排名（1, 2, 3...）
+# k = 平滑常数，默认 60</code></pre>
+  <p>核心思想：<strong>文档在多路检索里排名越靠前，得分越高</strong>。不 care 具体分数，只 care 排名。</p>
+  <div class="callout key">
+    <span class="callout-title">为什么 RRF 主流</span>
+    <p>①<strong>量纲无关</strong>——只看排名，dense 和 BM25 分数量纲不同无所谓；②<strong>无需归一化</strong>——省掉归一化的坑；③<strong>无需调权重</strong>——没有 α，k 用默认 60 即可；④<strong>稳健</strong>——对离群分数不敏感。所以 ES、Milvus、Dify 的混合检索默认都用 RRF。</p>
+  </div>
+
+  <h2>RRF 融合实例（算一遍）</h2>
+  <p>查询：<code>"ORA-01555 快照太旧"</code>，两路各召回 Top-5：</p>
+  <pre><code>稠密检索排名：   A, B, C, D, E
+BM25 检索排名：  A, C, F, G, H
+
+k = 60，rank 从 1 开始
+
+文档 A: dense 排名 1 → 1/(60+1) = 0.01639
+       BM25 排名 1 → 1/(60+1) = 0.01639
+       RRF = 0.03278  ⭐ 最高（两路都第一）
+
+文档 C: dense 排名 3 → 1/(60+3) = 0.01587
+       BM25 排名 2 → 1/(60+2) = 0.01613
+       RRF = 0.03200  （两路都靠前）
+
+文档 B: dense 排名 2 → 1/(60+2) = 0.01613
+       BM25 未命中 → 0
+       RRF = 0.01613  （只 dense 召回）
+
+文档 F: dense 未命中 → 0
+       BM25 排名 3 → 1/(60+3) = 0.01587
+       RRF = 0.01587  （只 BM25 召回）
+
+融合排名：A &gt; C &gt; B &gt; F &gt; ...</code></pre>
+  <p><strong>观察</strong>：A 两路都第一，稳坐榜首；C 两路都靠前，排第二；B、F 只一路召回，排后面。RRF 自然地<strong>奖励两路都命中的文档</strong>——这正是混合检索想要的：语义相关且字面匹配的最该靠前。</p>
+  <div class="callout info">
+    <span class="callout-title">k 的作用</span>
+    <p>k 控制"头部权重"。<strong>k 小</strong>（如 1）：排名 1 得 1/2=0.5，排名 2 得 1/3=0.33——头部优势放大，对排名敏感。<strong>k 大</strong>（如 60）：1/61 vs 1/62 差距小——更平滑，不那么敏感。<br>
+    k=60 是 RRF 原始论文（Cormack 2009）的经验值，对大多数场景够用，<strong>通常不用调</strong>。</p>
+  </div>
+
+  <h2>工程实现：两种架构</h2>
+
+  <h3>架构一：双系统（经典）</h3>
+  <p>向量库 + 全文检索引擎，两个系统分别检索，应用层 RRF 融合：</p>
+  <pre><code>用户查询
+   ├── 向量库（Milvus/Qdrant/pgvector）→ dense Top-K
+   ├── 全文检索（ES/OpenSearch）       → BM25 Top-K
+   └── 应用层 RRF 融合 → Top-N 喂给 LLM</code></pre>
+  <p>优点：BM25 用成熟的 ES，最稳；dense 用任意模型。缺点：维护两套系统、两份数据同步。</p>
+
+  <h3>架构二：一站式（Milvus 2.4+）</h3>
+  <p>Milvus 2.4+ 原生支持 BGE-M3 的 hybrid search——一个 collection 同时存 dense + sparse 向量，一次查询同时出两路，内部 RRF 融合：</p>
+  <pre><code># Milvus hybrid search（伪代码）
+results = collection.hybrid_search(
+    reqs=[dense_req, sparse_req],   # dense + sparse 两路
+    rerank=RRFRanker(k=60),          # RRF 融合
+    limit=5
+)</code></pre>
+  <p>优点：一个系统，省事，数据同步简单。缺点：sparse 是 BGE-M3 的神经稀疏，对罕见标识符不如 BM25 稳（Q&A 0005）。</p>
+
+  <h3>Dify 里怎么配（L10 详做）</h3>
+  <p>Dify 知识库设置里有"检索模式"：向量检索 / 全文检索 / <strong>混合检索</strong>。选混合检索后，Dify 内部用 RRF 融合 dense + BM25。L10 动手时具体演示配置。</p>
+
+  <h2>运维场景实战</h2>
+  <p>三个典型查询，看混合检索怎么发力：</p>
+  <table>
+    <thead><tr><th>查询</th><th>dense 召回</th><th>BM25 召回</th><th>混合效果</th></tr></thead>
+    <tbody>
+      <tr><td>"慢SQL怎么诊断"</td><td>✅ 语义相关（含"SQL性能排查"）</td><td>✅ 含"慢SQL"字面</td><td>两路并集，recall↑</td></tr>
+      <tr><td>"ORA-01555 错误"</td><td>❌ 可能漏（标识符无语义）</td><td>✅ 精确命中错误码</td><td>BM25 兜底，救回</td></tr>
+      <tr><td>"数据库连接池满了"</td><td>✅ 语义（含"连接耗尽"）</td><td>❌ 无共同词</td><td>dense 兜底，救回</td></tr>
+    </tbody>
+  </table>
+  <p><strong>评测驱动</strong>：搭 50 题运维测试集，对比纯 dense vs 混合的 Recall@5。通常混合能提 5-15% recall（运维标识符多，提升空间大）。</p>
+
+  <h2>参数与调优</h2>
+  <ul>
+    <li><strong>各路 Top-K</strong>：dense K=20~50，BM25 K=20~50，RRF 融合后取 Top-5~10 喂 rerank。K 设大广召回，rerank 精排（Q&A 0002 口诀）。</li>
+    <li><strong>RRF 的 k</strong>：默认 60，几乎不用调。极端情况：想更敏感头部试 k=30，想更平滑试 k=100。</li>
+    <li><strong>何时上混合</strong>：评测发现纯 dense Recall@5 不够（尤其标识符查询漏召）→ 上混合。别盲目上——双索引有成本。</li>
+    <li><strong>成本</strong>：双索引存储约翻倍（向量 + 倒排），ingest 慢一些。但 recall 提升通常值得——漏召回是 RAG 致命伤（Q&A 0002）。</li>
+  </ul>
+
+  <div class="callout interview">
+    <span class="callout-title">面试视角</span>
+    <p><strong>Q：为什么要混合检索？</strong> 纯稠密向量擅长语义相似，对精确标识符（错误码/视图名）弱。BM25 字面匹配补这块。两路互补提 recall——漏召回是 RAG 致命伤，混合是解药。</p>
+    <p><strong>Q：RRF 是什么？为什么不用加权求和？</strong> RRF 只看排名不看分数，<code>score=Σ 1/(k+rank)</code>。不用加权求和因为：①量纲不同（cosine∈[-1,1]，BM25 无界），直接加会被 BM25 碾压；②归一化方式影响结果且是坑；③加权 α 难调。RRF 量纲无关、无需归一化、无需调权重，稳健，所以主流。</p>
+    <p><strong>Q：BGE-M3 稀疏能替代 BM25 吗？</strong> 不能完全替代。BGE-M3 稀疏是"学"的神经稀疏，对训练语料没见过的罕见标识符权重学不好；BM25 是"算"的字面统计，字面命中稳。运维场景标识符多且罕见，经典混合（dense+BM25）最稳。（详见 Q&A 0005）</p>
+    <p><strong>Q：混合检索成本？</strong> 双索引存储翻倍、ingest 变慢。但 recall 提升（通常 5-15%）通常值得——漏召回导致答案残缺/幻觉，代价更高。POC 可先用 BGE-M3 一站式省事，规模大了再上经典混合。</p>
+    <p><strong>Q：RRF 的 k 为什么是 60？</strong> 原始论文（Cormack 2009）经验值。k 控制头部权重平滑度，k=60 对大多数场景够用，通常不调。k 小头部敏感，k 大更平滑。</p>
+  </div>
+
+  <h2>小测验</h2>
+  <div class="quiz" id="quiz">
+    <p class="quiz-q">场景</p>
+    <p class="quiz-scene">运维 RAG 用<strong>纯稠密向量检索</strong>，评测发现 Recall@5 = 65%。分析测试集发现：含错误码（<code>ORA-01555</code>）、视图名（<code>PGXC_STAT_ACTIVITY</code>）的查询几乎全漏，但语义类查询（"慢SQL诊断"）召回正常。以下改进<strong>最合理</strong>的是？</p>
+    <div class="quiz-options">
+      <label class="quiz-opt" data-correct="true"><span class="mark">✓</span><span>加 BM25 做混合检索（RRF 融合），补精确标识符匹配</span></label>
+      <label class="quiz-opt" data-correct="false"><span class="mark">✗</span><span>换 3072 维更强的 embedding 模型</span></label>
+      <label class="quiz-opt" data-correct="false"><span class="mark">✗</span><span>调大 dense 检索的 Top-K（K=5 → K=50）</span></label>
+      <label class="quiz-opt" data-correct="false"><span class="mark">✗</span><span>加 rerank 重排</span></label>
+    </div>
+    <div class="quiz-feedback" id="quiz-feedback">
+      <strong>✓ 加 BM25 混合检索。</strong> 症状诊断：语义类查询正常 → dense 没问题；标识符查询全漏 → 纯向量对精确匹配弱（L05 边界、Q&A 0001）。根因是<strong>缺少精确匹配能力</strong>，不是语义不够。<br>
+      解法：加 BM25 做混合检索，RRF 融合。BM25 字面命中 ORA-01555 这类标识符，补 dense 的盲区。<br><br>
+      <em>为什么不是「换 3072 维更强 embedding」</em>：维度高不解决精确标识符匹配——这是 embedding 的本质边界（无语义字符串），不是表达力不够。成本翻 3 倍却治不了根因。<br>
+      <em>为什么不是「调大 K」</em>：K=50 只是多召回，但 dense 对标识符根本排不到前面（语义距离远），K 再大也捞不到。治标不治本。<br>
+      <em>为什么不是「加 rerank」</em>：rerank 只重排已召回的 Top-K，不增加召回。漏的不在 Top-K 里，rerank 排不出来（Q&A 0002）。recall 问题先多捞（混合），不是精排。<br><br>
+      <strong>口诀</strong>：语义召回正常 + 标识符漏 → 加 BM25 混合，不是换模型/调 K/加 rerank。对症下药。
+    </div>
+  </div>
+  <script>
+    document.querySelectorAll('#quiz .quiz-opt').forEach(opt => {
+      opt.addEventListener('click', () => {
+        document.querySelectorAll('#quiz .quiz-opt').forEach(o => {
+          o.classList.remove('correct','wrong');
+          o.classList.add('reveal');
+          if (o.dataset.correct === 'true') o.classList.add('correct');
+          else if (o === opt) o.classList.add('wrong');
+        });
+        document.getElementById('quiz-feedback').classList.add('show');
+      });
+    });
+  </script>
+
+  <div class="win">
+    <h3>✓ 本节胜利</h3>
+    <p>你现在掌握了：</p>
+    <ol>
+      <li><strong>混合检索动机</strong>——稠密管语义、稀疏管精确，互补提 recall（不重讲 Q&A 0001/0005）。</li>
+      <li><strong>三种架构</strong>——一站式（BGE-M3）、经典混合（dense+BM25）⭐、三路融合。运维场景经典混合最稳。</li>
+      <li><strong>分数融合难题</strong>——量纲不同不能直接相加，加权融合有归一化和调 α 的坑。</li>
+      <li><strong>RRF</strong>——只看排名 <code>1/(k+rank)</code>，量纲无关、无需归一化、无需调权重，主流选择。</li>
+      <li><strong>工程实现</strong>——双系统（ES+向量库）或 Milvus 一站式，Dify 内置混合检索。</li>
+      <li><strong>调优</strong>——各路 K 设大广召回，RRF k=60 不用调，评测驱动决定是否上混合。</li>
+    </ol>
+  </div>
+
+  <div class="sources">
+    <h3>本节取材与推荐阅读</h3>
+    <ul>
+      <li><a href="https://plg.uwaterloo.ca/~gvcormac/cormacksigir09-rrf.pdf" target="_blank">[1] RRF 原始论文（Cormack 2009）</a> — Reciprocal Rank Fusion，k=60 的出处。</li>
+      <li><a href="https://milvus.io/docs/zh/multi-vector-search.md" target="_blank">[2] Milvus 混合检索文档</a> — hybrid search + RRF 融合实现。</li>
+      <li><a href="https://huggingface.co/BAAI/bge-m3" target="_blank">[3] BGE-M3 模型卡</a> — 三合一检索，hybrid + rerank 官方推荐。</li>
+      <li><a href="https://www.elastic.co/guide/en/elasticsearch/reference/current/rrf.html" target="_blank">[4] Elasticsearch RRF 文档</a> — ES 内置 RRF 融合。</li>
+    </ul>
+    <p class="cite">完整资源清单见 <code>learning/rag/RESOURCES.md</code>。</p>
+  </div>
+
+  <div class="ask-reminder">
+    💡 <strong>有不清楚的？直接问。</strong>比如：「RRF 的 k 调小会怎样？」「我们文档量不大，BGE-M3 一站式够不够，还要不要上 ES？」「Dify 里混合检索具体怎么配？」也可以直接说「继续 L07」进 Rerank 重排。
+  </div>
+
+  <nav class="lesson-nav" style="margin-top:40px;">
+    <a href="0005-embedding-selection.html">← 上一节：Embedding 选型</a>
+    <a href="0007-rerank.html">下一节：Rerank 重排 →</a>
+  </nav>
+
+</article>
+</body>
+</html>
