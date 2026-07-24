@@ -11,6 +11,8 @@
    https://www.anthropic.com/engineering/effective-context-engineering-for-ai-agents
 3. `[方法论一手]` **Writing effective tools for AI agents** — 工具定义、工具循环、工具设计原则。**工具层**。
    https://www.anthropic.com/engineering/writing-tools-for-agents
+4. `[方法论一手]` **Prompting best practices（Claude Platform Docs）** — 系统提示词写法：清晰直接 / XML 结构化 / 给例子 / 给角色 + agentic 场景下调控各层的 prompt 片段。**系统提示词层**。
+   https://platform.claude.com/docs/en/build-with-claude/prompt-engineering/claude-prompting-best-practices
 
 ## 主样本：Claude Agent SDK（Claude Code 开源内核）
 4. `[主样本]` **Agent SDK overview 文档** — "the same tools, agent loop, and context management that power Claude Code"。入口。

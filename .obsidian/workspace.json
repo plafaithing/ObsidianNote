@@ -11,14 +11,40 @@
             "id": "2d3bb3e7590a810d",
             "type": "leaf",
             "state": {
+              "type": "html-view",
+              "state": {
+                "file": "learning/harness-engineering/lessons/0004-system-prompt.html"
+              },
+              "icon": "code-glyph",
+              "title": "0004-system-prompt"
+            }
+          },
+          {
+            "id": "d39ea5006f29a4bf",
+            "type": "leaf",
+            "state": {
+              "type": "webviewer",
+              "state": {
+                "url": "https://www.anthropic.com/engineering/building-effective-agents",
+                "title": "Building Effective AI Agents \\ Anthropic",
+                "mode": "webview"
+              },
+              "icon": "globe-2",
+              "title": "Building Effective AI Agents \\ Anthropic"
+            }
+          },
+          {
+            "id": "b866c1df2144e730",
+            "type": "leaf",
+            "state": {
               "type": "markdown",
               "state": {
-                "file": "CLAUDE.md",
+                "file": "learning/harness-engineering/reference/Building Effective AI Agents.md",
                 "mode": "source",
                 "source": false
               },
               "icon": "lucide-file",
-              "title": "CLAUDE"
+              "title": "Building Effective AI Agents"
             }
           }
         ]
@@ -88,13 +114,13 @@
             "state": {
               "type": "outline",
               "state": {
-                "file": "CLAUDE.md",
+                "file": "learning/harness-engineering/lessons/0004-system-prompt.html",
                 "followCursor": true,
                 "showSearch": false,
                 "searchQuery": ""
               },
               "icon": "lucide-list",
-              "title": "CLAUDE 的大纲"
+              "title": "0004-system-prompt 的大纲"
             }
           }
         ]
@@ -146,7 +172,7 @@
             "state": {
               "type": "backlink",
               "state": {
-                "file": "CLAUDE.md",
+                "file": "learning/harness-engineering/lessons/0001-what-is-harness.html",
                 "collapseAll": false,
                 "extraContext": false,
                 "sortOrder": "alphabetical",
@@ -156,7 +182,7 @@
                 "unlinkedCollapsed": true
               },
               "icon": "links-coming-in",
-              "title": "CLAUDE 的反向链接列表"
+              "title": "0001-what-is-harness 的反向链接列表"
             }
           },
           {
@@ -209,6 +235,20 @@
   },
   "active": "2d3bb3e7590a810d",
   "lastOpenFiles": [
+    "learning/harness-engineering/lessons/0003-workflow-vs-agent.html",
+    "learning/harness-engineering/RESOURCES.md.tmp.10508.2c9b47df7017",
+    "learning/harness-engineering/lessons/0004-system-prompt.html",
+    "learning/harness-engineering/lessons/0004-system-prompt.html.tmp.10508.7363332f78e7",
+    "learning/harness-engineering/reference/Building Effective AI Agents.md",
+    "CLAUDE.md",
+    "learning/harness-engineering/RESOURCES.md",
+    "learning/harness-engineering/lessons/0002-agentic-loop.html",
+    "learning/harness-engineering/lessons/0001-what-is-harness.html",
+    "learning/harness-engineering/Q&A.md",
+    "learning/harness-engineering/课程目录.md.tmp.24140.6acc22b0ea1c",
+    "learning/shushu/courses.md",
+    "Excalidraw/Drawing 2026-06-20 01.26.28.excalidraw.md",
+    "learning/harness-engineering/课程目录.md",
     "learning/rag/lessons/0010-dify-demo.html",
     "learning/rag/demo-docs/04-parameter-tuning.md",
     "learning/rag/demo-docs/03-connection-pooling.md",
@@ -217,34 +257,20 @@
     "learning/rag/demo-docs",
     "learning/rag/Q&A.md.tmp.68512.3d633fe90872",
     "learning/shushu/shared/lessons/03-bagua-64hexagrams.html",
-    "learning/shushu/shared/lessons/02-ganzhi-chonghe.html",
-    "learning/shushu/shared/lessons/01-overview-yinyang-wuxing.html",
-    "learning/shushu/courses.md",
-    "learning/shushu/courses.md.tmp.70420.023f9c4db18a",
-    "learning/rag/lessons/0006-hybrid-retrieval.html",
     "learning/shushu/MISSION.md",
-    "learning/rag/lessons/0002-rag-pipeline.html",
-    "learning/rag/lessons/0002-practice-troubleshooting.html",
-    "learning/rag/lessons/0005-embedding-selection.html",
     "learning/subagents/课程目录.md",
     "learning/rag/MISSION.md",
-    "learning/harness-engineering/课程目录.md",
     "learning/INDEX.md",
     "未命名.md",
     "learning/harness-engineering/reference/harness各层速查.md",
     "learning/harness-engineering/reference/术语表.md",
     "CCLearningRecord/cc安装指导.md",
     "tasks/todo.md",
-    "learning/harness-engineering/RESOURCES.md",
     "learning/harness-engineering/NOTES.md",
     "learning/harness-engineering/MISSION.md",
     "learning/rag/NOTES.md",
     "learning/rag/Q&A.md",
     "learning/rag/reference/hnsw-cheatsheet.md",
-    "0004-metadata-extraction.md",
-    "0002-rag-pipeline.md",
-    "0005-embedding-selection.md",
-    "learning/shushu/Q&A.md",
     "Pasted image 20260523205829.png",
     "Pasted image 20260523205827.png",
     "Pasted image 20260523205348.png",

@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>L02 · agentic loop — agent 的心跳</title>
+  <style>
+  :root {
+    --bg: #fafaf7; --ink: #1a1a1a; --ink-soft: #444; --ink-mute: #777;
+    --rule: #e4e3dc; --accent: #2b5a8c; --accent-soft: #e8f0f7;
+    --warn: #b06a00; --warn-soft: #fdf3e3; --key: #2f7d52; --key-soft: #e8f5ee;
+    --pit: #a23a3a; --pit-soft: #fbecec; --code-bg: #f3f3ee;
+    --serif: 'Source Serif Pro','Noto Serif SC',Georgia,'Songti SC',serif;
+    --sans: -apple-system,BlinkMacSystemFont,'Segoe UI','PingFang SC','Microsoft YaHei',sans-serif;
+    --mono: 'SF Mono','JetBrains Mono',Consolas,monospace;
+  }
+  *{box-sizing:border-box} html{scroll-behavior:smooth}
+  body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--sans);font-size:16px;line-height:1.78;-webkit-font-smoothing:antialiased}
+  .lesson{max-width:760px;margin:0 auto;padding:48px 28px 96px}
+  .lesson-header{margin-bottom:36px;border-bottom:1px solid var(--rule);padding-bottom:22px}
+  .course-label{font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--accent);font-weight:700}
+  .lesson-num{font-size:13px;color:var(--ink-mute);margin:8px 0 2px}
+  .lesson-title{font-family:var(--serif);font-size:34px;line-height:1.22;margin:2px 0 8px;font-weight:700}
+  .lesson-sub{color:var(--ink-soft);font-size:15px;margin:0}
+  .lesson-nav{display:flex;justify-content:space-between;margin:0 0 40px;font-size:14px}
+  .lesson-nav a{color:var(--accent);text-decoration:none} .lesson-nav a:hover{text-decoration:underline}
+  .lesson-nav .disabled{color:var(--ink-mute);opacity:.4;pointer-events:none}
+  h2{font-family:var(--serif);font-size:24px;margin:44px 0 12px;font-weight:700}
+  h3{font-size:17px;margin:26px 0 8px;font-weight:600}
+  p{margin:12px 0} ul,ol{margin:12px 0;padding-left:24px} li{margin:6px 0}
+  strong{color:var(--ink);font-weight:600} em{color:var(--ink-soft)} a{color:var(--accent)}
+  code{font-family:var(--mono);background:var(--code-bg);padding:2px 6px;border-radius:4px;font-size:.9em}
+  pre{background:var(--code-bg);padding:16px;border-radius:8px;overflow-x:auto} pre code{background:none;padding:0;font-size:13.5px;line-height:1.6}
+  .callout{margin:22px 0;padding:14px 18px;border-left:3px solid;border-radius:0 6px 6px 0}
+  .callout p:first-child{margin-top:0} .callout p:last-child{margin-bottom:0}
+  .callout-title{font-weight:700;font-size:13px;letter-spacing:.03em;margin-bottom:6px;display:block}
+  .callout.info{background:var(--accent-soft);border-color:var(--accent)}
+  .callout.warn{background:var(--warn-soft);border-color:var(--warn)}
+  .callout.key{background:var(--key-soft);border-color:var(--key)}
+  .callout.pit{background:var(--pit-soft);border-color:var(--pit)}
+  table{width:100%;border-collapse:collapse;margin:18px 0;font-size:14px}
+  th,td{text-align:left;padding:10px 12px;border-bottom:1px solid var(--rule);vertical-align:top}
+  th{font-weight:600;color:var(--ink-soft);background:var(--code-bg)}
+  .pipeline{display:flex;flex-wrap:wrap;align-items:center;gap:6px;margin:20px 0;font-size:13px}
+  .pipeline .stage{background:#fff;border:1px solid var(--rule);border-radius:6px;padding:8px 12px;white-space:nowrap}
+  .pipeline .stage.model{border-color:var(--accent);color:var(--accent)}
+  .pipeline .stage.tool{border-color:var(--warn);color:var(--warn)}
+  .pipeline .stage.feed{border-color:var(--key);color:var(--key)}
+  .pipeline .arrow{color:var(--ink-mute);font-weight:600}
+  .pipeline .loop{font-size:11px;color:var(--ink-mute);width:100%;margin-top:6px;letter-spacing:.04em}
+  .quiz{margin:30px 0;border:1px solid var(--rule);border-radius:12px;padding:24px 26px;background:#fff}
+  .quiz-q{font-weight:600;margin:0 0 16px;font-size:16px}
+  .quiz-options{display:flex;flex-direction:column;gap:10px}
+  .quiz-opt{display:flex;align-items:center;gap:12px;padding:12px 16px;border:1.5px solid var(--rule);border-radius:10px;cursor:pointer;transition:all .15s;user-select:none}
+  .quiz-opt:hover{border-color:var(--accent);background:var(--accent-soft)}
+  .quiz-opt .mark{width:24px;height:24px;border-radius:50%;border:1.5px solid var(--ink-mute);display:inline-flex;align-items:center;justify-content:center;font-size:13px;color:transparent;flex-shrink:0}
+  .quiz-opt.reveal.correct{border-color:var(--key);background:var(--key-soft)}
+  .quiz-opt.reveal.correct .mark{background:var(--key);color:#fff;border-color:var(--key)}
+  .quiz-opt.reveal.wrong{border-color:var(--pit);background:var(--pit-soft)}
+  .quiz-opt.reveal.wrong .mark{background:var(--pit);color:#fff;border-color:var(--pit)}
+  .quiz-explain{margin-top:14px;font-size:14px;color:var(--ink-soft);display:none}
+  .quiz-explain.show{display:block}
+  .source-box{margin:30px 0 0;padding:18px 20px;background:var(--code-bg);border-radius:10px;font-size:14px}
+  .source-box .label{font-size:12px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-mute);font-weight:700;display:block;margin-bottom:6px}
+  .followup{margin:24px 0 0;padding:16px 20px;border:1px dashed var(--accent);border-radius:10px;background:var(--accent-soft);font-size:15px}
+  .followup .label{font-weight:700;color:var(--accent);display:block;margin-bottom:4px}
+  .anno{color:var(--ink-mute);font-size:12.5px}
+  </style>
+</head>
+<body>
+<article class="lesson">
+  <header class="lesson-header">
+    <span class="course-label">Harness Engineering · 模块 0</span>
+    <div class="lesson-num">第 02 课</div>
+    <h1 class="lesson-title">agentic loop — agent 的心跳</h1>
+    <p class="lesson-sub">把"循环"从抽象变成几行能读懂的代码，并看清 Claude Agent SDK 把这个循环藏去了哪里。</p>
+  </header>
+
+  <nav class="lesson-nav">
+    <a href="0001-what-is-harness.html">← 上一课：harness 是什么</a>
+    <a href="0003-workflow-vs-agent.html">下一课：workflow vs agent →</a>
+  </nav>
+
+  <h2>为什么需要循环</h2>
+  <p>上一课说 harness 七层里有"②工具 + 工具循环"。这节专讲这个循环。</p>
+  <p>关键事实：<strong>模型一次 API 调用，只会返回一个响应</strong>。它要么直接回答你，要么说"我要调某个工具"。要完成一个真实任务（比如"读文件、找到 bug、改掉它"），往往要调好几次工具——每调一次，都得把结果送回模型，让它决定下一步。</p>
+  <p>所以模型自己不会"循环"，是 <strong>harness 在外面套了个 while 循环</strong>，反复调用模型直到它不再要工具。这个循环，就是 agent 的心跳——叫 <strong>agentic loop</strong>。</p>
+
+  <h2>loop 长什么样</h2>
+  <div class="pipeline">
+    <span class="stage">用户消息</span>
+    <span class="arrow">→</span>
+    <span class="stage model">模型决策</span>
+    <span class="arrow">→</span>
+    <span class="stage tool">执行工具</span>
+    <span class="arrow">→</span>
+    <span class="stage feed">把结果喂回模型</span>
+    <span class="arrow">→</span>
+    <span class="stage model">再决策</span>
+    <span class="arrow">↻</span>
+    <span class="loop">↑ 只要模型还想调工具，就回到"执行工具"再走一圈；不想调了，输出最终回答</span>
+  </div>
+  <p>每一圈做三件事：<strong>① 模型决定要不要调工具 → ② harness 执行工具拿结果 → ③ 把结果塞回上下文，让模型继续</strong>。模型说"我不用调工具了"的那一刻，循环结束，输出回答。</p>
+
+  <h2>手写最小 agent（Client SDK 版）</h2>
+  <p>别被"agent"吓到——剥到最底，它就是一个 <code>while</code> 循环。这是用 Anthropic 底层 Client SDK 写的最小 agent，<strong>循环是你自己写的</strong>：</p>
+<pre><code><span class="anno"># 1. 第一轮：把用户问题 + 工具清单发给模型</span>
+response = client.messages.create(
+    model="claude-sonnet-4-5",
+    messages=[{"role": "user", "content": "当前目录有哪些文件？"}],
+    tools=[...],                      <span class="anno"># 工具定义（schema + 描述）</span>
+)
+
+<span class="anno"># 2. agentic loop：只要模型还想调工具，就继续转</span>
+while response.stop_reason == "tool_use":
+    tool_call = response.content      <span class="anno"># 模型说：我要调这个工具</span>
+    result = run_tool(tool_call)      <span class="anno"># harness 真正执行工具，拿结果</span>
+    response = client.messages.create(   <span class="anno"># 3. 把结果喂回，让模型继续决策</span>
+        model="claude-sonnet-4-5",
+        messages=[...旧历史, tool_call, result],   <span class="anno"># 历史里追加这一轮</span>
+        tools=[...],
+    )
+
+<span class="anno"># 4. 模型不再调工具 → 循环退出，输出最终回答</span>
+print(response.content)</code></pre>
+  <p>读懂这三处就够：第一，<code>while</code> 的条件 <code>stop_reason == "tool_use"</code> 是模型在说"我还要调工具"；第二，<code>run_tool</code> 是 harness 干的活（执行工具）；第三，每轮把工具结果追加进 <code>messages</code> 再发给模型——这就是"喂回"。</p>
+  <div class="callout key">
+    <span class="callout-title">小胜利</span>
+    <p>你现在能说出 agent 到底"自主"在哪了：模型决定<strong>调哪个工具、什么时候停</strong>，harness 只负责执行和喂回。所谓自主，就是<strong>模型掌控循环的走向</strong>，而不是代码写死下一步。</p>
+  </div>
+
+  <h2>Agent SDK 把循环藏去了哪里</h2>
+  <p>上面那段 <code>while</code>，你得自己写、自己维护工具执行、自己拼消息历史。Claude Agent SDK 把这整段循环封装进了一个 <code>query</code> 调用——<strong>同样的 agent，代码变成这样</strong>：</p>
+<pre><code><span class="anno"># Agent SDK：循环被封装了，Claude 自主处理工具</span>
+async for message in query(
+    prompt="当前目录有哪些文件？",
+    options=ClaudeAgentOptions(allowed_tools=["Bash", "Glob"]),
+):
+    print(message)</code></pre>
+  <p>没有 <code>while</code>，没有 <code>run_tool</code>，没有手动拼历史。那个循环还在——只是 Claude 替你转了，你只管流式收结果。</p>
+  <table>
+    <thead><tr><th></th><th>Client SDK</th><th>Agent SDK</th></tr></thead>
+    <tbody>
+      <tr><td>谁写 agentic loop</td><td>你自己（while 循环）</td><td>Claude 替你转</td></tr>
+      <tr><td>谁执行工具</td><td>你写 <code>run_tool</code></td><td>内置工具开箱即用</td></tr>
+      <tr><td>谁管消息历史</td><td>你手动拼</td><td>SDK 自动维护</td></tr>
+      <tr><td>适合</td><td>要完全掌控每一步</td><td>快速搭 agent / 生产用</td></tr>
+    </tbody>
+  </table>
+  <div class="callout info">
+    <span class="callout-title">记住这个对照</span>
+    <p>这就是 L01 说的"Claude Agent SDK 是 Claude Code 的开源内核"在代码层面的证据——CC 那个能读文件改代码的 agent，内核就是这样一个被封装好的 agentic loop。模块 8 我们会打开 Agent SDK 源码，看这个循环在代码里到底怎么写。</p>
+  </div>
+
+  <div class="quiz">
+    <p class="quiz-q">小练习：agentic loop 每一圈"喂回模型"的，是什么？</p>
+    <div class="quiz-options">
+      <div class="quiz-opt" data-correct="true"><span class="mark">✓</span>工具执行的结果</div>
+      <div class="quiz-opt"><span class="mark">✓</span>用户的下一条指令</div>
+      <div class="quiz-opt"><span class="mark">✓</span>系统提示词更新</div>
+      <div class="quiz-opt"><span class="mark">✓</span>压缩后的旧历史</div>
+    </div>
+    <p class="quiz-explain"><strong>答案：工具执行的结果。</strong>loop 的三件事是"模型决策 → 执行工具 → 把结果喂回"。喂回的是 <code>run_tool</code> 的产出，模型据此决定下一步。用户的下一条指令要等这轮 loop 结束才出现；系统提示词一般整轮不变；压缩历史是上下文管理的事（L09），不是 loop 每圈喂的东西。</p>
+  </div>
+
+  <div class="followup">
+    <span class="label">带着这个进下一课</span>
+    你刚看到 agent 的核心是"模型掌控走向的循环"。但 Anthropic 还有一类系统叫 <strong>workflow</strong>——走向是代码写死的，不让模型自己决定。下一课就拆这对概念：<strong>什么时候该用 workflow，什么时候必须上 agent</strong>？这是售前最常被客户问的判断题之一。
+  </div>
+
+  <div class="source-box">
+    <span class="label">本课主要来源（建议读）</span>
+    <a href="https://www.anthropic.com/engineering/building-effective-agents">Building Effective AI Agents — Anthropic</a>　读 "Agents" 一节，原文原话："They are typically just LLMs using tools based on environmental feedback in a loop."——这就是你今天手写的那段循环。<br>
+    <a href="https://code.claude.com/docs/en/agent-sdk/overview">Agent SDK overview</a>　"Compare the Agent SDK to other Claude tools" 一节有 Client SDK vs Agent SDK 的代码对照，本课的对比表就来自这里。
+  </div>
+
+  <div class="callout warn" style="margin-top:24px">
+    <span class="callout-title">有问题随时问</span>
+    <p>代码看不懂某行、或对"循环谁掌控"这个点有疑问，直接问——这节是地基，糊弄过去后面会一直别扭。</p>
+  </div>
+
+  <nav class="lesson-nav" style="margin-top:48px">
+    <a href="0001-what-is-harness.html">← 上一课：harness 是什么</a>
+    <a href="0003-workflow-vs-agent.html">下一课：workflow vs agent →</a>
+  </nav>
+</article>
+
+<script>
+document.querySelectorAll('.quiz-opt').forEach(opt=>{
+  opt.addEventListener('click',()=>{
+    const box=opt.closest('.quiz');
+    box.querySelectorAll('.quiz-opt').forEach(o=>o.classList.remove('reveal','correct','wrong'));
+    const isCorrect=opt.dataset.correct==='true';
+    opt.classList.add('reveal',isCorrect?'correct':'wrong');
+    box.querySelector('.quiz-explain').classList.add('show');
+  });
+});
+</script>
+</body>
+</html>

@@ -1,0 +1,2 @@
+# 忽略 Obsidian 翻译插件配置(内含 API key,切勿提交)
+.obsidian/plugins/Obsidian-Translation-main/data.json

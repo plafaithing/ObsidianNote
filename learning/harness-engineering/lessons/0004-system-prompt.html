@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>L04 · 系统提示词层：作用、结构、写法</title>
+  <style>
+  :root {
+    --bg: #fafaf7; --ink: #1a1a1a; --ink-soft: #444; --ink-mute: #777;
+    --rule: #e4e3dc; --accent: #2b5a8c; --accent-soft: #e8f0f7;
+    --warn: #b06a00; --warn-soft: #fdf3e3; --key: #2f7d52; --key-soft: #e8f5ee;
+    --pit: #a23a3a; --pit-soft: #fbecec; --code-bg: #f3f3ee;
+    --serif: 'Source Serif Pro','Noto Serif SC',Georgia,'Songti SC',serif;
+    --sans: -apple-system,BlinkMacSystemFont,'Segoe UI','PingFang SC','Microsoft YaHei',sans-serif;
+    --mono: 'SF Mono','JetBrains Mono',Consolas,monospace;
+  }
+  *{box-sizing:border-box} html{scroll-behavior:smooth}
+  body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--sans);font-size:16px;line-height:1.78;-webkit-font-smoothing:antialiased}
+  .lesson{max-width:760px;margin:0 auto;padding:48px 28px 96px}
+  .lesson-header{margin-bottom:36px;border-bottom:1px solid var(--rule);padding-bottom:22px}
+  .course-label{font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--accent);font-weight:700}
+  .lesson-num{font-size:13px;color:var(--ink-mute);margin:8px 0 2px}
+  .lesson-title{font-family:var(--serif);font-size:34px;line-height:1.22;margin:2px 0 8px;font-weight:700}
+  .lesson-sub{color:var(--ink-soft);font-size:15px;margin:0}
+  .lesson-nav{display:flex;justify-content:space-between;margin:0 0 40px;font-size:14px}
+  .lesson-nav a{color:var(--accent);text-decoration:none} .lesson-nav a:hover{text-decoration:underline}
+  .lesson-nav .disabled{color:var(--ink-mute);opacity:.4;pointer-events:none}
+  h2{font-family:var(--serif);font-size:24px;margin:44px 0 12px;font-weight:700}
+  h3{font-size:17px;margin:26px 0 8px;font-weight:600}
+  p{margin:12px 0} ul,ol{margin:12px 0;padding-left:24px} li{margin:6px 0}
+  strong{color:var(--ink);font-weight:600} em{color:var(--ink-soft)} a{color:var(--accent)}
+  code{font-family:var(--mono);background:var(--code-bg);padding:2px 6px;border-radius:4px;font-size:.9em}
+  pre{background:var(--code-bg);padding:16px;border-radius:8px;overflow-x:auto} pre code{background:none;padding:0;font-size:13px;line-height:1.7}
+  .callout{margin:22px 0;padding:14px 18px;border-left:3px solid;border-radius:0 6px 6px 0}
+  .callout p:first-child{margin-top:0} .callout p:last-child{margin-bottom:0}
+  .callout-title{font-weight:700;font-size:13px;letter-spacing:.03em;margin-bottom:6px;display:block}
+  .callout.info{background:var(--accent-soft);border-color:var(--accent)}
+  .callout.warn{background:var(--warn-soft);border-color:var(--warn)}
+  .callout.key{background:var(--key-soft);border-color:var(--key)}
+  .callout.pit{background:var(--pit-soft);border-color:var(--pit)}
+  table{width:100%;border-collapse:collapse;margin:18px 0;font-size:14px}
+  th,td{text-align:left;padding:10px 12px;border-bottom:1px solid var(--rule);vertical-align:top}
+  th{font-weight:600;color:var(--ink-soft);background:var(--code-bg)}
+  .quiz{margin:30px 0;border:1px solid var(--rule);border-radius:12px;padding:24px 26px;background:#fff}
+  .quiz-q{font-weight:600;margin:0 0 16px;font-size:16px}
+  .quiz-options{display:flex;flex-direction:column;gap:10px}
+  .quiz-opt{display:flex;align-items:center;gap:12px;padding:12px 16px;border:1.5px solid var(--rule);border-radius:10px;cursor:pointer;transition:all .15s;user-select:none}
+  .quiz-opt:hover{border-color:var(--accent);background:var(--accent-soft)}
+  .quiz-opt .mark{width:24px;height:24px;border-radius:50%;border:1.5px solid var(--ink-mute);display:inline-flex;align-items:center;justify-content:center;font-size:13px;color:transparent;flex-shrink:0}
+  .quiz-opt.reveal.correct{border-color:var(--key);background:var(--key-soft)}
+  .quiz-opt.reveal.correct .mark{background:var(--key);color:#fff;border-color:var(--key)}
+  .quiz-opt.reveal.wrong{border-color:var(--pit);background:var(--pit-soft)}
+  .quiz-opt.reveal.wrong .mark{background:var(--pit);color:#fff;border-color:var(--pit)}
+  .quiz-explain{margin-top:14px;font-size:14px;color:var(--ink-soft);display:none}
+  .quiz-explain.show{display:block}
+  .source-box{margin:30px 0 0;padding:18px 20px;background:var(--code-bg);border-radius:10px;font-size:14px}
+  .source-box .label{font-size:12px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-mute);font-weight:700;display:block;margin-bottom:6px}
+  .followup{margin:24px 0 0;padding:16px 20px;border:1px dashed var(--accent);border-radius:10px;background:var(--accent-soft);font-size:15px}
+  .followup .label{font-weight:700;color:var(--accent);display:block;margin-bottom:4px}
+  .anno{color:var(--ink-mute);font-size:12.5px}
+  </style>
+</head>
+<body>
+<article class="lesson">
+  <header class="lesson-header">
+    <span class="course-label">Harness Engineering · 模块 1</span>
+    <div class="lesson-num">第 04 课</div>
+    <h1 class="lesson-title">系统提示词层：作用、结构、写法</h1>
+    <p class="lesson-sub">harness 七层的第一层。你其实早就在用——<code>CLAUDE.md</code> 就是系统提示词的一部分。</p>
+  </header>
+
+  <nav class="lesson-nav">
+    <a href="0003-workflow-vs-agent.html">← 上一课：workflow vs agent</a>
+    <a href="0005-dissect-cc-system-prompt.html">下一课：拆 CC system prompt →</a>
+  </nav>
+
+  <h2>你早就在用这一层</h2>
+  <p>L01 把系统提示词列为 harness 第一层。你可能觉得它很陌生——但其实你写过：<strong>Claude Code 启动时会把 <code>CLAUDE.md</code> 的内容拼进 system prompt</strong>。你写在 CLAUDE.md 里的"用中文""别过度工程""先规划再实现"，都是在写系统提示词层。</p>
+  <p>系统提示词是什么？它是<strong>每次对话开始时注入的持久指令</strong>，塑造 agent 整场的行为——区别于用户消息（临时、一次性的）。用户消息是"这轮请你干什么"，系统提示词是"你是个什么样的 agent、永远遵守什么"。</p>
+
+  <h2>作用：四件事</h2>
+  <table>
+    <thead><tr><th>作用</th><th>例子</th></tr></thead>
+    <tbody>
+      <tr><td>① 身份与角色</td><td>"你是一个 Python 编码助手"——聚焦行为和语气</td></tr>
+      <tr><td>② 规则与约束</td><td>"改代码前先读文件""危险操作要确认"</td></tr>
+      <tr><td>③ 输出格式</td><td>"用流畅散文，别用 markdown 列表"</td></tr>
+      <tr><td>④ 上下文与背景</td><td>"当前日期是 X""这是售前场景，要可控可承诺"</td></tr>
+    </tbody>
+  </table>
+
+  <h2>结构：用 XML 标签分块</h2>
+  <p>Anthropic 的建议：复杂系统提示词用 <strong>XML 标签分块</strong>，让 Claude 无歧义解析哪部分是指令、哪部分是上下文、哪部分是例子。</p>
+<pre><code>&lt;role&gt;你是一个代码审查助手，专注 Python。&lt;/role&gt;
+
+&lt;instructions&gt;
+1. 改代码前必须先读文件
+2. 只改用户要求的，不顺手重构
+&lt;/instructions&gt;
+
+&lt;context&gt;当前是售前 POC，稳定性优先于功能丰富度。&lt;/context&gt;
+
+&lt;examples&gt;
+&lt;example&gt;...&lt;/example&gt;
+&lt;/examples&gt;</code></pre>
+  <p>标签名要一致、描述性；可嵌套。这一层做对了，后面 L05 你看 Claude Code 的真实 system prompt 时，会发现它正是这么组织的。</p>
+
+  <h2>写法四原则</h2>
+
+  <h3>① 清晰直接（黄金法则）</h3>
+  <p>把 Claude 当成<strong>聪明但缺背景的新员工</strong>。Anthropic 的黄金法则：<em>把你的 prompt 给一个不了解任务的同事看，如果 ta 会困惑，Claude 也会。</em>顺序重要就用编号列表，输出格式要具体。</p>
+
+  <h3>② 说"做什么"，别说"不做什么"</h3>
+  <div class="compare-row" style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin:16px 0">
+    <div style="border:1px solid var(--pit);border-radius:8px;padding:12px 14px;background:var(--pit-soft);font-size:13.5px">
+      <strong style="color:var(--pit)">✗ 别这样</strong><br>不要用 markdown
+    </div>
+    <div style="border:1px solid var(--key);border-radius:8px;padding:12px 14px;background:var(--key-soft);font-size:13.5px">
+      <strong style="color:var(--key)">✓ 这样</strong><br>用流畅的散文段落
+    </div>
+  </div>
+  <p>正面指示比负面禁止有效得多。Claude 更容易按"做什么"执行，而不是反向推理"不做什么之后该做什么"。</p>
+
+  <h3>③ 给例子（few-shot）</h3>
+  <p>3-5 个好例子比长篇描述更稳。例子要 <strong>Relevant</strong>（贴近真实用例）/ <strong>Diverse</strong>（覆盖边缘情况）/ <strong>Structured</strong>（用 <code>&lt;example&gt;</code> 标签包，和指令区分开）。</p>
+
+  <h3>④ 给角色</h3>
+  <p>哪怕一句话角色设定都能聚焦行为：<code>"你是一个帮助 DBA 诊断慢 SQL 的助手"</code> 比 <code>"你是一个助手"</code> 强得多。角色定了，语气、知识范围、默认行为都跟着收敛。</p>
+
+  <h2>关键洞察：系统提示词是 harness 各层的"控制面板"</h2>
+  <p>这是 agentic 场景下系统提示词最值钱的用法——你不只写身份，还能在里面<strong>调控 harness 其他层的行为</strong>。Anthropic 文档里给了不少真实片段：</p>
+  <ul>
+    <li><strong>调控工具层</strong>：想让 Claude 默认动手而非只建议，加 <code>&lt;default_to_action&gt;</code>；想保守就加 <code>&lt;do_not_act_before_instructions&gt;</code>。（→ L07 工具循环）</li>
+    <li><strong>调控安全层</strong>：告诉它哪些操作要确认——"删除文件、force push、影响共享系统的操作，先问用户"。（→ L14 安全设计）</li>
+    <li><strong>调控编排层</strong>：subagent 用过头了，加"简单任务直接干，别派 subagent"。（→ L15 编排层）</li>
+    <li><strong>防过度工程</strong>：加"只做要求的改动，别加抽象、别补 docstring"——这正好是你 CLAUDE.md 里写的。（→ 售前可控性）</li>
+    <li><strong>调控上下文层</strong>：告诉它"上下文会自动压缩，别提前停"。（→ L09 上下文管理）</li>
+  </ul>
+  <div class="callout key">
+    <span class="callout-title">记住这个视角</span>
+    <p>系统提示词不只是"角色设定"，它是 <strong>harness 各层行为的控制面板</strong>。很多你以为是"工具/权限/编排"层的事，其实是在系统提示词里一句话调控的。这也是为什么售前定制 agent 时，系统提示词往往是投入产出比最高的一层——改一句话，行为大变。</p>
+  </div>
+
+  <h2>反模式（别这么写）</h2>
+  <div class="callout pit">
+    <span class="callout-title">三个坑</span>
+    <p><strong>① 激进语言</strong>：新模型对系统提示词更敏感，<code>"CRITICAL: You MUST use this tool when..."</code> 会导致<strong>过度触发</strong>。改成正常的 <code>"Use this tool when..."</code> 即可。</p>
+    <p><strong>② 只写 don't</strong>："不要 hallucinate""不要改测试"——模型不知道该做什么。换成正面指令。</p>
+    <p><strong>③ 模糊</strong>："表现得专业一点"——没用。具体到"用中文、改代码前先读、只改要求的"。</p>
+  </div>
+
+  <div class="quiz">
+    <p class="quiz-q">小练习：想让 Claude Code 默认"直接动手改代码"而不是只给建议，系统提示词该怎么写？</p>
+    <div class="quiz-options">
+      <div class="quiz-opt" data-correct="true"><span class="mark">✓</span>正面写"默认实施改动"</div>
+      <div class="quiz-opt"><span class="mark">✓</span>写"不要只给建议"</div>
+      <div class="quiz-opt"><span class="mark">✓</span>用 CRITICAL MUST 强制</div>
+      <div class="quiz-opt"><span class="mark">✓</span>什么都不写就行</div>
+    </div>
+    <p class="quiz-explain"><strong>答案：正面写"默认实施改动"。</strong>两条原则叠加：① 说"做什么"别说"不做什么"——"不要只给建议"是负面，不如正面写"默认实施改动而非建议"；② 新模型对激进语言过敏，CRITICAL MUST 会过度触发，正常语气即可。这就是 Anthropic 文档里 <code>&lt;default_to_action&gt;</code> 片段的思路。</p>
+  </div>
+
+  <div class="followup">
+    <span class="label">带着这个进下一课</span>
+    下一课 <strong>L05 拆 Claude Code 的真实 system prompt</strong>——打开 Piebald 仓库，看 CC 的 system prompt 到底有多长、分哪几块、怎么用 XML/结构组织、怎么调控各层。你会发现今天学的"作用/结构/写法"全在里头，只是工业级规模。
+  </div>
+
+  <div class="source-box">
+    <span class="label">本课主要来源（建议读）</span>
+    <a href="https://platform.claude.com/docs/en/build-with-claude/prompt-engineering/claude-prompting-best-practices">Prompting best practices — Claude Platform Docs</a>　重点读 "General principles" 几节（Be clear and direct / Use examples / Structure prompts with XML tags / Give Claude a role）和 "Agentic systems" 里的几个 prompt 片段——本课"控制面板"的例子都来自这里。<br>
+    <a href="https://www.anthropic.com/engineering/building-effective-agents">Building Effective Agents</a>　Appendix 2 "Prompt engineering your tools" 也讲了工具描述的 prompt 工程，和本课思路一致。
+  </div>
+
+  <div class="callout warn" style="margin-top:24px">
+    <span class="callout-title">有问题随时问</span>
+    <p>对"系统提示词是控制面板"这个视角、或某条写法原则有疑问，直接问——这块是售前调 agent 行为最常用的杠杆。</p>
+  </div>
+
+  <nav class="lesson-nav" style="margin-top:48px">
+    <a href="0003-workflow-vs-agent.html">← 上一课：workflow vs agent</a>
+    <a href="0005-dissect-cc-system-prompt.html">下一课：拆 CC system prompt →</a>
+  </nav>
+</article>
+
+<script>
+document.querySelectorAll('.quiz-opt').forEach(opt=>{
+  opt.addEventListener('click',()=>{
+    const box=opt.closest('.quiz');
+    box.querySelectorAll('.quiz-opt').forEach(o=>o.classList.remove('reveal','correct','wrong'));
+    const isCorrect=opt.dataset.correct==='true';
+    opt.classList.add('reveal',isCorrect?'correct':'wrong');
+    box.querySelector('.quiz-explain').classList.add('show');
+  });
+});
+</script>
+</body>
+</html>

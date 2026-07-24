@@ -12,7 +12,10 @@
 - [x] 更新 learning/INDEX.md
 - [x] 深读核心资源（Building Effective Agents / Agent SDK overview）→ 沉淀 `reference/术语表.md` + `harness各层速查.md`（context engineering / writing tools 留给对应课再深读）
 - [x] 写 L01 harness 是什么（起点已对齐，建立七层总图）
-- [ ] 推进 L02 agentic loop + 手写最小 agent
+- [x] L02 agentic loop（Client SDK 手写 loop vs Agent SDK 封装对照）
+- [x] L03 workflow vs agent（售前判断三问；模块 0 心智模型收口）
+- [x] L04 系统提示词：作用/结构/写法（控制面板视角；读了 Prompting best practices）
+- [ ] 推进 L05 拆 CC system prompt（需读 Piebald 仓库）
 - [ ] 按最近发展区推进课程
 
 ## Review

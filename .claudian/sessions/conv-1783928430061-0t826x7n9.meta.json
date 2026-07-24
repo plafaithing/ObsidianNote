@@ -4,20 +4,20 @@
   "title": "Create Harness Engineering Course Methodology\n\n...",
   "titleGenerationStatus": "success",
   "createdAt": 1783928430062,
-  "updatedAt": 1783932327080,
-  "lastResponseAt": 1783932327080,
+  "updatedAt": 1784791695606,
+  "lastResponseAt": 1784791695605,
   "sessionId": "65297f4c-a1f9-4a08-be6d-fb0451825bf3",
   "providerState": {
     "providerSessionId": "65297f4c-a1f9-4a08-be6d-fb0451825bf3"
   },
   "usage": {
     "model": "haiku",
-    "inputTokens": 2583,
+    "inputTokens": 1688,
     "cacheCreationInputTokens": 0,
-    "cacheReadInputTokens": 106816,
+    "cacheReadInputTokens": 160576,
     "contextWindow": 200000,
-    "contextTokens": 109399,
-    "percentage": 55,
+    "contextTokens": 162264,
+    "percentage": 81,
     "contextWindowIsAuthoritative": true
   }
 }
