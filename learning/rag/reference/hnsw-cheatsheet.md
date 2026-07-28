@@ -98,4 +98,4 @@ results = collection.search(
 - **维度**：内存 + 延迟 + 维度灾难，1024 是甜点
 
 ---
-配套：[L05 Embedding 选型](../lessons/0005-embedding-selection.html) · [Q&A 0007](../Q&A.md) · [期中考试 Q11-Q12](../lessons/quiz-midterm.html)
+配套：[L05 Embedding 选型](../lessons/0005-embedding-selection.html) · [Q&A 0007](../Q&A.md) · [期中考试 Q11-Q12](../quizzes/midterm.html)

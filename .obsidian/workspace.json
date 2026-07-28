@@ -13,10 +13,10 @@
             "state": {
               "type": "html-view",
               "state": {
-                "file": "learning/harness-engineering/lessons/0004-system-prompt.html"
+                "file": "learning/harness-engineering/quizzes/01-foundations.html"
               },
               "icon": "code-glyph",
-              "title": "0004-system-prompt"
+              "title": "01-foundations"
             }
           },
           {
@@ -46,8 +46,21 @@
               "icon": "lucide-file",
               "title": "Building Effective AI Agents"
             }
+          },
+          {
+            "id": "0585ebb008ac8ef5",
+            "type": "leaf",
+            "state": {
+              "type": "html-view",
+              "state": {
+                "file": "learning/harness-engineering/lessons/0007-writing-effective-tools.html"
+              },
+              "icon": "code-glyph",
+              "title": "0007-writing-effective-tools"
+            }
           }
-        ]
+        ],
+        "currentTab": 3
       }
     ],
     "direction": "vertical"
@@ -114,13 +127,13 @@
             "state": {
               "type": "outline",
               "state": {
-                "file": "learning/harness-engineering/lessons/0004-system-prompt.html",
+                "file": "learning/harness-engineering/lessons/0007-writing-effective-tools.html",
                 "followCursor": true,
                 "showSearch": false,
                 "searchQuery": ""
               },
               "icon": "lucide-list",
-              "title": "0004-system-prompt 的大纲"
+              "title": "0007-writing-effective-tools 的大纲"
             }
           }
         ]
@@ -233,33 +246,37 @@
       "terminal:Open terminal": false
     }
   },
-  "active": "2d3bb3e7590a810d",
+  "active": "0585ebb008ac8ef5",
   "lastOpenFiles": [
-    "learning/harness-engineering/lessons/0003-workflow-vs-agent.html",
-    "learning/harness-engineering/RESOURCES.md.tmp.10508.2c9b47df7017",
-    "learning/harness-engineering/lessons/0004-system-prompt.html",
-    "learning/harness-engineering/lessons/0004-system-prompt.html.tmp.10508.7363332f78e7",
-    "learning/harness-engineering/reference/Building Effective AI Agents.md",
-    "CLAUDE.md",
-    "learning/harness-engineering/RESOURCES.md",
     "learning/harness-engineering/lessons/0002-agentic-loop.html",
-    "learning/harness-engineering/lessons/0001-what-is-harness.html",
-    "learning/harness-engineering/Q&A.md",
-    "learning/harness-engineering/课程目录.md.tmp.24140.6acc22b0ea1c",
-    "learning/shushu/courses.md",
-    "Excalidraw/Drawing 2026-06-20 01.26.28.excalidraw.md",
+    "tasks/todo.md.tmp.22420.e8daddf5bb9c",
+    "learning/harness-engineering/课程目录.md.tmp.22420.4b0d13fdadc0",
+    "learning/harness-engineering/lessons/0007-writing-effective-tools.html.tmp.22420.6c1d92a22c50",
+    "learning/harness-engineering/lessons/0007-writing-effective-tools.html",
+    "learning/harness-engineering/Q&A.md.tmp.22420.f0e1d3365279",
+    "learning/harness-engineering/quizzes/01-foundations.html",
     "learning/harness-engineering/课程目录.md",
-    "learning/rag/lessons/0010-dify-demo.html",
+    "learning/rag/quizzes/midterm.html.tmp.22420.6ed7759d0594",
+    "learning/rag/NOTES.md.tmp.22420.adde85c749af",
+    "learning/rag/quizzes/02-retrieval.html",
+    "learning/rag/quizzes/midterm.html",
+    "CLAUDE.md",
+    "learning/shushu/courses.md",
+    "tasks/lessons.md",
+    "learning/rag/reference/hnsw-cheatsheet.md",
+    "learning/rag/MISSION.md",
+    "learning/rag/RESOURCES.md",
+    "learning/rag/Q&A.md",
+    "learning/harness-engineering/reference/Building Effective AI Agents.md",
+    "learning/harness-engineering/RESOURCES.md",
+    "learning/harness-engineering/Q&A.md",
+    "Excalidraw/Drawing 2026-06-20 01.26.28.excalidraw.md",
     "learning/rag/demo-docs/04-parameter-tuning.md",
     "learning/rag/demo-docs/03-connection-pooling.md",
     "learning/rag/demo-docs/02-session-lock-analysis.md",
     "learning/rag/demo-docs/01-slow-sql-diagnosis.md",
-    "learning/rag/demo-docs",
-    "learning/rag/Q&A.md.tmp.68512.3d633fe90872",
-    "learning/shushu/shared/lessons/03-bagua-64hexagrams.html",
     "learning/shushu/MISSION.md",
     "learning/subagents/课程目录.md",
-    "learning/rag/MISSION.md",
     "learning/INDEX.md",
     "未命名.md",
     "learning/harness-engineering/reference/harness各层速查.md",
@@ -267,10 +284,6 @@
     "CCLearningRecord/cc安装指导.md",
     "tasks/todo.md",
     "learning/harness-engineering/NOTES.md",
-    "learning/harness-engineering/MISSION.md",
-    "learning/rag/NOTES.md",
-    "learning/rag/Q&A.md",
-    "learning/rag/reference/hnsw-cheatsheet.md",
     "Pasted image 20260523205829.png",
     "Pasted image 20260523205827.png",
     "Pasted image 20260523205348.png",

@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>L06 · tool use 机制与工具定义</title>
+  <style>
+  :root {
+    --bg: #fafaf7; --ink: #1a1a1a; --ink-soft: #444; --ink-mute: #777;
+    --rule: #e4e3dc; --accent: #2b5a8c; --accent-soft: #e8f0f7;
+    --warn: #b06a00; --warn-soft: #fdf3e3; --key: #2f7d52; --key-soft: #e8f5ee;
+    --pit: #a23a3a; --pit-soft: #fbecec; --code-bg: #f3f3ee;
+    --serif: 'Source Serif Pro','Noto Serif SC',Georgia,'Songti SC',serif;
+    --sans: -apple-system,BlinkMacSystemFont,'Segoe UI','PingFang SC','Microsoft YaHei',sans-serif;
+    --mono: 'SF Mono','JetBrains Mono',Consolas,monospace;
+  }
+  *{box-sizing:border-box} html{scroll-behavior:smooth}
+  body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--sans);font-size:16px;line-height:1.78;-webkit-font-smoothing:antialiased}
+  .lesson{max-width:760px;margin:0 auto;padding:48px 28px 96px}
+  .lesson-header{margin-bottom:36px;border-bottom:1px solid var(--rule);padding-bottom:22px}
+  .course-label{font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--accent);font-weight:700}
+  .lesson-num{font-size:13px;color:var(--ink-mute);margin:8px 0 2px}
+  .lesson-title{font-family:var(--serif);font-size:34px;line-height:1.22;margin:2px 0 8px;font-weight:700}
+  .lesson-sub{color:var(--ink-soft);font-size:15px;margin:0}
+  .lesson-nav{display:flex;justify-content:space-between;margin:0 0 40px;font-size:14px}
+  .lesson-nav a{color:var(--accent);text-decoration:none} .lesson-nav a:hover{text-decoration:underline}
+  h2{font-family:var(--serif);font-size:24px;margin:44px 0 12px;font-weight:700}
+  h3{font-size:17px;margin:26px 0 8px;font-weight:600}
+  p{margin:12px 0} ul,ol{margin:12px 0;padding-left:24px} li{margin:6px 0}
+  strong{color:var(--ink);font-weight:600} em{color:var(--ink-soft)} a{color:var(--accent)}
+  code{font-family:var(--mono);background:var(--code-bg);padding:2px 6px;border-radius:4px;font-size:.9em}
+  pre{background:var(--code-bg);padding:16px;border-radius:8px;overflow-x:auto} pre code{background:none;padding:0;font-size:13px;line-height:1.7}
+  .callout{margin:22px 0;padding:14px 18px;border-left:3px solid;border-radius:0 6px 6px 0}
+  .callout p:first-child{margin-top:0} .callout p:last-child{margin-bottom:0}
+  .callout-title{font-weight:700;font-size:13px;letter-spacing:.03em;margin-bottom:6px;display:block}
+  .callout.info{background:var(--accent-soft);border-color:var(--accent)}
+  .callout.warn{background:var(--warn-soft);border-color:var(--warn)}
+  .callout.key{background:var(--key-soft);border-color:var(--key)}
+  .callout.pit{background:var(--pit-soft);border-color:var(--pit)}
+  table{width:100%;border-collapse:collapse;margin:18px 0;font-size:14px}
+  th,td{text-align:left;padding:10px 12px;border-bottom:1px solid var(--rule);vertical-align:top}
+  th{font-weight:600;color:var(--ink-soft);background:var(--code-bg)}
+  .seq{margin:20px 0;padding:18px 20px;background:#fff;border:1px solid var(--rule);border-radius:10px}
+  .seq-step{display:flex;gap:14px;align-items:flex-start;margin:10px 0;font-size:14.5px}
+  .seq-step .n{width:26px;height:26px;border-radius:50%;background:var(--accent);color:#fff;display:inline-flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;flex-shrink:0;font-family:var(--serif)}
+  .seq-step .body code{font-size:12.5px}
+  .seq-arrow{margin-left:13px;color:var(--ink-mute);font-size:13px}
+  .quiz{margin:34px 0;border:1px solid var(--rule);border-radius:12px;padding:24px 26px;background:#fff}
+  .quiz-q{font-weight:600;margin:0 0 16px;font-size:16px}
+  .quiz-q .qnum{display:inline-block;width:28px;height:28px;border-radius:50%;background:var(--accent);color:#fff;text-align:center;line-height:28px;font-size:14px;margin-right:10px;font-family:var(--serif)}
+  .quiz-q .tag{font-size:11px;color:var(--ink-mute);font-weight:500;margin-left:8px;letter-spacing:.03em}
+  .quiz-options{display:flex;flex-direction:column;gap:10px}
+  .quiz-opt{display:flex;align-items:flex-start;gap:12px;padding:12px 16px;border:1.5px solid var(--rule);border-radius:10px;cursor:pointer;transition:all .15s;user-select:none}
+  .quiz-opt:hover{border-color:var(--accent);background:var(--accent-soft)}
+  .quiz-opt .mark{width:24px;height:24px;border-radius:50%;border:1.5px solid var(--ink-mute);display:inline-flex;align-items:center;justify-content:center;font-size:13px;color:transparent;flex-shrink:0;margin-top:1px}
+  .quiz-opt.reveal.correct{border-color:var(--key);background:var(--key-soft)}
+  .quiz-opt.reveal.correct .mark{background:var(--key);color:#fff;border-color:var(--key)}
+  .quiz-opt.reveal.wrong{border-color:var(--pit);background:var(--pit-soft)}
+  .quiz-opt.reveal.wrong .mark{background:var(--pit);color:#fff;border-color:var(--pit)}
+  .quiz-explain{margin-top:14px;font-size:14px;color:var(--ink-soft);display:none;line-height:1.7}
+  .quiz-explain.show{display:block}
+  .quiz-explain .verdict{font-weight:700;color:var(--ink);display:block;margin-bottom:6px}
+  .quiz-explain ul{margin:6px 0 0;padding-left:20px} .quiz-explain li{margin:4px 0}
+  .quiz-explain .mnemonic{margin-top:8px;padding:8px 12px;background:var(--key-soft);border-radius:6px;color:var(--key);font-size:13px}
+  .source-box{margin:30px 0 0;padding:18px 20px;background:var(--code-bg);border-radius:10px;font-size:14px}
+  .source-box .label{font-size:12px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-mute);font-weight:700;display:block;margin-bottom:6px}
+  .followup{margin:24px 0 0;padding:16px 20px;border:1px dashed var(--accent);border-radius:10px;background:var(--accent-soft);font-size:15px}
+  .followup .label{font-weight:700;color:var(--accent);display:block;margin-bottom:4px}
+  .anno{color:var(--ink-mute);font-size:12.5px}
+  </style>
+</head>
+<body>
+<article class="lesson">
+  <header class="lesson-header">
+    <span class="course-label">Harness Engineering · 模块 2 · 工具层</span>
+    <div class="lesson-num">第 06 课</div>
+    <h1 class="lesson-title">tool use 机制与工具定义</h1>
+    <p class="lesson-sub">L02 你手写过 <code>run_tool</code>，但"工具"本身长什么样？模型到底怎么"调"？今天拆开。</p>
+  </header>
+
+  <nav class="lesson-nav">
+    <a href="../quizzes/01-foundations.html">← 模块测验 01</a>
+    <a href="0007-writing-effective-tools.html">下一课：写好工具 →</a>
+  </nav>
+
+  <h2>从 L02 的黑盒说起</h2>
+  <p>L02 的 while 循环里，工具是个黑盒：你传了 <code>tools=[...]</code>，模型"调用"了，你 <code>run_tool</code> 执行了，结果喂回去。但<strong>工具定义长什么样？模型是真的在"调用函数"吗？</strong>这两个问题不弄清，售前给客户讲"我们能给 agent 加工具"就讲不踏实。</p>
+
+  <h2>一、什么是工具：确定 × 非确定的契约</h2>
+  <p>Anthropic 在 <em>Writing effective tools</em> 里给了个精准定位：</p>
+  <div class="callout info">
+    <span class="callout-title">原文要义</span>
+    <p>传统软件是<strong>确定性系统之间</strong>的契约——<code>getWeather("NYC")</code> 每次都以完全一样的方式拿天气。而工具是<strong>确定性系统 × 非确定性 agent</strong> 的新契约：用户问"今天要带伞吗"，agent 可能调天气工具、可能直接用知识答、可能先问你在哪个城市，偶尔还会幻觉或不会用。</p>
+  </div>
+  <p>这带来一个根本转变：<strong>工具不是给开发者用的 API，是给 agent 用的</strong>。不能按写函数/API 的方式写，要按 agent 的认知方式设计。这条伏笔 L07 展开（怎么选工具、怎么写描述），今天先把机制和定义讲透。</p>
+
+  <h2>二、工具定义解剖：三要素</h2>
+  <p>一个工具定义就是三块：<code>name</code> / <code>description</code> / <code>input_schema</code>。真实的 <code>get_weather</code> 长这样：</p>
+<pre><code>{
+  "name": "get_weather",
+  "description": "获取指定城市的当前天气。",
+  "input_schema": {
+    "type": "object",
+    "properties": {
+      "location": {
+        "type": "string",
+        "description": "城市名，如 'NYC'"
+      }
+    },
+    "required": ["location"]
+  }
+}</code></pre>
+  <table>
+    <thead><tr><th>要素</th><th>作用</th><th>注意</th></tr></thead>
+    <tbody>
+      <tr><td><code>name</code></td><td>工具名，agent 靠它选工具</td><td>要无歧义；多工具时要 namespacing（L07）</td></tr>
+      <tr><td><code>description</code></td><td>给 agent 看的说明</td><td><strong>会被拼进 system prompt</strong>——见第五节</td></tr>
+      <tr><td><code>input_schema</code></td><td>参数的 JSON Schema</td><td>类型 / required / enum 约束取值</td></tr>
+    </tbody>
+  </table>
+
+  <h2>三、模型怎么"调"工具：它不调，它"说"</h2>
+  <p>这是本课最反直觉的一点：<strong>模型不会真的执行函数</strong>。它做的，是输出一个 <code>tool_use</code> 块（结构化文本）：</p>
+<pre><code>{
+  "type": "tool_use",
+  "name": "get_weather",
+  "input": {"location": "NYC"},
+  "id": "toolu_01abc"
+}</code></pre>
+  <p>真正的执行在 <strong>harness 侧的 <code>run_tool</code></strong>——就是你 L02 写的那个函数。模型只是"说"它想调什么、参数是什么，harness 替它跑。这正好回答了 Q&A Q1：<code>run_tool</code> 是 harness 侧的代码，不是模型内部的东西。</p>
+  <div class="callout key">
+    <span class="callout-title">为什么是这样设计</span>
+    <p>模型是个文本输入/文本输出的推理机，它<strong>没有执行代码的能力</strong>。能跑代码的是你（harness）。所以"工具调用"本质是：<strong>模型用结构化文本表达意图，harness 解析并执行</strong>。这个分工是 L02 那个 while 能转起来的根。</p>
+  </div>
+
+  <h2>四、调用协议：tool_use ↔ tool_result 配对</h2>
+  <p>把 L02 的循环展开成时序，看 tool_use 和 tool_result 怎么靠 <code>id</code> 串起来：</p>
+  <div class="seq">
+    <div class="seq-step"><span class="n">1</span><div class="body">模型输出 <strong>assistant</strong> 消息，含 <code>tool_use</code> 块（name / input / <strong>id</strong>），<code>stop_reason="tool_use"</code></div></div>
+    <div class="seq-arrow">↓</div>
+    <div class="seq-step"><span class="n">2</span><div class="body">harness 解析 <code>tool_use</code>，调 <code>run_tool(name, input)</code>，拿到结果</div></div>
+    <div class="seq-arrow">↓</div>
+    <div class="seq-step"><span class="n">3</span><div class="body">harness 构造 <strong>user</strong> 消息，含 <code>tool_result</code> 块（<strong>tool_use_id</strong> 对上 / content），喂回模型</div></div>
+    <div class="seq-arrow">↓</div>
+    <div class="seq-step"><span class="n">4</span><div class="body">模型读 result，决定：继续调工具（回到 1）or <code>end_turn</code> 停下</div></div>
+  </div>
+  <p>配对靠 <code>tool_use_id</code>——assistant 的 <code>tool_use.id</code> 和 user 的 <code>tool_result.tool_use_id</code> 必须一致。一条 assistant 消息可以含<strong>多个 tool_use 块</strong>（并行调用多个工具），每个都对应一个 tool_result。</p>
+  <div class="callout warn">
+    <span class="callout-title">API 无状态的后果</span>
+    <p>Messages API 是无状态的——每次 <code>messages.create</code> 都要把<strong>完整历史</strong>发过去（Q&amp;A Q2）。所以 tool_use 和 tool_result 作为历史消息一直留在 messages 里，模型每轮都重读。这也是为什么工具结果太大会吃爆 context——L09 展开。</p>
+  </div>
+
+  <h2>五、工具描述也是系统提示词（控制面板延伸）</h2>
+  <p>看 <code>description</code> 字段——它不只是文档，Anthropic 文档明说：工具定义被 <strong>dynamically loaded into Claude's system prompt</strong>。<em>Writing effective tools</em> 也强调描述 "are loaded into your agents' context"。</p>
+  <div class="callout key">
+    <span class="callout-title">L05 控制面板，在工具层的延续</span>
+    <p>L05 说 CC 的 system prompt 里有 <code>Tool use concepts</code>（11835 tks）这种大片段调工具层。现在你明白了：<strong>每个工具的 description 也是拼进 system prompt 的一部分</strong>。你写工具描述 = 在调工具层行为。所以"写好工具描述"本质是 prompt 工程——L07 专门讲。</p>
+  </div>
+
+  <h2>六、参数设计速览（深在 L07）</h2>
+  <ul>
+    <li><strong>无歧义命名</strong>：用 <code>user_id</code> 不要用 <code>user</code>——agent 不知道 <code>user</code> 该传名字还是 ID。Anthropic 原话："input parameters should be unambiguously named"。</li>
+    <li><strong>required 标必填</strong>：必填的放 <code>required</code> 数组，可选的不放。</li>
+    <li><strong>enum 约束取值</strong>：取值固定时用 <code>enum</code>，如 <code>response_format: ["concise","detailed"]</code>，减少 agent 猜错。</li>
+    <li><strong>参数也要写 description</strong>：每个参数的 description 同样进 system prompt，是 prompt 工程的一部分。</li>
+  </ul>
+
+  <h2>本课小结</h2>
+  <ul>
+    <li>工具 = <strong>确定 × 非确定</strong>的契约，按 agent 认知设计，不是给开发者的 API。</li>
+    <li>定义三要素：<code>name</code> / <code>description</code> / <code>input_schema</code>（JSON Schema）。</li>
+    <li>模型<strong>不真调函数</strong>，输出 <code>tool_use</code> 块；harness 侧 <code>run_tool</code> 执行；<code>tool_result</code> 喂回，靠 <code>id</code> 配对。</li>
+    <li><code>description</code> 被拼进 system prompt = <strong>工具层的控制面板</strong>（L05 延伸）。怎么写好 → L07。</li>
+  </ul>
+
+  <!-- 随堂题 4 道，角度错开去重池 -->
+  <div class="quiz">
+    <p class="quiz-q"><span class="qnum">1</span>用户问"今天要带伞吗"，模型决定调 <code>get_weather</code>。这一刻模型实际做了什么？<span class="tag">机制</span></p>
+    <div class="quiz-options">
+      <div class="quiz-opt"><span class="mark">✓</span>真的执行了 get_weather 函数，拿到天气数据</div>
+      <div class="quiz-opt" data-correct="true"><span class="mark">✓</span>输出一个 tool_use 块（结构化文本），由 harness 侧的 run_tool 去执行</div>
+      <div class="quiz-opt"><span class="mark">✓</span>直接用自己训练时的知识回答，不调工具</div>
+      <div class="quiz-opt"><span class="mark">✓</span>生成一段调用日志写到磁盘</div>
+    </div>
+    <div class="quiz-explain">
+      <span class="verdict">答案：输出 tool_use 块，harness 执行。</span>
+      <ul>
+        <li><strong>真执行函数 ✗</strong>：模型是文本输入/输出推理机，<strong>没有执行代码的能力</strong>。能跑代码的是 harness。</li>
+        <li><strong>输出 tool_use 块 ✓</strong>：模型用结构化文本表达"我想调 get_weather，参数 location=NYC"，harness 解析后调 run_tool。这是"工具调用"的本质。</li>
+        <li><strong>直接用知识 ✗</strong>：agent 确实可能这么做（确定×非确定契约），但题目说"决定调 get_weather"，那就走工具路径，不是用知识答。</li>
+        <li><strong>写日志 ✗</strong>：无关，模型不写磁盘。</li>
+      </ul>
+      <div class="mnemonic">口诀:「模型说，harness 做」——tool_use 是意图，run_tool 是执行。</div>
+    </div>
+  </div>
+
+  <div class="quiz">
+    <p class="quiz-q"><span class="qnum">2</span>一个工具定义由哪三要素组成？<span class="tag">定义</span></p>
+    <div class="quiz-options">
+      <div class="quiz-opt"><span class="mark">✓</span>name / description / output_schema</div>
+      <div class="quiz-opt" data-correct="true"><span class="mark">✓</span>name / description / input_schema</div>
+      <div class="quiz-opt"><span class="mark">✓</span>name / version / dependencies</div>
+      <div class="quiz-opt"><span class="mark">✓</span>prompt / model / temperature</div>
+    </div>
+    <div class="quiz-explain">
+      <span class="verdict">答案：name / description / input_schema。</span>
+      <ul>
+        <li><strong>output_schema ✗</strong>：易混点——工具定义的是<strong>输入</strong>参数 schema（input_schema），输出是 tool_result 自由格式内容，没有 output_schema 字段。</li>
+        <li><strong>input_schema ✓</strong>：name 供 agent 选用，description 给 agent 说明（且拼进 system prompt），input_schema 是参数的 JSON Schema（类型/required/enum）。</li>
+        <li><strong>version/dependencies ✗</strong>：这是软件包的概念，不是工具定义。</li>
+        <li><strong>prompt/model/temperature ✗</strong>：这是调用参数，不是工具定义本身。</li>
+      </ul>
+      <div class="mnemonic">口诀:「工具三件套：名字、说明、参数表」——name 让 agent 选，description 让 agent 懂，input_schema 让参数对；输出没 schema。</div>
+    </div>
+  </div>
+
+  <div class="quiz">
+    <p class="quiz-q"><span class="qnum">3</span>设计 <code>send_message</code> 工具时，参数该叫 <code>user</code> 还是 <code>user_id</code>？为什么？<span class="tag">应用</span></p>
+    <div class="quiz-options">
+      <div class="quiz-opt"><span class="mark">✓</span><code>user</code>——更短，agent 更好记</div>
+      <div class="quiz-opt" data-correct="true"><span class="mark">✓</span><code>user_id</code>——无歧义，agent 不会纠结该传名字还是 ID</div>
+      <div class="quiz-opt"><span class="mark">✓</span>无所谓，agent 都能猜对</div>
+      <div class="quiz-opt"><span class="mark">✓</span><code>u</code>——最省 token</div>
+    </div>
+    <div class="quiz-explain">
+      <span class="verdict">答案：user_id。</span>
+      <ul>
+        <li><strong>user ✗</strong>：歧义——agent 不知道该传用户名、邮箱还是 ID，容易猜错。Anthropic 原话"input parameters should be unambiguously named"。</li>
+        <li><strong>user_id ✓</strong>：明确告诉 agent 传 ID，消除歧义，减少参数错误。</li>
+        <li><strong>无所谓 ✗</strong>：命名对工具调用成功率影响很大，Sonnet 3.5 在 SWE-bench 上靠精修工具描述就大幅降错。</li>
+        <li><strong>u ✗</strong>：省 token 但牺牲清晰度，agent 难理解，本末倒置。</li>
+      </ul>
+      <div class="mnemonic">口诀:「参数名要一眼懂，user_id 不含糊」——清晰优先于简短。</div>
+    </div>
+  </div>
+
+  <div class="quiz">
+    <p class="quiz-q"><span class="qnum">4</span>给 agent 做通讯录工具，<code>list_contacts</code>（返回全部联系人）和 <code>search_contacts</code>（按名搜索）哪个更合适？<span class="tag">决策</span></p>
+    <div class="quiz-options">
+      <div class="quiz-opt"><span class="mark">✓</span><code>list_contacts</code>——功能更全，agent 拿到全部数据自己挑</div>
+      <div class="quiz-opt" data-correct="true"><span class="mark">✓</span><code>search_contacts</code>——只返回相关结果，不浪费 agent 有限的 context</div>
+      <div class="quiz-opt"><span class="mark">✓</span>两个都做，让 agent 自己选</div>
+      <div class="quiz-opt"><span class="mark">✓</span>都不做，让 agent 用知识猜</div>
+    </div>
+    <div class="quiz-explain">
+      <span class="verdict">答案：search_contacts。</span>
+      <ul>
+        <li><strong>list_contacts ✗</strong>：返回全部联系人，agent 要逐条读 token 浪费有限 context——像"从头到尾翻通讯录找人"。Anthropic 明确反对这种暴力遍历。</li>
+        <li><strong>search_contacts ✓</strong>：只返回相关结果，把"找"的工作放回工具里，省 context、降出错率。这是"选对工具"的核心原则。</li>
+        <li><strong>两个都做 ✗</strong>：工具重叠会分散 agent 注意力，且 list 本身就是反模式。少而精更好。</li>
+        <li><strong>都不做 ✗</strong>：通讯录是私有数据，agent 训练时没见过，用知识猜必幻觉。</li>
+      </ul>
+      <div class="mnemonic">口诀:「agent 工具要跳到相关页，别从头翻」——search 优于 list，少而精优于多而全。</div>
+    </div>
+  </div>
+
+  <div class="followup">
+    <span class="label">进下一课</span>
+    机制和定义讲透了，下一课 <strong>L07 写好工具</strong>——把今天点的五条原则展开：选对工具（list vs search 已埋伏笔）/ namespacing / 返回有意义上下文（别返回 UUID，返回名字）/ token 效率（CC 默认截断 25000 token）/ prompt-engineer 工具描述。全部来自 <em>Writing effective tools</em>。
+  </div>
+
+  <div class="source-box">
+    <span class="label">本课主要来源（建议读）</span>
+    <a href="https://www.anthropic.com/engineering/writing-tools-for-agents">Writing effective tools for AI agents — Anthropic</a>　重点读"What is a tool?"（工具=确定×非确定契约）和"Choosing the right tools"（list_contacts vs search_contacts 例子）。本课机制+定义+参数命名都出自这里。<br>
+    <a href="https://docs.claude.com/en/docs/build-with-claude/tool-use">Anthropic Tool Use 文档</a>　工具定义的 input_schema 格式、tool_use/tool_result 块结构、id 配对协议的权威说明。
+  </div>
+
+  <nav class="lesson-nav" style="margin-top:48px">
+    <a href="../quizzes/01-foundations.html">← 模块测验 01</a>
+    <a href="0007-writing-effective-tools.html">下一课：写好工具 →</a>
+  </nav>
+</article>
+
+<script>
+document.querySelectorAll('.quiz-opt').forEach(opt=>{
+  opt.addEventListener('click',()=>{
+    const box=opt.closest('.quiz');
+    box.querySelectorAll('.quiz-opt').forEach(o=>o.classList.remove('reveal','correct','wrong'));
+    const isCorrect=opt.dataset.correct==='true';
+    opt.classList.add('reveal',isCorrect?'correct':'wrong');
+    box.querySelector('.quiz-explain').classList.add('show');
+  });
+});
+</script>
+</body>
+</html>

@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>测验 01 · 心智模型 + 系统提示词</title>
+  <style>
+  :root {
+    --bg: #fafaf7; --ink: #1a1a1a; --ink-soft: #444; --ink-mute: #777;
+    --rule: #e4e3dc; --accent: #2b5a8c; --accent-soft: #e8f0f7;
+    --warn: #b06a00; --warn-soft: #fdf3e3; --key: #2f7d52; --key-soft: #e8f5ee;
+    --pit: #a23a3a; --pit-soft: #fbecec; --code-bg: #f3f3ee;
+    --serif: 'Source Serif Pro','Noto Serif SC',Georgia,'Songti SC',serif;
+    --sans: -apple-system,BlinkMacSystemFont,'Segoe UI','PingFang SC','Microsoft YaHei',sans-serif;
+    --mono: 'SF Mono','JetBrains Mono',Consolas,monospace;
+  }
+  *{box-sizing:border-box} html{scroll-behavior:smooth}
+  body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--sans);font-size:16px;line-height:1.78;-webkit-font-smoothing:antialiased}
+  .lesson{max-width:760px;margin:0 auto;padding:48px 28px 96px}
+  .lesson-header{margin-bottom:28px;border-bottom:1px solid var(--rule);padding-bottom:22px}
+  .course-label{font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--accent);font-weight:700}
+  .lesson-title{font-family:var(--serif);font-size:32px;line-height:1.22;margin:8px 0 6px;font-weight:700}
+  .lesson-sub{color:var(--ink-soft);font-size:15px;margin:0}
+  .quiz-nav-top{margin:0 0 36px;font-size:14px} .quiz-nav-top a{color:var(--accent);text-decoration:none}
+  h2{font-family:var(--serif);font-size:22px;margin:36px 0 10px;font-weight:700}
+  p{margin:12px 0} strong{color:var(--ink);font-weight:600} em{color:var(--ink-soft)} a{color:var(--accent)}
+  code{font-family:var(--mono);background:var(--code-bg);padding:2px 6px;border-radius:4px;font-size:.9em}
+  .quiz{margin:28px 0;border:1px solid var(--rule);border-radius:12px;padding:22px 24px;background:#fff}
+  .quiz-q{font-weight:600;margin:0 0 14px;font-size:16px}
+  .quiz-q .qnum{display:inline-block;width:28px;height:28px;border-radius:50%;background:var(--accent);color:#fff;text-align:center;line-height:28px;font-size:14px;margin-right:10px;font-family:var(--serif)}
+  .quiz-q .tag{font-size:11px;color:var(--ink-mute);font-weight:500;margin-left:8px;letter-spacing:.03em}
+  .quiz-options{display:flex;flex-direction:column;gap:10px}
+  .quiz-opt{display:flex;align-items:flex-start;gap:12px;padding:11px 16px;border:1.5px solid var(--rule);border-radius:10px;cursor:pointer;transition:all .15s;user-select:none}
+  .quiz-opt:hover{border-color:var(--accent);background:var(--accent-soft)}
+  .quiz-opt.selected{border-color:var(--accent);background:var(--accent-soft)}
+  .quiz-opt .mark{width:24px;height:24px;border-radius:50%;border:1.5px solid var(--ink-mute);display:inline-flex;align-items:center;justify-content:center;font-size:13px;color:transparent;flex-shrink:0;margin-top:1px}
+  .quiz-opt.selected .mark{background:var(--accent);color:#fff;border-color:var(--accent)}
+  .quiz-opt.reveal.correct{border-color:var(--key);background:var(--key-soft)}
+  .quiz-opt.reveal.correct .mark{background:var(--key);color:#fff;border-color:var(--key)}
+  .quiz-opt.reveal.wrong{border-color:var(--pit);background:var(--pit-soft)}
+  .quiz-opt.reveal.wrong .mark{background:var(--pit);color:#fff;border-color:var(--pit)}
+  .quiz-opt.reveal.missed{border-color:var(--key);background:var(--key-soft);outline:2px dashed var(--key);outline-offset:-4px}
+  .quiz-explain{margin-top:14px;font-size:14px;color:var(--ink-soft);display:none;line-height:1.7}
+  .quiz-explain.show{display:block}
+  .quiz-explain .verdict{font-weight:700;color:var(--ink);display:block;margin-bottom:6px}
+  .quiz-explain ul{margin:6px 0 0;padding-left:20px} .quiz-explain li{margin:4px 0}
+  .quiz-explain .mnemonic{margin-top:8px;padding:8px 12px;background:var(--key-soft);border-radius:6px;color:var(--key);font-size:13px}
+  .submit-row{margin:30px 0;text-align:center}
+  .submit-btn{font-family:var(--sans);font-size:16px;font-weight:700;color:#fff;background:var(--accent);border:none;border-radius:10px;padding:14px 40px;cursor:pointer;transition:all .15s}
+  .submit-btn:hover{background:#1f4774}
+  .submit-btn:disabled{background:var(--ink-mute);cursor:not-allowed}
+  .score-panel{margin:20px 0 0;padding:24px 28px;border-radius:12px;display:none}
+  .score-panel.show{display:block}
+  .score-panel.band-a{background:var(--key-soft);border:1px solid var(--key)}
+  .score-panel.band-b{background:var(--accent-soft);border:1px solid var(--accent)}
+  .score-panel.band-c{background:var(--warn-soft);border:1px solid var(--warn)}
+  .score-panel.band-d{background:var(--pit-soft);border:1px solid var(--pit)}
+  .score-num{font-family:var(--serif);font-size:42px;font-weight:700;line-height:1}
+  .score-label{font-size:14px;color:var(--ink-soft);margin-top:4px}
+  .score-advice{margin-top:14px;font-size:14.5px;line-height:1.7}
+  .score-advice strong{color:var(--ink)}
+  .source-box{margin:30px 0 0;padding:18px 20px;background:var(--code-bg);border-radius:10px;font-size:14px}
+  .source-box .label{font-size:12px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-mute);font-weight:700;display:block;margin-bottom:6px}
+  </style>
+</head>
+<body>
+<article class="lesson">
+  <header class="lesson-header">
+    <span class="course-label">Harness Engineering · 模块测验 01</span>
+    <h1 class="lesson-title">心智模型 + 系统提示词</h1>
+    <p class="lesson-sub">8 题，覆盖 L01-L05。做完点"提交评分"出总分与分档复习建议。诊断用，别怕错。</p>
+  </header>
+
+  <div class="quiz-nav-top"><a href="../lessons/0005-dissect-cc-system-prompt.html">← 回到 L05</a></div>
+
+  <div class="quiz">
+    <p class="quiz-q"><span class="qnum">1</span>同事说"CLAUDE.md 是系统提示词"，你说"它也是记忆"。CLAUDE.md 到底属于 harness 哪层？<span class="tag">L01+L04 · 跨概念</span></p>
+    <div class="quiz-options">
+      <div class="quiz-opt"><span class="mark">✓</span>只属于系统提示词层</div>
+      <div class="quiz-opt"><span class="mark">✓</span>只属于上下文与记忆层</div>
+      <div class="quiz-opt" data-correct="true"><span class="mark">✓</span>跨两层：以文件形式存（记忆层），启动时拼进 system prompt（系统提示词层）</div>
+      <div class="quiz-opt"><span class="mark">✓</span>不属于任何层，是普通配置文件</div>
+    </div>
+    <div class="quiz-explain">
+      <span class="verdict">答案：跨两层。</span>
+      <ul>
+        <li><strong>只系统提示词 ✗</strong>：忽略了它本质是个 md 文件，存在 vault 里、跨会话持久——这是记忆层属性。</li>
+        <li><strong>只记忆层 ✗</strong>：忽略了 CC 启动时把它的内容拼进 system prompt 注入——这是系统提示词层行为。L01 quiz 选"上下文与记忆层"是存储视角，没毛病，但不全。</li>
+        <li><strong>跨两层 ✓</strong>：存储视角=记忆层，运行视角=系统提示词层注入。两个视角都对。</li>
+        <li><strong>普通配置 ✗</strong>：它塑造 agent 行为，不是死配置。</li>
+      </ul>
+      <div class="mnemonic">口诀:「CLAUDE.md 两幅面孔：存是记忆，注入是提示词」——很多 harness 部件跨层，别非此即彼。</div>
+    </div>
+  </div>
+
+  <div class="quiz">
+    <p class="quiz-q"><span class="qnum">2</span>手写 Client SDK agent 的 while 循环里，<code>run_tool(tool_call)</code> 执行后，下一步 <code>messages.create</code> 要把什么喂回给模型？<span class="tag">L02 · 机制</span></p>
+    <div class="quiz-options">
+      <div class="quiz-opt"><span class="mark">✓</span>工具的描述文本（tool definition）</div>
+      <div class="quiz-opt" data-correct="true"><span class="mark">✓</span>工具执行的结果（tool_result）</div>
+      <div class="quiz-opt"><span class="mark">✓</span>一句"工具已执行成功"</div>
+      <div class="quiz-opt"><span class="mark">✓</span>重新生成的 system prompt</div>
+    </div>
+    <div class="quiz-explain">
+      <span class="verdict">答案：工具执行的结果（tool_result）。</span>
+      <ul>
+        <li><strong>工具描述 ✗</strong>：tool definition 是调用前就给模型的（在 tools 参数里），不是喂回的东西。</li>
+        <li><strong>tool_result ✓</strong>：以 user 角色的 tool_result 块喂回，和 assistant 的 tool_use 块配对，模型据此决定下一步。</li>
+        <li><strong>"已执行成功" ✗</strong>：太模糊，模型需要真实结果内容才能继续推理。</li>
+        <li><strong>重新生成 system prompt ✗</strong>：system prompt 每次调用都带，但不是"喂回"的对象，且 API 无状态、要带全历史。</li>
+      </ul>
+      <div class="mnemonic">口诀:「喂回结果不喂描述，tool_use 配 tool_result」——见 Q&A Q2。</div>
+    </div>
+  </div>
+
+  <div class="quiz">
+    <p class="quiz-q"><span class="qnum">3</span>售前客户要"完全自主、模型自己决定调什么工具、何时停"的 agent。实现路线选？<span class="tag">L02 · SDK 选型</span></p>
+    <div class="quiz-options">
+      <div class="quiz-opt" data-correct="true"><span class="mark">✓</span>Agent SDK 的 query()——它封装了 while 循环，模型自主</div>
+      <div class="quiz-opt"><span class="mark">✓</span>Client SDK 手写 while 循环——代码控制每步</div>
+      <div class="quiz-opt"><span class="mark">✓</span>单次 messages.create 调用，不循环</div>
+      <div class="quiz-opt"><span class="mark">✓</span>用 workflow 固定步骤链</div>
+    </div>
+    <div class="quiz-explain">
+      <span class="verdict">答案：Agent SDK 的 query()。</span>
+      <ul>
+        <li><strong>Agent SDK query() ✓</strong>：query() 把 while/工具调度/历史都封装了，Claude 自主决定调什么、何时停——正是"完全自主"。</li>
+        <li><strong>Client SDK 手写 ✗</strong>：Client SDK 要你自己写 while 和 run_tool、自己管历史，是"你控制每步"的路线，不是"模型自主"。方向反了。</li>
+        <li><strong>单次调用 ✗</strong>：无循环=用完一个工具就停，无法多步自主。</li>
+        <li><strong>workflow ✗</strong>：workflow 是预定义路径，模型不自主——和需求矛盾。</li>
+      </ul>
+      <div class="mnemonic">口诀:「模型自主 Agent，代码控步 Client」——见 Q&A Q4。</div>
+    </div>
+  </div>
+
+  <div class="quiz">
+    <p class="quiz-q"><span class="qnum">4</span>客户要"读代码定位 bug、改多文件、跑测试"的系统，步数不可预测、要边走边探索。优先考虑？<span class="tag">L03 · 售前判断</span></p>
+    <div class="quiz-options">
+      <div class="quiz-opt"><span class="mark">✓</span>workflow（routing 路由模式）</div>
+      <div class="quiz-opt" data-correct="true"><span class="mark">✓</span>agent（自主循环）</div>
+      <div class="quiz-opt"><span class="mark">✓</span>单次 LLM 调用加好检索</div>
+      <div class="quiz-opt"><span class="mark">✓</span>prompt chaining（提示链）</div>
+    </div>
+    <div class="quiz-explain">
+      <span class="verdict">答案：agent。</span>
+      <ul>
+        <li><strong>routing ✗</strong>：routing 是分类后转固定流程，走向可预测。改 bug 步数不可预测，不是分类问题。</li>
+        <li><strong>agent ✓</strong>：步数不可预测、要模型边走边探索→agent。Claude Code 干的就是这个。</li>
+        <li><strong>单次调用 ✗</strong>：Anthropic 忠告——能单次解决就单次，但多文件改 bug 显然超单次能力。</li>
+        <li><strong>prompt chaining ✗</strong>：提示链是固定步骤串行，步数写死，不适合探索性任务。</li>
+      </ul>
+      <div class="mnemonic">口诀:「步数写死 workflow，写不死才 agent」——售前三问第一问。</div>
+    </div>
+  </div>
+
+  <div class="quiz">
+    <p class="quiz-q"><span class="qnum">5</span>想让 Claude Code 默认"直接改代码"而非只给建议。system prompt 怎么写？<span class="tag">L04 · 写法</span></p>
+    <div class="quiz-options">
+      <div class="quiz-opt"><span class="mark">✓</span>"CRITICAL: You MUST implement changes immediately"</div>
+      <div class="quiz-opt"><span class="mark">✓</span>"不要只给建议"</div>
+      <div class="quiz-opt" data-correct="true"><span class="mark">✓</span>"默认实施改动而非建议"</div>
+      <div class="quiz-opt"><span class="mark">✓</span>什么都不写，模型自己会懂</div>
+    </div>
+    <div class="quiz-explain">
+      <span class="verdict">答案："默认实施改动而非建议"。</span>
+      <ul>
+        <li><strong>CRITICAL MUST ✗</strong>：新模型对激进语言过敏，会<strong>过度触发</strong>——本该问的时候也莽撞改。正常语气即可。</li>
+        <li><strong>"不要只给建议" ✗</strong>：负面禁止，模型不知道该做什么。换成正面指令。</li>
+        <li><strong>正面写 ✓</strong>：说"做什么"（实施改动）而非"不做什么"，正常语气。即 Anthropic 文档 &lt;default_to_action&gt; 的思路。</li>
+        <li><strong>不写 ✗</strong>：默认行为是给建议，不写就不会动手。</li>
+      </ul>
+      <div class="mnemonic">口诀:「正面写做什么，别 CRITICAL MUST」——L04 两条原则叠加。</div>
+    </div>
+  </div>
+
+  <div class="quiz">
+    <p class="quiz-q"><span class="qnum">6</span>你在 system prompt 加一句"删除文件、force push、影响共享系统的操作，先问用户"。这是用系统提示词调 harness 的哪层？<span class="tag">L04+L05 · 控制面板</span></p>
+    <div class="quiz-options">
+      <div class="quiz-opt"><span class="mark">✓</span>工具层（怎么调工具）</div>
+      <div class="quiz-opt"><span class="mark">✓</span>编排层（多 agent 派发）</div>
+      <div class="quiz-opt" data-correct="true"><span class="mark">✓</span>权限/安全层（危险操作确认）</div>
+      <div class="quiz-opt"><span class="mark">✓</span>上下文层（窗口压缩）</div>
+    </div>
+    <div class="quiz-explain">
+      <span class="verdict">答案：权限/安全层。</span>
+      <ul>
+        <li><strong>工具层 ✗</strong>：工具层是"何时用哪个工具"，对应 CC 的 Tool use concepts 片段。</li>
+        <li><strong>编排层 ✗</strong>：编排层是多 agent 协调，对应 Coordinator mode orchestration 片段。</li>
+        <li><strong>权限/安全层 ✓</strong>：危险操作确认是安全行为，对应 CC 的 Executing actions with care 片段（1105 tks）。这就是"系统提示词=控制面板"——一句话调安全层。</li>
+        <li><strong>上下文层 ✗</strong>：上下文层是窗口/压缩，对应 Context compaction summary 片段。</li>
+      </ul>
+      <div class="mnemonic">口诀:「看行为认层」——确认危险=安全层，调度工具=工具层，派子任务=编排层。</div>
+    </div>
+  </div>
+
+  <div class="quiz">
+    <p class="quiz-q"><span class="qnum">7</span>打开 Claude Code 真实 system prompt（Piebald 仓库，v2.1.220），它的结构是？<span class="tag">L05 · 结构</span></p>
+    <div class="quiz-options">
+      <div class="quiz-opt"><span class="mark">✓</span>一段写在配置文件里的长文本</div>
+      <div class="quiz-opt" data-correct="true"><span class="mark">✓</span>515 段条件注入的片段，按环境/配置动态拼成</div>
+      <div class="quiz-opt"><span class="mark">✓</span>只有 CLAUDE.md 这一段</div>
+      <div class="quiz-opt"><span class="mark">✓</span>模型运行时自己生成</div>
+    </div>
+    <div class="quiz-explain">
+      <span class="verdict">答案：515 段条件注入。</span>
+      <ul>
+        <li><strong>一段长文本 ✗</strong>：这正是反直觉点——CC prompt 不是单段，是碎片化条件注入。</li>
+        <li><strong>515 段条件注入 ✓</strong>：分四类（主 prompt / 27 工具描述 / 子 agent / 工具型），按语言/模式/能力动态拼。</li>
+        <li><strong>只有 CLAUDE.md ✗</strong>：CLAUDE.md 只是用户层注入的一段。</li>
+        <li><strong>模型自己生成 ✗</strong>：system prompt 是 harness 侧注入，不是模型生成。</li>
+      </ul>
+      <div class="mnemonic">口诀:「五百段条件装，不是一段」——条件注入省 context 预算。</div>
+    </div>
+  </div>
+
+  <div class="quiz">
+    <p class="quiz-q"><span class="qnum">8</span>售前客户想给 CC 加一条"改代码前先读文件"的行为。投入产出比最高的第一步？<span class="tag">L05 · 定制入口</span></p>
+    <div class="quiz-options">
+      <div class="quiz-opt"><span class="mark">✓</span>用 tweakcc 改 CC 内部 fragment</div>
+      <div class="quiz-opt" data-correct="true"><span class="mark">✓</span>写进 CLAUDE.md，启动时自动注入</div>
+      <div class="quiz-opt"><span class="mark">✓</span>自建一套 harness 从头实现</div>
+      <div class="quiz-opt"><span class="mark">✓</span>改 Claude Code 源码重新编译</div>
+    </div>
+    <div class="quiz-explain">
+      <span class="verdict">答案：写进 CLAUDE.md。</span>
+      <ul>
+        <li><strong>tweakcc ✗</strong>：能做但不是第一步。改内部 fragment，CC 升级可能冲突，需 diff 管理。</li>
+        <li><strong>CLAUDE.md ✓</strong>：一句话注入即改行为，零维护、跨版本存活。CLAUDE.md 表达不了的深度定制才上 tweakcc。</li>
+        <li><strong>自建 harness ✗</strong>：过度方案，一句话能解决的事不值得自建。</li>
+        <li><strong>改源码 ✗</strong>：最重方案，CC 闭源升级即丢。</li>
+      </ul>
+      <div class="mnemonic">口诀:「定制先 CLAUDE.md，不够再 tweakcc，最后才自建」——从轻到重。</div>
+    </div>
+  </div>
+
+  <div class="submit-row">
+    <button class="submit-btn" id="submitBtn" onclick="gradeQuiz()">提交评分</button>
+  </div>
+
+  <div class="score-panel" id="scorePanel"></div>
+
+  <div class="source-box">
+    <span class="label">覆盖范围与复习指引</span>
+    本测验覆盖 L01-L05（模块 0 心智模型 + 模块 1 系统提示词）。分档建议里的"L0x"指对应课程，"Q&amp;A Qn"指 <a href="../Q&A.md">Q&A.md</a> 的问答编号。错题对应的课程建议重看相关小节再做一遍本题。
+  </div>
+</article>
+
+<script>
+let answered={};
+document.querySelectorAll('.quiz').forEach((box,qi)=>{
+  const qnum=qi+1;
+  box.querySelectorAll('.quiz-opt').forEach(opt=>{
+    opt.addEventListener('click',()=>{
+      if(answered[qnum]) return; // 提交后锁定
+      box.querySelectorAll('.quiz-opt').forEach(o=>o.classList.remove('selected'));
+      opt.classList.add('selected');
+      opt.dataset.selected='true';
+    });
+  });
+});
+function gradeQuiz(){
+  const quizzes=document.querySelectorAll('.quiz');
+  let score=0; let unanswered=0;
+  quizzes.forEach((box,qi)=>{
+    const qnum=qi+1; answered[qnum]=true;
+    const opts=box.querySelectorAll('.quiz-opt');
+    let picked=null;
+    opts.forEach(o=>{ if(o.dataset.selected==='true') picked=o; });
+    if(!picked){ unanswered++; }
+    opts.forEach(o=>{
+      const correct=o.dataset.correct==='true';
+      o.classList.remove('selected');
+      if(correct && o===picked){ o.classList.add('reveal','correct'); score++; }
+      else if(correct){ o.classList.add('reveal','correct','missed'); }
+      else if(o===picked){ o.classList.add('reveal','wrong'); }
+    });
+    box.querySelector('.quiz-explain').classList.add('show');
+  });
+  const panel=document.getElementById('scorePanel');
+  const pct=Math.round(score/8*100);
+  let band, cls, advice;
+  if(score>=7){
+    band='A · 85%+ 扎实'; cls='band-a';
+    advice='掌握扎实，可以进 <strong>模块 2 工具层（L06 tool use 机制）</strong>。系统提示词"控制面板"视角已建立，后续拆工具层时会再次验证它。';
+  }else if(score>=5){
+    band='B · 60%+ 基础 OK'; cls='band-b';
+    advice='基础 OK，补薄弱点再前进。重点重看：<strong>L02 agentic loop</strong>（Q2/Q3 错→Q&A Q1-Q4）、<strong>L04 写法原则</strong>（Q5 错）、<strong>L05 控制面板</strong>（Q6/Q7 错）。';
+  }else if(score>=3){
+    band='C · 35%+ 需复习'; cls='band-c';
+    advice='概念还没连起来。建议重看 <strong>L01 七层总图</strong> + <strong>L03 workflow vs agent</strong> + <strong>L04 控制面板视角</strong>，再回来做本题。别急着进工具层。';
+  }else{
+    band='D · 基础未稳'; cls='band-d';
+    advice='建议从 <strong>L01 重学模块 0</strong>，把 harness 七层和 agentic loop 先吃透。售前判断（L03）和系统提示词（L04-L05）依赖这两个根基。';
+  }
+  let note = unanswered>0 ? `<br><span style="color:var(--warn);font-size:13px">⚠ 有 ${unanswered} 题未作答，按错误计。</span>` : '';
+  panel.className='score-panel show '+cls;
+  panel.innerHTML=`<div class="score-num">${score}/8 <span style="font-size:24px;color:var(--ink-mute)">(${pct}%)</span></div><div class="score-label">${band}</div><div class="score-advice">${advice}${note}</div>`;
+  document.getElementById('submitBtn').disabled=true;
+  document.getElementById('submitBtn').textContent='已提交';
+  panel.scrollIntoView({behavior:'smooth',block:'center'});
+}
+</script>
+</body>
+</html>

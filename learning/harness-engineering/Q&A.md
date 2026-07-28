@@ -66,4 +66,26 @@
 即 ClaudeAgentOptions 是 **harness 各层暴露成可配置参数的入口**。这也是 L20 定制实战的伏笔：定制 Claude Code / 用 Agent SDK 搭 agent，本质就是填这张配置单。
 - 关联：L02 agentic loop、L01 harness 七层、L20 CC 定制面全景、L24 Agent SDK 架构总览。
 
+### Q5：回喂 tool_result 时，是否包含新的提示词？
+**A：不包含。** 回喂这一步只是**在 messages 末尾追加两条**（assistant 的 `tool_use` + user 的 `tool_result`），其余一律不变：
+
+| 部分 | 回喂时 | 说明 |
+|------|--------|------|
+| system prompt | 不变 | 每次请求都带（API 无状态要求），但整个 loop 里是同一个，不重新生成；且在单独的 `system` 参数里，不在 messages 数组 |
+| user 新指令 | 没有 | 用户没说话，user 消息里只有 tool_result 块 |
+| tools 清单 | 不变 | 同一套工具定义 |
+| messages 末尾 | 追加两条 | 模型上步的 tool_use + 工具返回的 tool_result |
+
+L02 代码 `messages=[...旧历史, tool_call, result]` 里的 `tool_call` 容易让人误以为是"新提示词"，其实它是**模型自己上一步的输出**——因为 API 无状态，模型不记得自己刚说了啥，得把它的话放回历史，它才知道"我刚才调了 list_files，现在结果回来了"。`result` 才是真正"喂回"的内容。
+
+**注意"上步输出"不是说它已在历史里**：模型本轮的 tool_use 是从 response 里返回的，返回时还没进 messages。harness 要把它作为一条 **assistant 消息追加**进 messages（连同 user 的 tool_result 一起追加）。即 `messages=[...旧历史, tool_call, result]` 里后两条都是**本轮新增**，都不属于旧历史——代码注释"历史里追加这一轮"即此意。
+
+"提示词"三种理解辨析：
+- 指 **system prompt** → 每次带但不变，不是"喂回"对象
+- 指 **user 新指令** → 回喂时没有
+- 指 **给模型的输入** → tool_result 算新信息，但它是"工具结果/事实数据"，不是"指令"
+
+口诀：「回喂不喂新提示，只追 tool_use 配 tool_result；system 每次带但不变」
+- 关联：L02 agentic loop、L06 tool use 机制、L09 上下文管理（历史膨胀）。
+
 ---

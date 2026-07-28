@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>L05 · 拆 Claude Code 的 system prompt</title>
+  <style>
+  :root {
+    --bg: #fafaf7; --ink: #1a1a1a; --ink-soft: #444; --ink-mute: #777;
+    --rule: #e4e3dc; --accent: #2b5a8c; --accent-soft: #e8f0f7;
+    --warn: #b06a00; --warn-soft: #fdf3e3; --key: #2f7d52; --key-soft: #e8f5ee;
+    --pit: #a23a3a; --pit-soft: #fbecec; --code-bg: #f3f3ee;
+    --serif: 'Source Serif Pro','Noto Serif SC',Georgia,'Songti SC',serif;
+    --sans: -apple-system,BlinkMacSystemFont,'Segoe UI','PingFang SC','Microsoft YaHei',sans-serif;
+    --mono: 'SF Mono','JetBrains Mono',Consolas,monospace;
+  }
+  *{box-sizing:border-box} html{scroll-behavior:smooth}
+  body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--sans);font-size:16px;line-height:1.78;-webkit-font-smoothing:antialiased}
+  .lesson{max-width:760px;margin:0 auto;padding:48px 28px 96px}
+  .lesson-header{margin-bottom:36px;border-bottom:1px solid var(--rule);padding-bottom:22px}
+  .course-label{font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--accent);font-weight:700}
+  .lesson-num{font-size:13px;color:var(--ink-mute);margin:8px 0 2px}
+  .lesson-title{font-family:var(--serif);font-size:34px;line-height:1.22;margin:2px 0 8px;font-weight:700}
+  .lesson-sub{color:var(--ink-soft);font-size:15px;margin:0}
+  .lesson-nav{display:flex;justify-content:space-between;margin:0 0 40px;font-size:14px}
+  .lesson-nav a{color:var(--accent);text-decoration:none} .lesson-nav a:hover{text-decoration:underline}
+  h2{font-family:var(--serif);font-size:24px;margin:44px 0 12px;font-weight:700}
+  h3{font-size:17px;margin:26px 0 8px;font-weight:600}
+  p{margin:12px 0} ul,ol{margin:12px 0;padding-left:24px} li{margin:6px 0}
+  strong{color:var(--ink);font-weight:600} em{color:var(--ink-soft)} a{color:var(--accent)}
+  code{font-family:var(--mono);background:var(--code-bg);padding:2px 6px;border-radius:4px;font-size:.9em}
+  pre{background:var(--code-bg);padding:16px;border-radius:8px;overflow-x:auto} pre code{background:none;padding:0;font-size:13px;line-height:1.7}
+  .callout{margin:22px 0;padding:14px 18px;border-left:3px solid;border-radius:0 6px 6px 0}
+  .callout p:first-child{margin-top:0} .callout p:last-child{margin-bottom:0}
+  .callout-title{font-weight:700;font-size:13px;letter-spacing:.03em;margin-bottom:6px;display:block}
+  .callout.info{background:var(--accent-soft);border-color:var(--accent)}
+  .callout.warn{background:var(--warn-soft);border-color:var(--warn)}
+  .callout.key{background:var(--key-soft);border-color:var(--key)}
+  .callout.pit{background:var(--pit-soft);border-color:var(--pit)}
+  table{width:100%;border-collapse:collapse;margin:18px 0;font-size:14px}
+  th,td{text-align:left;padding:10px 12px;border-bottom:1px solid var(--rule);vertical-align:top}
+  th{font-weight:600;color:var(--ink-soft);background:var(--code-bg)}
+  .quiz{margin:34px 0;border:1px solid var(--rule);border-radius:12px;padding:24px 26px;background:#fff}
+  .quiz-q{font-weight:600;margin:0 0 16px;font-size:16px}
+  .quiz-q .qnum{display:inline-block;width:28px;height:28px;border-radius:50%;background:var(--accent);color:#fff;text-align:center;line-height:28px;font-size:14px;margin-right:10px;font-family:var(--serif)}
+  .quiz-options{display:flex;flex-direction:column;gap:10px}
+  .quiz-opt{display:flex;align-items:flex-start;gap:12px;padding:12px 16px;border:1.5px solid var(--rule);border-radius:10px;cursor:pointer;transition:all .15s;user-select:none}
+  .quiz-opt:hover{border-color:var(--accent);background:var(--accent-soft)}
+  .quiz-opt .mark{width:24px;height:24px;border-radius:50%;border:1.5px solid var(--ink-mute);display:inline-flex;align-items:center;justify-content:center;font-size:13px;color:transparent;flex-shrink:0;margin-top:1px}
+  .quiz-opt.reveal.correct{border-color:var(--key);background:var(--key-soft)}
+  .quiz-opt.reveal.correct .mark{background:var(--key);color:#fff;border-color:var(--key)}
+  .quiz-opt.reveal.wrong{border-color:var(--pit);background:var(--pit-soft)}
+  .quiz-opt.reveal.wrong .mark{background:var(--pit);color:#fff;border-color:var(--pit)}
+  .quiz-explain{margin-top:14px;font-size:14px;color:var(--ink-soft);display:none;line-height:1.7}
+  .quiz-explain.show{display:block}
+  .quiz-explain .verdict{font-weight:700;color:var(--ink);display:block;margin-bottom:6px}
+  .quiz-explain ul{margin:6px 0 0;padding-left:20px} .quiz-explain li{margin:4px 0}
+  .quiz-explain .mnemonic{margin-top:8px;padding:8px 12px;background:var(--key-soft);border-radius:6px;color:var(--key);font-size:13px}
+  .source-box{margin:30px 0 0;padding:18px 20px;background:var(--code-bg);border-radius:10px;font-size:14px}
+  .source-box .label{font-size:12px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-mute);font-weight:700;display:block;margin-bottom:6px}
+  .followup{margin:24px 0 0;padding:16px 20px;border:1px dashed var(--accent);border-radius:10px;background:var(--accent-soft);font-size:15px}
+  .followup .label{font-weight:700;color:var(--accent);display:block;margin-bottom:4px}
+  .anno{color:var(--ink-mute);font-size:12.5px}
+  .tks{color:var(--ink-mute);font-size:12px;font-family:var(--mono)}
+  </style>
+</head>
+<body>
+<article class="lesson">
+  <header class="lesson-header">
+    <span class="course-label">Harness Engineering · 模块 1</span>
+    <div class="lesson-num">第 05 课</div>
+    <h1 class="lesson-title">拆 Claude Code 的 system prompt</h1>
+    <p class="lesson-sub">L04 说系统提示词是"控制面板"——今天打开 CC 真实 system prompt，验证这件事。</p>
+  </header>
+
+  <nav class="lesson-nav">
+    <a href="0004-system-prompt.html">← 上一课：系统提示词层</a>
+    <a href="../quizzes/01-foundations.html" style="font-weight:700">模块测验 01 →</a>
+  </nav>
+
+  <div class="callout info">
+    <span class="callout-title">数据来源</span>
+    <p>本课所有数字、分段名、token 计数来自 <a href="https://github.com/Piebald-AI/claude-code-system-prompts">Piebald-AI/claude-code-system-prompts</a> 仓库，对应 <strong>Claude Code v2.1.220（2026-07-24）</strong>。该仓库从 CC 编译产物里抽取真实 prompt 字符串，与 CC 实际使用的完全一致。</p>
+  </div>
+
+  <h2>第一个惊讶：CC 没有"一个" system prompt</h2>
+  <p>你可能以为 system prompt 是一段写在某处的长文本。打开 CC 的实现，第一个反直觉的事实：</p>
+  <div class="callout key">
+    <span class="callout-title">Piebald 仓库的开场白</span>
+    <p>"Claude Code doesn't just have one single string for its system prompt." CC 的 system prompt 不是单一字符串，而是 <strong>515 段</strong>（2026-06 从 350 段扩到 515）被拼起来、且<strong>大量段落是条件注入</strong>的——按环境和配置决定哪些段进、哪些不进。</p>
+  </div>
+  <p>这 515 段分四大类：</p>
+  <table>
+    <thead><tr><th>类别</th><th>是什么</th><th>举例</th></tr></thead>
+    <tbody>
+      <tr><td>① 主 system prompt</td><td>塑造主 agent 行为的指令段（本身由几十个 fragment 拼成）</td><td>身份、工具使用原则、安全、语气…</td></tr>
+      <tr><td>② 内建工具描述</td><td>27 个工具各自的描述（喂给模型的 tool definition）</td><td>Write / Bash / TodoWrite / Read…</td></tr>
+      <tr><td>③ 子 agent prompt</td><td>内建子 agent 各自的 system prompt</td><td>Explore（871 tks）、Plan（715 tks）</td></tr>
+      <tr><td>④ 工具型 prompt</td><td>AI 驱动的辅助功能各自的 prompt</td><td>对话压缩、CLAUDE.md 生成、会话标题…</td></tr>
+    </tbody>
+  </table>
+  <p class="anno">注意②：工具描述在 L06 会讲——它本质也是"喂给模型的文本"，和系统提示词同源。CC 把它单列是因为有些工具描述很大（如 Bash、Tool use concepts）。</p>
+
+  <h2>第二个惊讶：主 prompt 内部是一堆"小片段"，每段调一层</h2>
+  <p>真正印证 L04"控制面板"视角的，是主 system prompt 的内部结构。它不是一整段散文，而是<strong>几十个命名 fragment</strong>，每个 fragment 调一个具体行为/一层 harness。从 Piebald 抽的片段名和 token 数：</p>
+  <table>
+    <thead><tr><th>fragment（CC 内部名）</th><th>tks</th><th>调的是哪层 / 什么行为</th></tr></thead>
+    <tbody>
+      <tr><td>Tool use concepts</td><td class="tks">11835</td><td><strong>工具层</strong>——何时该用工具、怎么选工具的总纲（最大一段）</td></tr>
+      <tr><td>Coordinator mode orchestration</td><td class="tks">5916</td><td><strong>编排层</strong>——多 agent 协调、派发子任务</td></tr>
+      <tr><td>Executing actions with care</td><td class="tks">1105</td><td><strong>权限/安全层</strong>——危险操作要确认、谨慎执行</td></tr>
+      <tr><td>Delivering work at full scope</td><td class="tks">605</td><td>任务收口——交付完整范围、别半途而废</td></tr>
+      <tr><td>Context compaction summary</td><td class="tks">409</td><td><strong>上下文层</strong>——压缩时怎么生成摘要</td></tr>
+      <tr><td>Correction restraint</td><td class="tks">365</td><td>别过度纠正用户、别画蛇添足</td></tr>
+      <tr><td>Communication style</td><td class="tks">297</td><td>输出格式/语气</td></tr>
+      <tr><td>Censoring assistance with malicious activities</td><td class="tks">98</td><td><strong>安全层</strong>——拒绝恶意请求</td></tr>
+      <tr><td>Doing tasks (no unnecessary additions)</td><td class="tks">73</td><td><strong>防过度工程</strong>——不加要求外的东西</td></tr>
+      <tr><td>Doing tasks (no unnecessary error handling)</td><td class="tks">64</td><td>防过度工程——不为不可能场景写错误处理</td></tr>
+      <tr><td>Emoji avoidance</td><td class="tks">31</td><td>输出格式——不用 emoji</td></tr>
+      <tr><td>Tone and style (concise output — short)</td><td class="tks">16</td><td>语气——简短</td></tr>
+    </tbody>
+  </table>
+  <div class="callout key">
+    <span class="callout-title">L04 的论断，被实证了</span>
+    <p>L04 说"系统提示词是 harness 各层的控制面板"。看 CC 的真实 fragment 表：<strong>工具层、编排层、权限安全层、上下文层、防过度工程</strong>——每一层都对应一个或几个 prompt 片段在调控。这不是比喻，是 CC 的工程现实。<strong>很多你以为要"改代码"才能调的行为，其实是在 system prompt 里改一句话。</strong></p>
+  </div>
+
+  <h2>第三个惊讶：你和 CC 想到一起去了</h2>
+  <p>看这条 fragment：</p>
+  <pre><code>Doing tasks (no unnecessary additions)  <span class="anno">// 73 tokens</span>
+Doing tasks (no unnecessary error handling) <span class="anno">// 64 tokens</span></code></pre>
+  <p>这是 CC 内部防过度工程的 prompt 片段。现在翻翻你自己的 <code>CLAUDE.md</code>：</p>
+  <pre><code>没有要求的功能就不做。
+单次使用的代码不要抽象。
+没有要求的"灵活性""可配置性"不要加。
+不可能发生的场景不要写错误处理。</code></pre>
+  <p>几乎一模一样。你不是在"学习一个新概念"——你已经在用 CC 同款的思路写系统提示词了，只是规模小、放在 <code>CLAUDE.md</code> 这个用户入口里。<strong>CC 的 system prompt 就是工业级、碎片化、条件注入版的 CLAUDE.md。</strong></p>
+
+  <h2>为什么是 500+ 段而不是一段？条件注入</h2>
+  <p>Piebald 仓库解释了为什么 CC 的 prompt 碎成这么多段：<strong>"Large portions conditionally added depending on the environment and various configs."</strong> 不同段落按环境/配置动态拼接。真实例子：</p>
+  <ul>
+    <li><strong>按语言注入</strong>：只有当仓库含该语言时，才注入 <code>Tool use reference — Python</code>（7076 tks）/ <code>TypeScript</code>（7559 tks）/ <code>Go</code>（3468 tks）等。不会一股脑全塞——省 token、减干扰。</li>
+    <li><strong>按模式注入</strong>：<code>Autonomous loop tick</code>、<code>Autonomous operation guidelines</code> 等片段只在 /loop 自主模式下注入。</li>
+    <li><strong>按能力注入</strong>：<code>Chrome browser MCP tools</code>、<code>Claude in Chrome browser automation</code> 只在浏览器 MCP 接入时注入。</li>
+  </ul>
+  <div class="callout warn">
+    <span class="callout-title">这就是上下文工程</span>
+    <p>条件注入不是为了优雅，是<strong>上下文预算管理</strong>——系统提示词也占 context window，全塞进去既贵又稀释注意力。CC 按需注入，是 L09 上下文管理层的提前预演。<strong>系统提示词层和上下文层在这里交汇。</strong></p>
+  </div>
+
+  <h2>定制入口：你想"读透并定制"，从哪下手</h2>
+  <p>你的 mission 之一是"读透现有 harness 并尝试定制"。CC 的 system prompt 层有两个定制入口，投入产出比从高到低：</p>
+  <table>
+    <thead><tr><th>入口</th><th>改什么</th><th>难度</th><th>持久性</th></tr></thead>
+    <tbody>
+      <tr><td><code>CLAUDE.md</code></td><td>用户层注入——追加你自己的指令片段（CC 启动时拼进 system prompt）</td><td>低（写 markdown）</td><td>跨版本存活（你的文件，CC 升级不动它）</td></tr>
+      <tr><td><code>tweakcc</code></td><td>改 CC 内部 fragment 本身——把任一段导出为 markdown，改完 patch 回 CC 安装</td><td>中（需理解片段含义）</td><td>CC 升级可能冲突，需 diff 管理</td></tr>
+    </tbody>
+  </table>
+  <p class="anno">tweakcc 来自 Piebald 团队，专门把 CC 的 minified prompt 拆成可编辑 markdown，并提供冲突管理——正好对上"读透并定制"的目标。模块 7 定制实战（L20-L23）会动手。</p>
+  <div class="callout pit">
+    <span class="callout-title">售前提醒</span>
+    <p>客户要"定制 agent 行为"，<strong>先问能不能用 CLAUDE.md 解决</strong>——一句话注入就能改行为，零维护成本。只有 CLAUDE.md 表达不了的深度定制（改工具调度逻辑、改压缩策略）才考虑 tweakcc 或自建 harness。这是售前投入产出比的第一判断。</p>
+  </div>
+
+  <h2>本课小结</h2>
+  <ul>
+    <li>CC 的 system prompt <strong>不是一段，是 515 段条件注入</strong>，分四类（主 prompt / 27 工具描述 / 子 agent / 工具型）。</li>
+    <li>主 prompt 内部是<strong>每段调一层的 fragment</strong>——工具/编排/权限/上下文/防过度工程都有对应片段。<strong>L04"控制面板"论断被实证。</strong></li>
+    <li>你的 <code>CLAUDE.md</code> 和 CC 内部 fragment（如 <code>Doing tasks (no unnecessary additions)</code>）<strong>同款思路</strong>，只是用户层入口。</li>
+    <li>定制入口：<code>CLAUDE.md</code>（低本高回报）→ <code>tweakcc</code>（深度定制，需维护）。</li>
+  </ul>
+
+  <!-- 随堂题 4 道 -->
+  <div class="quiz">
+    <p class="quiz-q"><span class="qnum">1</span>Claude Code 的 system prompt 是怎样的结构？</p>
+    <div class="quiz-options">
+      <div class="quiz-opt" data-correct="true"><span class="mark">✓</span>515 段条件注入的片段，按环境/配置动态拼成</div>
+      <div class="quiz-opt"><span class="mark">✓</span>一段写在配置文件里的长文本</div>
+      <div class="quiz-opt"><span class="mark">✓</span>完全由模型自己生成</div>
+      <div class="quiz-opt"><span class="mark">✓</span>只有 CLAUDE.md 这一段</div>
+    </div>
+    <div class="quiz-explain">
+      <span class="verdict">答案：515 段条件注入。</span>
+      <ul>
+        <li><strong>515 段条件注入 ✓</strong>：Piebald 仓库原话"doesn't just have one single string"，515 段按环境/配置动态拼接。</li>
+        <li><strong>一段长文本 ✗</strong>：这正是反直觉点——它不是单段，是碎片化条件注入。</li>
+        <li><strong>模型自己生成 ✗</strong>：system prompt 是 harness 侧注入的，不是模型生成的。</li>
+        <li><strong>只有 CLAUDE.md ✗</strong>：CLAUDE.md 只是用户层注入的一段，主 prompt 还包含工具原则/安全/编排等几十段。</li>
+      </ul>
+      <div class="mnemonic">口诀：「CC prompt 不是一段，是五百段条件装」——条件注入省 token、减干扰。</div>
+    </div>
+  </div>
+
+  <div class="quiz">
+    <p class="quiz-q"><span class="qnum">2</span>CC 内部 fragment <code>Executing actions with care</code>（1105 tks）调的是哪一层？</p>
+    <div class="quiz-options">
+      <div class="quiz-opt" data-correct="true"><span class="mark">✓</span>权限/安全层（危险操作要确认）</div>
+      <div class="quiz-opt"><span class="mark">✓</span>工具层（怎么调工具）</div>
+      <div class="quiz-opt"><span class="mark">✓</span>上下文层（窗口压缩）</div>
+      <div class="quiz-opt"><span class="mark">✓</span>编排层（多 agent 派发）</div>
+    </div>
+    <div class="quiz-explain">
+      <span class="verdict">答案：权限/安全层。</span>
+      <ul>
+        <li><strong>权限/安全层 ✓</strong>："executing actions with care"=谨慎执行操作，对应危险操作前确认、谨慎执行，是安全层行为。</li>
+        <li><strong>工具层 ✗</strong>：工具层由 <code>Tool use concepts</code>（11835 tks）那段调，不是这段。</li>
+        <li><strong>上下文层 ✗</strong>：上下文层由 <code>Context compaction summary</code>（409 tks）调。</li>
+        <li><strong>编排层 ✗</strong>：编排层由 <code>Coordinator mode orchestration</code>（5916 tks）调。</li>
+      </ul>
+      <div class="mnemonic">口诀：「看片段名认层」——care=安全、concepts=工具、orchestration=编排、compaction=上下文。</div>
+    </div>
+  </div>
+
+  <div class="quiz">
+    <p class="quiz-q"><span class="qnum">3</span>售前场景：客户想改 CC 一个具体行为（比如"改代码前先读文件"），投入产出比最高的第一步是？</p>
+    <div class="quiz-options">
+      <div class="quiz-opt" data-correct="true"><span class="mark">✓</span>先写进 CLAUDE.md 试一句话注入</div>
+      <div class="quiz-opt"><span class="mark">✓</span>直接用 tweakcc 改 CC 内部 fragment</div>
+      <div class="quiz-opt"><span class="mark">✓</span>自建一套 harness 从头实现</div>
+      <div class="quiz-opt"><span class="mark">✓</span>改 Claude Code 源码重新编译</div>
+    </div>
+    <div class="quiz-explain">
+      <span class="verdict">答案：先写进 CLAUDE.md。</span>
+      <ul>
+        <li><strong>先 CLAUDE.md ✓</strong>：CC 启动时把 CLAUDE.md 拼进 system prompt，一句话就能改行为，零维护、跨版本存活——投入产出比最高。</li>
+        <li><strong>直接 tweakcc ✗</strong>：能做但不是第一步。tweakcc 改内部 fragment，CC 升级可能冲突，需 diff 管理。只有 CLAUDE.md 表达不了时才上。</li>
+        <li><strong>自建 harness ✗</strong>：过度方案。一句话能解决的事不值得自建。</li>
+        <li><strong>改源码重编译 ✗</strong>：最重方案，且 CC 闭源/升级即丢，售前绝不从这里开始。</li>
+      </ul>
+      <div class="mnemonic">口诀:「定制先 CLAUDE.md，不够再 tweakcc，最后才自建」——从轻到重。</div>
+    </div>
+  </div>
+
+  <div class="quiz">
+    <p class="quiz-q"><span class="qnum">4</span>为什么 CC 把 prompt 碎成 500+ 段条件注入，而不是一段全塞？</p>
+    <div class="quiz-options">
+      <div class="quiz-opt" data-correct="true"><span class="mark">✓</span>按需注入省 context 预算、减干扰</div>
+      <div class="quiz-opt"><span class="mark">✓</span>因为模型一次只能处理 500 字</div>
+      <div class="quiz-opt"><span class="mark">✓</span>为了让 README 看起来长</div>
+      <div class="quiz-opt"><span class="mark">✓</span>法律要求必须分段</div>
+    </div>
+    <div class="quiz-explain">
+      <span class="verdict">答案：按需注入省预算、减干扰。</span>
+      <ul>
+        <li><strong>按需注入省预算 ✓</strong>：system prompt 占 context window，全塞既贵又稀释注意力。按语言/模式/能力条件注入，是上下文工程。</li>
+        <li><strong>模型只能处理 500 字 ✗</strong>：模型上下文窗口远大于此，碎段不是因为处理不了，是为了精准和省钱。</li>
+        <li><strong>README 显长 ✗</strong>：无关。这是 CC 运行时的工程决策，不是文档展示。</li>
+        <li><strong>法律要求 ✗</strong>：无此要求。纯属工程权衡。</li>
+      </ul>
+      <div class="mnemonic">口诀:「条件注入=上下文预算管理」——系统提示词层和上下文层在这里交汇（L09 展开）。</div>
+    </div>
+  </div>
+
+  <div class="followup">
+    <span class="label">模块 1 收口 · 该测验了</span>
+    模块 0（心智模型）+ 模块 1（系统提示词）都走完了。下一步不是新课，而是<strong>第一次模块测验 <a href="../quizzes/01-foundations.html">01-foundations</a></strong>——8 道题诊断你对 L01-L05 的掌握。做完出总分和分档复习建议。测完再进模块 2 工具层（L06）。
+  </div>
+
+  <div class="source-box">
+    <span class="label">本课主要来源（建议读）</span>
+    <a href="https://github.com/Piebald-AI/claude-code-system-prompts">Piebald-AI/claude-code-system-prompts</a>　读 README 的"Why multiple system prompts?"和"Prompts"章节，看 515 段的分类与 token 计数。CHANGELOG.md 记了 246 个版本的 prompt 变化，可感受 prompt 在持续工程化演进。<br>
+    <a href="https://platform.claude.com/docs/en/build-with-claude/prompt-engineering/claude-prompting-best-practices">Prompting best practices</a>　L04 的写法原则在 CC 真实 fragment 里处处可见（正面指令、XML 结构、给角色）。
+  </div>
+
+  <nav class="lesson-nav" style="margin-top:48px">
+    <a href="0004-system-prompt.html">← 上一课：系统提示词层</a>
+    <a href="../quizzes/01-foundations.html" style="font-weight:700">模块测验 01 →</a>
+  </nav>
+</article>
+
+<script>
+document.querySelectorAll('.quiz-opt').forEach(opt=>{
+  opt.addEventListener('click',()=>{
+    const box=opt.closest('.quiz');
+    box.querySelectorAll('.quiz-opt').forEach(o=>o.classList.remove('reveal','correct','wrong'));
+    const isCorrect=opt.dataset.correct==='true';
+    opt.classList.add('reveal',isCorrect?'correct':'wrong');
+    box.querySelector('.quiz-explain').classList.add('show');
+  });
+});
+</script>
+</body>
+</html>

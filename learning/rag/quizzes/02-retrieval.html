@@ -69,8 +69,8 @@
   </header>
 
   <nav class="lesson-nav">
-    <a href="0007-rerank.html">← 上一节：L07 Rerank</a>
-    <a href="0008-context-prompt.html">下一节：L08 上下文组装 →</a>
+    <a href="../lessons/0007-rerank.html">← 上一节：L07 Rerank</a>
+    <a href="../lessons/0008-context-prompt.html">下一节：L08 上下文组装 →</a>
   </nav>
 
   <div class="quiz-bar">
@@ -242,8 +242,8 @@
   </div>
 
   <nav class="lesson-nav" style="margin-top:36px;">
-    <a href="0007-rerank.html">← 上一节：L07 Rerank</a>
-    <a href="0008-context-prompt.html">下一节：L08 上下文组装 →</a>
+    <a href="../lessons/0007-rerank.html">← 上一节：L07 Rerank</a>
+    <a href="../lessons/0008-context-prompt.html">下一节：L08 上下文组装 →</a>
   </nav>
 
 </article>
@@ -268,10 +268,10 @@
       fb = '<strong>检索侧三件套掌握扎实</strong>——embedding / 混合 / rerank 职责清晰，场景诊断到位，rerank 的"窄窗口 recall=precision"和"recall@K1 天花板"这两条核心都吃透了。M3 检索侧稳了，可以进 L08 上下文组装与 Prompt 工程（M4 生成侧）。';
       cls = 'good';
     } else if (pct >= 60) {
-      fb = '<strong>检索侧概念掌握，但 rerank / 诊断还有盲点</strong>。重点回看错题：<br>• rerank 提什么、recall@K1 天花板 → 重看 <a href="0007-rerank.html">L07</a>「68%→89% 真相」和「关键前提」<br>• 诊断该加什么（recall 够 vs 不够） → 重看 L07「运维实战」表 + Q&A 0002<br>• K1/K2 含义 → 重看 L07「Top-K 怎么定」<br>把错题反馈里的"为什么不是其他选项"过一遍，再进 L08。';
+      fb = '<strong>检索侧概念掌握，但 rerank / 诊断还有盲点</strong>。重点回看错题：<br>• rerank 提什么、recall@K1 天花板 → 重看 <a href="../lessons/0007-rerank.html">L07</a>「68%→89% 真相」和「关键前提」<br>• 诊断该加什么（recall 够 vs 不够） → 重看 L07「运维实战」表 + Q&A 0002<br>• K1/K2 含义 → 重看 L07「Top-K 怎么定」<br>把错题反馈里的"为什么不是其他选项"过一遍，再进 L08。';
       cls = 'mid';
     } else if (pct >= 35) {
-      fb = '<strong>检索侧概念有印象，但跨环节判断弱</strong>。建议：①重看 <a href="0007-rerank.html">L07</a> 正文（尤其两阶段、bi vs cross、68%→89% 真相三节）；②配合 <a href="quiz-midterm.html">期中 Q9–Q16</a> 一起复习检索侧；③回头再做本测验。别急着进 L08，先把检索侧判断力练出来。';
+      fb = '<strong>检索侧概念有印象，但跨环节判断弱</strong>。建议：①重看 <a href="../lessons/0007-rerank.html">L07</a> 正文（尤其两阶段、bi vs cross、68%→89% 真相三节）；②配合 <a href="midterm.html">期中 Q9–Q16</a> 一起复习检索侧；③回头再做本测验。别急着进 L08，先把检索侧判断力练出来。';
       cls = 'low';
     } else {
       fb = '<strong>建议先重看 L05–L07 课程正文</strong>。检索侧是 RAG 命中的关键，地基不稳后面生成侧会更吃力。重看重点：L05 embedding 选型与维度、L06 混合检索 RRF、L07 两阶段与 rerank 天花板。配合 <code>reference/hnsw-cheatsheet.md</code> 速查。看完目标至少 60% 再进 L08。';

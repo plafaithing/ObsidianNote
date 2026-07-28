@@ -1,0 +1,329 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>L07 · 写好工具——5 原则</title>
+  <style>
+  :root {
+    --bg: #fafaf7; --ink: #1a1a1a; --ink-soft: #444; --ink-mute: #777;
+    --rule: #e4e3dc; --accent: #2b5a8c; --accent-soft: #e8f0f7;
+    --warn: #b06a00; --warn-soft: #fdf3e3; --key: #2f7d52; --key-soft: #e8f5ee;
+    --pit: #a23a3a; --pit-soft: #fbecec; --code-bg: #f3f3ee;
+    --serif: 'Source Serif Pro','Noto Serif SC',Georgia,'Songti SC',serif;
+    --sans: -apple-system,BlinkMacSystemFont,'Segoe UI','PingFang SC','Microsoft YaHei',sans-serif;
+    --mono: 'SF Mono','JetBrains Mono',Consolas,monospace;
+  }
+  *{box-sizing:border-box} html{scroll-behavior:smooth}
+  body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--sans);font-size:16px;line-height:1.78;-webkit-font-smoothing:antialiased}
+  .lesson{max-width:760px;margin:0 auto;padding:48px 28px 96px}
+  .lesson-header{margin-bottom:36px;border-bottom:1px solid var(--rule);padding-bottom:22px}
+  .course-label{font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--accent);font-weight:700}
+  .lesson-num{font-size:13px;color:var(--ink-mute);margin:8px 0 2px}
+  .lesson-title{font-family:var(--serif);font-size:34px;line-height:1.22;margin:2px 0 8px;font-weight:700}
+  .lesson-sub{color:var(--ink-soft);font-size:15px;margin:0}
+  .lesson-nav{display:flex;justify-content:space-between;margin:0 0 40px;font-size:14px}
+  .lesson-nav a{color:var(--accent);text-decoration:none} .lesson-nav a:hover{text-decoration:underline}
+  h2{font-family:var(--serif);font-size:24px;margin:44px 0 12px;font-weight:700}
+  h3{font-size:17px;margin:26px 0 8px;font-weight:600}
+  p{margin:12px 0} ul,ol{margin:12px 0;padding-left:24px} li{margin:6px 0}
+  strong{color:var(--ink);font-weight:600} em{color:var(--ink-soft)} a{color:var(--accent)}
+  code{font-family:var(--mono);background:var(--code-bg);padding:2px 6px;border-radius:4px;font-size:.9em}
+  pre{background:var(--code-bg);padding:16px;border-radius:8px;overflow-x:auto} pre code{background:none;padding:0;font-size:13px;line-height:1.7}
+  .callout{margin:22px 0;padding:14px 18px;border-left:3px solid;border-radius:0 6px 6px 0}
+  .callout p:first-child{margin-top:0} .callout p:last-child{margin-bottom:0}
+  .callout-title{font-weight:700;font-size:13px;letter-spacing:.03em;margin-bottom:6px;display:block}
+  .callout.info{background:var(--accent-soft);border-color:var(--accent)}
+  .callout.warn{background:var(--warn-soft);border-color:var(--warn)}
+  .callout.key{background:var(--key-soft);border-color:var(--key)}
+  .callout.pit{background:var(--pit-soft);border-color:var(--pit)}
+  table{width:100%;border-collapse:collapse;margin:18px 0;font-size:14px}
+  th,td{text-align:left;padding:10px 12px;border-bottom:1px solid var(--rule);vertical-align:top}
+  th{font-weight:600;color:var(--ink-soft);background:var(--code-bg)}
+  .principle{margin:30px 0;padding:22px 24px;background:#fff;border:1px solid var(--rule);border-radius:12px}
+  .principle .pnum{display:inline-block;width:30px;height:30px;border-radius:50%;background:var(--accent);color:#fff;text-align:center;line-height:30px;font-size:14px;font-weight:700;margin-right:10px;font-family:var(--serif)}
+  .principle h3{display:inline-block;margin:0;font-size:19px;vertical-align:middle}
+  .principle .mnem{margin:10px 0 0;padding:8px 12px;background:var(--key-soft);border-radius:6px;color:var(--key);font-size:13.5px}
+  .principle .src{font-size:12px;color:var(--ink-mute);margin-top:8px}
+  .quiz{margin:34px 0;border:1px solid var(--rule);border-radius:12px;padding:24px 26px;background:#fff}
+  .quiz-q{font-weight:600;margin:0 0 16px;font-size:16px}
+  .quiz-q .qnum{display:inline-block;width:28px;height:28px;border-radius:50%;background:var(--accent);color:#fff;text-align:center;line-height:28px;font-size:14px;margin-right:10px;font-family:var(--serif)}
+  .quiz-q .tag{font-size:11px;color:var(--ink-mute);font-weight:500;margin-left:8px;letter-spacing:.03em}
+  .quiz-options{display:flex;flex-direction:column;gap:10px}
+  .quiz-opt{display:flex;align-items:flex-start;gap:12px;padding:12px 16px;border:1.5px solid var(--rule);border-radius:10px;cursor:pointer;transition:all .15s;user-select:none}
+  .quiz-opt:hover{border-color:var(--accent);background:var(--accent-soft)}
+  .quiz-opt .mark{width:24px;height:24px;border-radius:50%;border:1.5px solid var(--ink-mute);display:inline-flex;align-items:center;justify-content:center;font-size:13px;color:transparent;flex-shrink:0;margin-top:1px}
+  .quiz-opt.reveal.correct{border-color:var(--key);background:var(--key-soft)}
+  .quiz-opt.reveal.correct .mark{background:var(--key);color:#fff;border-color:var(--key)}
+  .quiz-opt.reveal.wrong{border-color:var(--pit);background:var(--pit-soft)}
+  .quiz-opt.reveal.wrong .mark{background:var(--pit);color:#fff;border-color:var(--pit)}
+  .quiz-explain{margin-top:14px;font-size:14px;color:var(--ink-soft);display:none;line-height:1.7}
+  .quiz-explain.show{display:block}
+  .quiz-explain .verdict{font-weight:700;color:var(--ink);display:block;margin-bottom:6px}
+  .quiz-explain ul{margin:6px 0 0;padding-left:20px} .quiz-explain li{margin:4px 0}
+  .quiz-explain .mnemonic{margin-top:8px;padding:8px 12px;background:var(--key-soft);border-radius:6px;color:var(--key);font-size:13px}
+  .source-box{margin:30px 0 0;padding:18px 20px;background:var(--code-bg);border-radius:10px;font-size:14px}
+  .source-box .label{font-size:12px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-mute);font-weight:700;display:block;margin-bottom:6px}
+  .followup{margin:24px 0 0;padding:16px 20px;border:1px dashed var(--accent);border-radius:10px;background:var(--accent-soft);font-size:15px}
+  .followup .label{font-weight:700;color:var(--accent);display:block;margin-bottom:4px}
+  .anno{color:var(--ink-mute);font-size:12.5px}
+  </style>
+</head>
+<body>
+<article class="lesson">
+  <header class="lesson-header">
+    <span class="course-label">Harness Engineering · 模块 2 · 工具层</span>
+    <div class="lesson-num">第 07 课</div>
+    <h1 class="lesson-title">写好工具——5 原则让工具从"能用"到"好用"</h1>
+    <p class="lesson-sub">L06 讲透了机制和定义：循环能转，不代表转得好。工具是 agent 认识世界的唯一接口，工具烂则 agent 烂。今天讲怎么设计好。</p>
+  </header>
+
+  <nav class="lesson-nav">
+    <a href="0006-tool-use-and-definition.html">← L06 tool use 机制</a>
+    <a href="0008-read-agent-sdk-tools.html">下一课：读 SDK 工具实现 →</a>
+  </nav>
+
+  <h2>核心心法：为 agent 设计，不是为开发者设计</h2>
+  <p>L06 点过：工具是<strong>确定 × 非确定</strong>的契约。Anthropic 在 <em>Writing effective tools</em> 里把后果说得很直白：</p>
+  <div class="callout info">
+    <span class="callout-title">原文要义</span>
+    <p>"instead of writing tools and MCP servers the way we'd write functions and APIs for other developers or systems, we need to design them for agents."——<strong>别按写函数/API 的方式写工具，要按 agent 的认知方式设计。</strong></p>
+  </div>
+  <p>因为 agent 和传统软件的"affordance"不同：传统软件内存廉价，可以 <code>list_contacts</code> 返回全部逐条遍历；agent 的 context 金贵，逐条读 token 就是浪费生命。下面 5 条原则都从这条心法派生。</p>
+
+  <h2>五条原则</h2>
+
+  <div class="principle">
+    <span class="pnum">1</span><h3>选对工具粒度（Choosing the right tools）</h3>
+    <p><strong>反例</strong>：<code>list_contacts</code> 返回全部联系人，agent 逐条读——像"从头翻通讯录找人"，暴力遍历浪费 context。</p>
+    <p><strong>正例</strong>：给 <code>search_contacts</code>（跳到相关页）。工具还能<strong>整合多步</strong>，把 agent 要调好几次的活一次干完：</p>
+<pre><code><span class="anno"># 选对粒度：让 agent 搜，别让 agent 翻</span>
+✗ list_contacts()                         <span class="anno"># 返回全部，agent 逐条读</span>
+✓ search_contacts(name)                   <span class="anno"># 只返匹配，省 context</span>
+
+<span class="anno"># 整合多步：把 N 次调用压成 1 次</span>
+✗ list_users + list_events + create_event <span class="anno"># agent 调 3 次自己拼</span>
+✓ schedule_event(attendees, when)         <span class="anno"># 工具内部找空闲+建事件</span>
+
+✗ get_customer_by_id + list_transactions + list_notes  <span class="anno"># 3 次</span>
+✓ get_customer_context(customer_id)       <span class="anno"># 一次编译客户近期所有相关信息</span></code></pre>
+    <p><strong>为什么</strong>：agent context 有限，把"找"和"拼"的活放回工具里（确定性侧），省下 context 给推理。少而精，每个工具要有清晰独立的用途——工具重叠会分散 agent 注意力。</p>
+    <div class="mnem">口诀:「让 agent 搜，别让 agent 翻；整合多步，少而精」</div>
+    <div class="src">原文 "Choosing the right tools for agents"：search_contacts / schedule_event / get_customer_context 三例均出自此节。</div>
+  </div>
+
+  <div class="principle">
+    <span class="pnum">2</span><h3>命名空间分组（Namespacing）</h3>
+    <p>agent 可能挂几十个 MCP server、几百个工具。工具功能重叠或目的模糊时，agent 会不知道调哪个。</p>
+<pre><code><span class="anno"># 按 service 前缀分组</span>
+✗  search / create / update               <span class="anno"># Asana 和 Jira 都有 search，重名，agent 混</span>
+✓  asana_search / jira_search             <span class="anno"># 按 service 前缀划开</span>
+
+<span class="anno"># 再按 resource 细分</span>
+✓  asana_projects_search / asana_users_search</code></pre>
+    <p><strong>为什么</strong>：名字反映任务的天然划分，agent 选工具时更准，同时减少载入 context 的工具数和描述数。prefix 还是 suffix？原文说有"non-trivial effects"，<strong>看你自己评估选</strong>——没有绝对，但 Anthropic 示例都用 prefix。</p>
+    <div class="mnem">口诀:「名前缀划边界，service + resource 分组」</div>
+    <div class="src">原文 "Namespacing your tools"：asana_search / jira_search / asana_projects_search 例。</div>
+  </div>
+
+  <div class="principle">
+    <span class="pnum">3</span><h3>返回有意义上下文（Returning meaningful context）</h3>
+    <p>工具返回的东西要直接能用在 agent 的下一步推理上，别返一堆底层技术标识符。</p>
+<pre><code><span class="anno"># 返名字，别返 UUID</span>
+✗  {"uuid":"4f3a...", "mime_type":"image/png", "256px_image_url":"..."}   <span class="anno"># agent 还要再查才能用</span>
+✓  {"name":"架构图.png", "file_type":"png", "image_url":"..."}             <span class="anno"># 直接能引用</span>
+
+<span class="anno"># 兼顾两种需求：response_format 枚举</span>
+enum ResponseFormat { DETAILED="detailed", CONCISE="concise" }
+<span class="anno"># detailed: 返 ID（thread_ts/channel_id）供后续工具调用</span>
+<span class="anno"># concise: 只返内容，约 1/3 token</span></code></pre>
+    <p><strong>为什么</strong>：agent 处理自然语言名远比处理 cryptic ID 强——原文说"merely resolving UUIDs to meaningful language significantly improves Claude's precision... by reducing hallucinations"。需要 ID 触发后续调用时，用 <code>response_format</code> 枚举让 agent 自选 detailed/concise。</p>
+    <div class="mnem">口诀:「返名字不返 UUID，detailed/concise 让 agent 选」</div>
+    <div class="src">原文 "Returning meaningful context"：uuid→name、ResponseFormat enum、Slack thread_ts 例。</div>
+  </div>
+
+  <div class="principle">
+    <span class="pnum">4</span><h3>token 效率（Optimizing for token efficiency）</h3>
+    <p>不光返回的<em>质量</em>要高，<em>数量</em>也要控。可能吃爆 context 的工具，要带分页/范围/过滤/截断 + 合理默认值。</p>
+<pre><code><span class="anno"># CC 默认截断 25000 token</span>
+<span class="anno"># 截断时给 agent 指引，别让它干等</span>
+"You returned 40000 tokens (truncated to 25000).
+ Use 'filter' or 'page' to narrow results."
+
+<span class="anno"># 错误响应：可操作 vs 不可操作</span>
+✗  {"error": "EINVAL"}                    <span class="anno"># agent 不知怎么改</span>
+✓  {"error": "customer_id 12345 not found.
+       Try search_customers(name='acme') to find the correct ID."}</code></pre>
+    <p><strong>为什么</strong>：Claude Code 默认把工具响应截断到 <strong>25,000 token</strong>（原文明确数字）。截断了要引导 agent 用更省的策略（多而小的精准搜索 &gt; 一次大搜索）。错误响应尤其要 prompt-engineer——给具体可操作的改进建议或正确格式示例，<strong>别给 opaque error code 或 traceback</strong>。</p>
+    <div class="mnem">口诀:「默认截断 25000，截断给指引，错误要可操作」</div>
+    <div class="src">原文 "Optimizing tool responses for token efficiency"：25,000 token 截断、truncated/error 响应示例。</div>
+  </div>
+
+  <div class="principle">
+    <span class="pnum">5</span><h3>prompt-engineer 描述（Prompt-engineering descriptions）</h3>
+    <p>L06 点过：description 会被拼进 system prompt。所以<strong>写工具描述 = prompt 工程</strong>，是改善工具最有效的方法之一。</p>
+<pre><code><span class="anno"># 像给新员工解释，把隐含上下文写明</span>
+✗  description: "获取天气"
+✓  description: "获取指定城市的当前天气。用于用户问天气/是否带伞/穿什么时调用。
+                 location 传城市名如 'NYC'，不支持经纬度。
+                 返回温度（摄氏）和天气状况。"
+
+<span class="anno"># 参数名无歧义（L06 已点，这里收口）</span>
+✗  {"user": "string"}        <span class="anno"># 传名字？ID？邮箱？agent 猜</span>
+✓  {"user_id": "string"}     <span class="anno"># 明确传 ID</span></code></pre>
+    <p><strong>为什么</strong>：像给团队新员工解释工具那样写——把你脑里隐含的（查询格式、术语定义、资源关系）全写明。<strong>小改大提升</strong>：原文说 Claude Sonnet 3.5 在 SWE-bench Verified 上达到 SOTA，靠的就是精修工具描述，大幅降低错误率、提升任务完成度。</p>
+    <div class="mnem">口诀:「描述当 prompt 写，像带新员工；参数名一眼懂」</div>
+    <div class="src">原文 "Prompt-engineering your tool descriptions"：user_id vs user、SWE-bench Verified 案例。</div>
+  </div>
+
+  <h2>错误处理：错误也是 tool_result，不是异常</h2>
+  <p>这条单独拎出来，因为它是原则 4 的延伸，也是 agent"自主性"在错误场景的落点：</p>
+  <div class="callout warn">
+    <span class="callout-title">工具失败时别中断 loop</span>
+    <p>工具执行出错（参数校验失败、资源找不到），<strong>不要抛异常中断整个 agent loop</strong>。把错误信息作为 <code>tool_result</code>（带 <code>is_error: true</code>）喂回模型，让它<strong>看到可操作的错误自己改路径</strong>——换参数、换工具、或告诉用户办不到。这才是 agent 的"自主"。</p>
+  </div>
+  <p>错误内容要 prompt-engineer：不说 <code>"ERROR 500"</code>，说 <code>"customer_id 12345 not found, try search_customers(name='acme') first"</code>。给 agent 一条可走的路，它就能自己走出来。</p>
+
+  <h2>综合：坏工具 vs 好工具（客服场景）</h2>
+  <p>把 5 原则串起来看一个完整对比：</p>
+  <table>
+    <thead><tr><th>维度</th><th>坏设计</th><th>好设计</th><th>对应原则</th></tr></thead>
+    <tbody>
+      <tr><td>查客户</td><td><code>list_customers</code> 返回全部</td><td><code>search_customers(name)</code> 按名搜</td><td>原则 1</td></tr>
+      <tr><td>取上下文</td><td>3 个工具分别查，返 <code>uuid</code></td><td><code>get_customer_context</code> 一次编译，返 <code>name</code>+订单+备注</td><td>原则 1 + 3</td></tr>
+      <tr><td>命名</td><td><code>search</code> / <code>create</code>（多 service 重名）</td><td><code>crm_search</code> / <code>crm_create</code></td><td>原则 2</td></tr>
+      <tr><td>大返回</td><td>日志全量返回 40000 token</td><td>分页 + 默认截断 25000 + 给 filter 指引</td><td>原则 4</td></tr>
+      <tr><td>出错</td><td><code>"ERROR 500"</code></td><td><code>"id 12345 not found, try search_customers first"</code></td><td>原则 4 + 错误处理</td></tr>
+      <tr><td>描述</td><td>"查客户"</td><td>"按名搜客户。用于… 传 name 不传 ID。返回…"</td><td>原则 5</td></tr>
+    </tbody>
+  </table>
+
+  <h2>本课小结</h2>
+  <ul>
+    <li><strong>心法</strong>：为 agent 设计，不是为开发者设计——agent context 金贵，把"找/拼"的活放回工具。</li>
+    <li><strong>原则 1 选对粒度</strong>：search 优于 list，整合多步，少而精。</li>
+    <li><strong>原则 2 namespacing</strong>：service + resource 前缀分组，防几百个工具打架。</li>
+    <li><strong>原则 3 返回有意义上下文</strong>：返名字不返 UUID，response_format 枚举兼顾 detailed/concise。</li>
+    <li><strong>原则 4 token 效率</strong>：CC 默认截断 25000，截断给指引，错误要可操作。</li>
+    <li><strong>原则 5 prompt-engineer 描述</strong>：像带新员工，参数名无歧义，小改大提升（SWE-bench 实证）。</li>
+    <li><strong>错误处理</strong>：错误作为 tool_result 喂回，不中断 loop，给 agent 一条可走的路。</li>
+  </ul>
+  <div class="callout key">
+    <span class="callout-title">小胜利</span>
+    <p>你现在拿到任何一个工具（自己写的、客户的、第三方的），能<strong>评判它好不好、知道往哪改</strong>——对着 5 原则逐条扫一遍：是 list 还是 search？返 UUID 还是名字？错误可操作吗？描述像给新员工吗？这就是售前/定制时的工具评审能力。</p>
+  </div>
+
+  <!-- 随堂题 4 道，角度错开去重池：识别/应用/机制/应用 -->
+  <div class="quiz">
+    <p class="quiz-q"><span class="qnum">1</span>客服工具 <code>get_customer</code> 返回 <code>{"uuid":"4f3a...", "mime_type":"image/png", "256px_image_url":"..."}</code>，模型拿到后还得再调一次工具才能用。这违反了哪条原则？<span class="tag">识别</span></p>
+    <div class="quiz-options">
+      <div class="quiz-opt"><span class="mark">✓</span>原则 1 选对工具粒度</div>
+      <div class="quiz-opt"><span class="mark">✓</span>原则 2 namespacing</div>
+      <div class="quiz-opt" data-correct="true"><span class="mark">✓</span>原则 3 返回有意义上下文</div>
+      <div class="quiz-opt"><span class="mark">✓</span>原则 5 prompt-engineer 描述</div>
+    </div>
+    <div class="quiz-explain">
+      <span class="verdict">答案：原则 3 返回有意义上下文。</span>
+      <ul>
+        <li><strong>原则 1 ✗</strong>：原则 1 讲"选对工具/整合多步"（list vs search、schedule_event），本题考的是<strong>返回内容</strong>不对，不是工具选错。</li>
+        <li><strong>原则 2 ✗</strong>：namespacing 讲工具<strong>命名分组</strong>（asana_search/jira_search），与返回字段无关。</li>
+        <li><strong>原则 3 ✓</strong>：返回 uuid/mime_type/256px_image_url 这些 cryptic 标识符，agent 不能直接用，要再查。原文明确：应返 name/file_type/image_url 这类直接能用的字段。</li>
+        <li><strong>原则 5 ✗</strong>：原则 5 讲<strong>描述和参数名</strong>怎么写（user_id 而非 user），本题考返回值，不是描述。</li>
+      </ul>
+      <div class="mnemonic">口诀:「返名字不返 UUID」——agent 看得懂名字，看不懂 4f3a...。</div>
+    </div>
+  </div>
+
+  <div class="quiz">
+    <p class="quiz-q"><span class="qnum">2</span>你给 agent 挂了 Asana 和 Jira 两个 MCP server，都要做"搜索"工具。工具名怎么取最不容易让 agent 混？<span class="tag">应用</span></p>
+    <div class="quiz-options">
+      <div class="quiz-opt"><span class="mark">✓</span><code>search</code>——一个工具名，靠参数区分 service</div>
+      <div class="quiz-opt" data-correct="true"><span class="mark">✓</span><code>asana_search</code> / <code>jira_search</code>——按 service 前缀划开</div>
+      <div class="quiz-opt"><span class="mark">✓</span><code>asana_jira_search</code>——一个工具塞两个 service</div>
+      <div class="quiz-opt"><span class="mark">✓</span><code>tool1_search</code> / <code>tool2_search</code>——无意义编号</div>
+    </div>
+    <div class="quiz-explain">
+      <span class="verdict">答案：asana_search / jira_search。</span>
+      <ul>
+        <li><strong>search ✗</strong>：两个 service 都叫 search 会重名，agent 不知道调谁的。无 namespace 就是 namespacing 原则要解决的痛点。</li>
+        <li><strong>asana_search / jira_search ✓</strong>：按 service 前缀分组，边界清晰，agent 一眼选对。原文示例即此。可再按 resource 细分（asana_projects_search）。</li>
+        <li><strong>asana_jira_search ✗</strong>：把两个 service 塞一个工具，违反"每个工具清晰独立用途"，参数也要复杂区分 service，反而更乱。</li>
+        <li><strong>tool1/tool2 ✗</strong>：无意义名，agent 完全无法从名字判断用途，靠读描述猜，出错率飙升。</li>
+      </ul>
+      <div class="mnemonic">口诀:「名前缀划边界，service + resource 分组」——名字要能看出"谁家的、查什么"。</div>
+    </div>
+  </div>
+
+  <div class="quiz">
+    <p class="quiz-q"><span class="qnum">3</span>工具执行时参数校验失败抛了异常。harness 怎么处理最符合 best practice？<span class="tag">机制 · 排错</span></p>
+    <div class="quiz-options">
+      <div class="quiz-opt"><span class="mark">✓</span>直接抛异常中断整个 agent loop，让开发者修 bug</div>
+      <div class="quiz-opt" data-correct="true"><span class="mark">✓</span>把错误作为 tool_result（is_error:true）喂回模型，给可操作的改进建议</div>
+      <div class="quiz-opt"><span class="mark">✓</span>静默忽略错误，假装工具执行成功返回空结果</div>
+      <div class="quiz-opt"><span class="mark">✓</span>自动重试 3 次，还失败就崩溃退出</div>
+    </div>
+    <div class="quiz-explain">
+      <span class="verdict">答案：把错误作为 tool_result 喂回，给可操作建议。</span>
+      <ul>
+        <li><strong>抛异常中断 ✗</strong>：agent 的"自主"就体现在能从错误中改路径。中断 loop 等于剥夺 agent 自愈机会，用户每次小错都要开发者介入。</li>
+        <li><strong>tool_result 喂回 ✓</strong>：错误也是 tool_result（is_error:true），让模型看到"customer_id 12345 not found, try search_customers first"这种<strong>可操作</strong>的错误，自己换路走。这正是 agent 区别于普通函数调用的关键。</li>
+        <li><strong>静默忽略 ✗</strong>：模型以为成功，基于空结果继续推理，必产出错误回答甚至幻觉。错误必须让模型看见。</li>
+        <li><strong>重试 3 次崩溃 ✗</strong>：参数校验失败是确定性错误，重试也是同样结果。盲目重试只对网络抖动这类瞬态错误有意义，且崩溃退出是最差处理。</li>
+      </ul>
+      <div class="mnemonic">口诀:「错误当结果喂回去，给可操作的提示」——别抛、别藏、给路。</div>
+    </div>
+  </div>
+
+  <div class="quiz">
+    <p class="quiz-q"><span class="qnum">4</span>两段 <code>get_weather</code> 的 description，哪个更符合 best practice？<br>
+    A：<code>"获取天气"</code><br>
+    B：<code>"获取指定城市的当前天气。用于用户问天气/是否带伞/穿什么时调用。location 传城市名如 'NYC'，不支持经纬度。返回温度和天气状况。"</code><span class="tag">应用</span></p>
+    <div class="quiz-options">
+      <div class="quiz-opt"><span class="mark">✓</span>A——更短，省 token，description 不该写太长</div>
+      <div class="quiz-opt" data-correct="true"><span class="mark">✓</span>B——写清何时用、参数格式、限制和返回，像给新员工解释</div>
+      <div class="quiz-opt"><span class="mark">✓</span>两个一样好，description 只是文档，agent 靠名字选工具</div>
+      <div class="quiz-opt"><span class="mark">✓</span>A 更好，因为模型训练时见过 get_weather，不需要描述</div>
+    </div>
+    <div class="quiz-explain">
+      <span class="verdict">答案：B。</span>
+      <ul>
+        <li><strong>A ✗</strong>：太短，没说何时用、参数格式、限制。description 被拼进 system prompt 是 prompt 工程的一部分，省这几个 token 换来的是 agent 误用、参数猜错，得不偿失。</li>
+        <li><strong>B ✓</strong>：像给新员工解释——写了<strong>何时用</strong>（问天气/带伞/穿衣）、<strong>参数格式</strong>（城市名如 NYC）、<strong>限制</strong>（不支持经纬度）、<strong>返回</strong>（温度+状况）。把隐含上下文全写明，正是原则 5 的要求。</li>
+        <li><strong>"两个一样好" ✗</strong>：description 不是普通文档，它<strong>进 system prompt 直接引导工具调用行为</strong>（L06 已点）。原文说"even small refinements to tool descriptions can yield dramatic improvements"——Sonnet 3.5 靠精修描述拿下 SWE-bench SOTA。</li>
+        <li><strong>"训练见过不需要" ✗</strong>：模型可能见过 get_weather 这个名字，但<strong>你的工具的参数格式、限制、返回结构</strong>是项目特定的，模型训练时没见过，必须靠 description 告诉它。</li>
+      </ul>
+      <div class="mnemonic">口诀:「描述当 prompt 写，像带新员工」——何时用、怎么传、返什么、有什么限制，全写明。</div>
+    </div>
+  </div>
+
+  <div class="followup">
+    <span class="label">进下一课</span>
+    5 原则讲完了，下一课 <strong>L08 读 Agent SDK 工具实现</strong>（待学）——去 Claude Agent SDK 源码里看：真实的工具是怎么定义和调度的？CC 内置的 Read/Bash/Edit 在源码里长什么样？把 L06 的定义三要素和 L07 的 5 原则落到真实代码上验证。<br>
+    <span class="anno">原文还有"原型 → 评估 → 协作改进"的迭代流程（用 Claude Code 自动优化工具），本课聚焦 5 原则未展开，留给后续可观测性/评估相关课。</span>
+  </div>
+
+  <div class="source-box">
+    <span class="label">本课主要来源（建议读）</span>
+    <a href="https://www.anthropic.com/engineering/writing-tools-for-agents">Writing effective tools for AI agents — Anthropic</a>　本课 5 原则全部出自此文的 "Principles for writing effective tools" 一节（search_contacts / schedule_event / asana_search / uuid→name / 25000 token / user_id / SWE-bench 案例均原文可查）。<br>
+    <a href="https://docs.claude.com/en/docs/build-with-claude/tool-use">Anthropic Tool Use 文档</a>　tool_result 的 is_error 字段、错误处理机制的权威说明。
+  </div>
+
+  <nav class="lesson-nav" style="margin-top:48px">
+    <a href="0006-tool-use-and-definition.html">← L06 tool use 机制</a>
+    <a href="0008-read-agent-sdk-tools.html">下一课：读 SDK 工具实现 →</a>
+  </nav>
+</article>
+
+<script>
+document.querySelectorAll('.quiz-opt').forEach(opt=>{
+  opt.addEventListener('click',()=>{
+    const box=opt.closest('.quiz');
+    box.querySelectorAll('.quiz-opt').forEach(o=>o.classList.remove('reveal','correct','wrong'));
+    const isCorrect=opt.dataset.correct==='true';
+    opt.classList.add('reveal',isCorrect?'correct':'wrong');
+    box.querySelector('.quiz-explain').classList.add('show');
+  });
+});
+</script>
+</body>
+</html>

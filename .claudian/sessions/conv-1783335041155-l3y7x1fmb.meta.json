@@ -4,20 +4,20 @@
   "title": "继续RAG学习\n\n我理解您想继续学习RAG（检索增强生成）相关的知识。让我先搜索一些高质量的R...",
   "titleGenerationStatus": "success",
   "createdAt": 1783335041155,
-  "updatedAt": 1784268617018,
-  "lastResponseAt": 1784268617018,
+  "updatedAt": 1785137139846,
+  "lastResponseAt": 1785137139846,
   "sessionId": "ebfcd0ae-d856-4242-9369-7d8786569147",
   "providerState": {
     "providerSessionId": "ebfcd0ae-d856-4242-9369-7d8786569147"
   },
   "usage": {
     "model": "haiku",
-    "inputTokens": 1360,
+    "inputTokens": 1028,
     "cacheCreationInputTokens": 0,
-    "cacheReadInputTokens": 57600,
+    "cacheReadInputTokens": 76608,
     "contextWindow": 200000,
-    "contextTokens": 58960,
-    "percentage": 29,
+    "contextTokens": 77636,
+    "percentage": 39,
     "contextWindowIsAuthoritative": true
   }
 }
