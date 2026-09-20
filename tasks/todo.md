@@ -20,7 +20,8 @@
 - [x] 制定测验计划（三层频率：随堂 4 道 / 模块 8 题 / 期中期末 20 题，写入课程目录）
 - [x] L06 tool use 机制与工具定义（工具=确定×非确定契约、三要素、tool_use不真调、配对协议、description进system prompt；读了 Writing effective tools）
 - [x] L07 写好工具——5 原则（选对工具/namespacing/返回有意义上下文/token效率/描述 + 错误处理；读 Writing effective tools 原文核实）
-- [ ] 按最近发展区推进课程（下一节 L08 读 Agent SDK 工具实现）
+- [x] L08 读 Agent SDK 工具实现（SDK 是 wrapper 仓库无 src/；tool() 四部分+Zod+annotations；createSdkMcpServer+全名格式；tool search；readOnlyHint 并行；可用性vs权限两层；错误不中断 loop；读 custom-tools/agent-loop 官方文档核实）
+- [ ] 按最近发展区推进课程（下一节 L09 上下文管理：窗口、压缩、原则）
 
 ## Review
 （待补：开主题完成后写）

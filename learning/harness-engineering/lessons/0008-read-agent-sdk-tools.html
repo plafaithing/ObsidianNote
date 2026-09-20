@@ -1,0 +1,388 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>L08 · 读 Agent SDK 工具实现</title>
+  <style>
+  :root {
+    --bg: #fafaf7; --ink: #1a1a1a; --ink-soft: #444; --ink-mute: #777;
+    --rule: #e4e3dc; --accent: #2b5a8c; --accent-soft: #e8f0f7;
+    --warn: #b06a00; --warn-soft: #fdf3e3; --key: #2f7d52; --key-soft: #e8f5ee;
+    --pit: #a23a3a; --pit-soft: #fbecec; --code-bg: #f3f3ee;
+    --serif: 'Source Serif Pro','Noto Serif SC',Georgia,'Songti SC',serif;
+    --sans: -apple-system,BlinkMacSystemFont,'Segoe UI','PingFang SC','Microsoft YaHei',sans-serif;
+    --mono: 'SF Mono','JetBrains Mono',Consolas,monospace;
+  }
+  *{box-sizing:border-box} html{scroll-behavior:smooth}
+  body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--sans);font-size:16px;line-height:1.78;-webkit-font-smoothing:antialiased}
+  .lesson{max-width:760px;margin:0 auto;padding:48px 28px 96px}
+  .lesson-header{margin-bottom:36px;border-bottom:1px solid var(--rule);padding-bottom:22px}
+  .course-label{font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--accent);font-weight:700}
+  .lesson-num{font-size:13px;color:var(--ink-mute);margin:8px 0 2px}
+  .lesson-title{font-family:var(--serif);font-size:34px;line-height:1.22;margin:2px 0 8px;font-weight:700}
+  .lesson-sub{color:var(--ink-soft);font-size:15px;margin:0}
+  .lesson-nav{display:flex;justify-content:space-between;margin:0 0 40px;font-size:14px}
+  .lesson-nav a{color:var(--accent);text-decoration:none} .lesson-nav a:hover{text-decoration:underline}
+  h2{font-family:var(--serif);font-size:24px;margin:44px 0 12px;font-weight:700}
+  h3{font-size:17px;margin:26px 0 8px;font-weight:600}
+  p{margin:12px 0} ul,ol{margin:12px 0;padding-left:24px} li{margin:6px 0}
+  strong{color:var(--ink);font-weight:600} em{color:var(--ink-soft)} a{color:var(--accent)}
+  code{font-family:var(--mono);background:var(--code-bg);padding:2px 6px;border-radius:4px;font-size:.9em}
+  pre{background:var(--code-bg);padding:16px;border-radius:8px;overflow-x:auto} pre code{background:none;padding:0;font-size:13px;line-height:1.7}
+  .callout{margin:22px 0;padding:14px 18px;border-left:3px solid;border-radius:0 6px 6px 0}
+  .callout p:first-child{margin-top:0} .callout p:last-child{margin-bottom:0}
+  .callout-title{font-weight:700;font-size:13px;letter-spacing:.03em;margin-bottom:6px;display:block}
+  .callout.info{background:var(--accent-soft);border-color:var(--accent)}
+  .callout.warn{background:var(--warn-soft);border-color:var(--warn)}
+  .callout.key{background:var(--key-soft);border-color:var(--key)}
+  .callout.pit{background:var(--pit-soft);border-color:var(--pit)}
+  table{width:100%;border-collapse:collapse;margin:18px 0;font-size:14px}
+  th,td{text-align:left;padding:10px 12px;border-bottom:1px solid var(--rule);vertical-align:top}
+  th{font-weight:600;color:var(--ink-soft);background:var(--code-bg)}
+  .seq{margin:20px 0;padding:18px 20px;background:#fff;border:1px solid var(--rule);border-radius:10px}
+  .seq-step{display:flex;gap:14px;align-items:flex-start;margin:10px 0;font-size:14.5px}
+  .seq-step .n{width:26px;height:26px;border-radius:50%;background:var(--accent);color:#fff;display:inline-flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;flex-shrink:0;font-family:var(--serif)}
+  .seq-step .body code{font-size:12.5px}
+  .seq-arrow{margin-left:13px;color:var(--ink-mute);font-size:13px}
+  .quiz{margin:34px 0;border:1px solid var(--rule);border-radius:12px;padding:24px 26px;background:#fff}
+  .quiz-q{font-weight:600;margin:0 0 16px;font-size:16px}
+  .quiz-q .qnum{display:inline-block;width:28px;height:28px;border-radius:50%;background:var(--accent);color:#fff;text-align:center;line-height:28px;font-size:14px;margin-right:10px;font-family:var(--serif)}
+  .quiz-q .tag{font-size:11px;color:var(--ink-mute);font-weight:500;margin-left:8px;letter-spacing:.03em}
+  .quiz-options{display:flex;flex-direction:column;gap:10px}
+  .quiz-opt{display:flex;align-items:flex-start;gap:12px;padding:12px 16px;border:1.5px solid var(--rule);border-radius:10px;cursor:pointer;transition:all .15s;user-select:none}
+  .quiz-opt:hover{border-color:var(--accent);background:var(--accent-soft)}
+  .quiz-opt .mark{width:24px;height:24px;border-radius:50%;border:1.5px solid var(--ink-mute);display:inline-flex;align-items:center;justify-content:center;font-size:13px;color:transparent;flex-shrink:0;margin-top:1px}
+  .quiz-opt.reveal.correct{border-color:var(--key);background:var(--key-soft)}
+  .quiz-opt.reveal.correct .mark{background:var(--key);color:#fff;border-color:var(--key)}
+  .quiz-opt.reveal.wrong{border-color:var(--pit);background:var(--pit-soft)}
+  .quiz-opt.reveal.wrong .mark{background:var(--pit);color:#fff;border-color:var(--pit)}
+  .quiz-explain{margin-top:14px;font-size:14px;color:var(--ink-soft);display:none;line-height:1.7}
+  .quiz-explain.show{display:block}
+  .quiz-explain .verdict{font-weight:700;color:var(--ink);display:block;margin-bottom:6px}
+  .quiz-explain ul{margin:6px 0 0;padding-left:20px} .quiz-explain li{margin:4px 0}
+  .quiz-explain .mnemonic{margin-top:8px;padding:8px 12px;background:var(--key-soft);border-radius:6px;color:var(--key);font-size:13px}
+  .source-box{margin:30px 0 0;padding:18px 20px;background:var(--code-bg);border-radius:10px;font-size:14px}
+  .source-box .label{font-size:12px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-mute);font-weight:700;display:block;margin-bottom:6px}
+  .followup{margin:24px 0 0;padding:16px 20px;border:1px dashed var(--accent);border-radius:10px;background:var(--accent-soft);font-size:15px}
+  .followup .label{font-weight:700;color:var(--accent);display:block;margin-bottom:4px}
+  .anno{color:var(--ink-mute);font-size:12.5px}
+  </style>
+</head>
+<body>
+<article class="lesson">
+  <header class="lesson-header">
+    <span class="course-label">Harness Engineering · 模块 2 · 工具层</span>
+    <div class="lesson-num">第 08 课</div>
+    <h1 class="lesson-title">读 Agent SDK 工具实现</h1>
+    <p class="lesson-sub">L06 讲了 API 层的"工具三要素"，L07 讲了 5 设计原则。今天落到 Claude Agent SDK：真实的工具怎么定义、注册、调度、出错怎么办。</p>
+  </header>
+
+  <nav class="lesson-nav">
+    <a href="0007-writing-effective-tools.html">← L07 写好工具</a>
+    <a href="../quizzes/02-tools-context.html">模块测验 02 →</a>
+  </nav>
+
+  <h2>先说清一个真相：SDK 是 wrapper，不是源码</h2>
+  <p>课程目录原本写"读源码怎么定义与调度工具"。我去看 <code>claude-agent-sdk-typescript</code> 仓库，<strong>根目录没有 <code>src/</code></strong>——只有 README、examples、CHANGELOG。官方文档明说：SDK 是个 standalone 包，<strong>内嵌 Claude Code 的 agent loop</strong>，通过 spawn claude 进程（subprocess）跑。reddit 上开发者也证实："the agent SDK is basically a wrapper... spawns a claude process"。</p>
+  <div class="callout info">
+    <span class="callout-title">调整策略：读文档 + 实例代码</span>
+    <p>loop 的实现源码不在这个仓库里（在 CLI 内部）。但<strong>工具的定义和调度接口是公开文档化的</strong>——<code>tool()</code> 函数、<code>createSdkMcpServer</code>、注解、权限两层、错误处理，官方 custom-tools 文档讲得透。这比读 wrapper 源码更准。所以本课读文档+实例，不假装读不到的源码。</p>
+  </div>
+
+  <h2>一、从 API 三要素 到 SDK 四部分</h2>
+  <p>L06 讲的 <code>name</code> / <code>description</code> / <code>input_schema</code> 是 <strong>Anthropic API 层</strong>模型看到的三要素。SDK 层多了两块——<strong>handler</strong>（真正执行的代码）和可选 <strong>annotations</strong>（行为注解）。官方原文："A tool is defined by four parts"：</p>
+  <table>
+    <thead><tr><th>部分</th><th>作用</th><th>对应 L06</th></tr></thead>
+    <tbody>
+      <tr><td>Name</td><td>唯一标识，Claude 靠它调用</td><td>= <code>name</code></td></tr>
+      <tr><td>Description</td><td>Claude 读它决定何时调用</td><td>= <code>description</code></td></tr>
+      <tr><td>Input schema</td><td>参数；TS 用 Zod，Py 用 dict/JSON Schema</td><td>= <code>input_schema</code>（SDK 自动转 JSON Schema）</td></tr>
+      <tr><td><strong>Handler</strong></td><td>async 函数，Claude 调用时执行</td><td><strong>SDK 新增</strong>（API 层没有）</td></tr>
+      <tr><td>Annotations（可选）</td><td>行为元数据（readOnlyHint 等）</td><td><strong>SDK 新增</strong></td></tr>
+    </tbody>
+  </table>
+  <div class="callout key">
+    <span class="callout-title">为什么 SDK 多了 handler</span>
+    <p>API 层你只<strong>声明</strong>工具（model 看到三要素），执行靠你自己写 <code>run_tool</code>（L02）。SDK 把"声明 + 执行"打包：<code>tool()</code> 既定义 schema 又绑 handler，<strong>一个调用同时给模型看（schema）和替模型跑（handler）</strong>。这就是从"手写 loop"到"用 SDK"的核心简化。</p>
+  </div>
+
+  <h2>二、tool() 函数解剖（TypeScript）</h2>
+  <p>官方 weather 工具示例（原文 verbatim）：</p>
+<pre><code>import { tool, createSdkMcpServer } from "@anthropic-ai/claude-agent-sdk";
+import { z } from "zod";
+
+const getTemperature = tool(
+  "get_temperature",                              <span class="anno">// 1. name</span>
+  "Get the current temperature at a location",    <span class="anno">// 2. description（Claude 读它决定何时调）</span>
+  {
+    latitude: z.number().describe("Latitude coordinate"),   <span class="anno">// 3. schema：Zod，.describe() 字段说明 Claude 可见</span>
+    longitude: z.number().describe("Longitude coordinate")
+  },
+  async (args) => {                                <span class="anno">// 4. handler：args 自动从 schema 推断类型</span>
+    const response = await fetch(
+      `https://api.open-meteo.com/v1/forecast?latitude=${args.latitude}&longitude=${args.longitude}&current=temperature_2m&temperature_unit=fahrenheit`
+    );
+    const data: any = await response.json();
+    return {                                        <span class="anno">// 返回 content 数组（MCP 格式）</span>
+      content: [{ type: "text", text: `Temperature: ${data.current.temperature_2m}°F` }]
+    };
+  }
+);</code></pre>
+  <p>三个 Zod 技巧（对应 L06/L07 讲的参数设计）：</p>
+  <ul>
+    <li><strong><code>.describe()</code></strong>：给字段加说明，<strong>这个说明 Claude 也能看到</strong>（进 system prompt）——L07 原则 5 的落点。</li>
+    <li><strong><code>.default(12)</code></strong>：让参数可选（带默认值）。</li>
+    <li><strong><code>z.enum(["length","temperature","weight"])</code></strong>：约束取值——L06 讲的 enum，这里落地。</li>
+  </ul>
+  <div class="callout key">
+    <span class="callout-title">Zod 的类型推断</span>
+    <p>handler 的 <code>args</code> 不用手动声明类型——<strong>Zod schema 自动推断</strong>。你写 <code>latitude: z.number()</code>，<code>args.latitude</code> 就是 <code>number</code>。改 schema 类型，handler 类型自动跟。这是 TS 版 SDK 的核心人体工学优势。</p>
+  </div>
+
+  <h2>三、注册：从 tool 到 mcp__server__tool</h2>
+  <p>定义完工具，要包成 MCP server 再传给 <code>query()</code>。三步：</p>
+  <div class="seq">
+    <div class="seq-step"><span class="n">1</span><div class="body"><strong>定义</strong>：<code>tool()</code> 造工具（上面的 getTemperature）</div></div>
+    <div class="seq-arrow">↓</div>
+    <div class="seq-step"><span class="n">2</span><div class="body"><strong>包成 server</strong>：<code>createSdkMcpServer({name:"weather", version:"1.0.0", tools:[getTemperature]})</code>——in-process，<strong>不单独进程</strong></div></div>
+    <div class="seq-arrow">↓</div>
+    <div class="seq-step"><span class="n">3</span><div class="body"><strong>传给 query</strong>：<code>query({prompt, options:{mcpServers:{weather: weatherServer}, allowedTools:["mcp__weather__get_temperature"]}})</code></div></div>
+  </div>
+  <p><strong>工具全名格式</strong>（关键）：MCP 工具暴露给 Claude 时叫 <code>mcp__{server_name}__{tool_name}</code>。weather server 里的 get_temperature → <code>mcp__weather__get_temperature</code>。这个全名要写进 <code>allowedTools</code> 才免权限提示。</p>
+  <div class="callout warn">
+    <span class="callout-title">server 名 = 命名空间</span>
+    <p>发现没？<code>mcp__weather__get_temperature</code> 里的 <code>weather</code> 就是 L07 原则 2 讲的 <strong>namespacing</strong>——SDK 用 server 名自动做前缀分组。不同 server 的同名工具不会撞：weather 的 search 和 jira 的 search 分别是 <code>mcp__weather__search</code> / <code>mcp__jira__search</code>。原则 2 在 SDK 层是强制的。</p>
+  </div>
+  <p>多工具用通配符：<code>allowedTools: ["mcp__weather__*"]</code> 一次批准整个 server。</p>
+
+  <h2>四、内置工具 + tool search</h2>
+  <p>SDK 自带 <strong>CC 同款内置工具</strong>（Read/Glob/Grep/Edit/Write/Bash 等），开箱即用。自定义工具走 MCP server 接入。</p>
+  <p><strong>tool search 默认开</strong>：MCP 工具 schema <strong>延迟加载</strong>——Claude 先看到一个紧凑工具名列表，用到时才加载完整 schema。好处是省 context（几十个工具不全量塞进每轮 prompt）。坏处是可能多一次 <code>ToolSearch</code> 调用。想强制全 schema 进初始 prompt？<code>alwaysLoad: true</code>。</p>
+  <div class="callout info">
+    <span class="callout-title">衔接 L09 上下文层</span>
+    <p>tool search 是"工具定义吃 context"这个问题的解法——和 L09 要讲的 context 管理、压缩是一脉。先记住：工具越多，schema 占 context 越多，tool search 用延迟加载缓解。</p>
+  </div>
+
+  <h2>五、并行 vs 串行：readOnlyHint</h2>
+  <p>Claude 一轮可以请求多个工具调用。SDK 怎么调度？看工具改不改状态：</p>
+  <table>
+    <thead><tr><th>工具类型</th><th>调度</th><th>例子</th></tr></thead>
+    <tbody>
+      <tr><td>只读（标记 readOnlyHint）</td><td><strong>并行</strong></td><td>Read / Glob / Grep / MCP 只读工具</td></tr>
+      <tr><td>写/改状态</td><td><strong>串行</strong></td><td>Edit / Write / Bash</td></tr>
+      <tr><td>自定义工具（默认）</td><td>串行</td><td>不设注解的自定义 tool</td></tr>
+    </tbody>
+  </table>
+  <p>自定义工具默认串行。想并行？第五参数设 <code>readOnlyHint: true</code>：</p>
+<pre><code>tool(
+  "get_temperature",
+  "Get the current temperature at a location",
+  { latitude: z.number(), longitude: z.number() },
+  async (args) => ({ content: [{ type: "text", text: `...` }] }),
+  { annotations: { readOnlyHint: true } }    <span class="anno">// 第五参数：让 Claude 把它和其他只读工具并行调</span>
+);</code></pre>
+  <p><strong>四类注解</strong>（官方表）：</p>
+  <table>
+    <thead><tr><th>Field</th><th>默认</th><th>含义</th><th>是否强制</th></tr></thead>
+    <tbody>
+      <tr><td><code>readOnlyHint</code></td><td>false</td><td>不改环境；<strong>控制能否并行</strong></td><td>影响调度</td></tr>
+      <tr><td><code>destructiveHint</code></td><td>true</td><td>可能破坏性更新</td><td>仅信息</td></tr>
+      <tr><td><code>idempotentHint</code></td><td>false</td><td>重复调用无额外效果</td><td>仅信息</td></tr>
+      <tr><td><code>openWorldHint</code></td><td>true</td><td>访问进程外系统</td><td>仅信息</td></tr>
+    </tbody>
+  </table>
+  <div class="callout pit">
+    <span class="callout-title">注解是元数据，不是强制</span>
+    <p>官方原文："Annotations are metadata, not enforcement. A tool marked <code>readOnlyHint: true</code> can still write to disk if that's what the handler does."——<strong>注解要和 handler 实际行为一致</strong>。标了只读但 handler 写盘，调度会误并行，可能出竞态。诚实标注。</p>
+  </div>
+
+  <h2>六、可用性 vs 权限：两层区分（易混点）</h2>
+  <p>工具控制有两个独立层，官方原文明确区分：</p>
+  <table>
+    <thead><tr><th>选项</th><th>层</th><th>效果</th></tr></thead>
+    <tbody>
+      <tr><td><code>tools: ["Read","Grep"]</code></td><td><strong>可用性</strong></td><td>只有列出的内置工具<strong>出现在 context</strong>；未列的移除</td></tr>
+      <tr><td><code>tools: []</code></td><td>可用性</td><td>所有内置移除，Claude 只能用你的 MCP 工具</td></tr>
+      <tr><td><code>allowedTools</code></td><td><strong>权限</strong></td><td>列出的<strong>免提示直接跑</strong>；未列的仍在 context 但走权限流</td></tr>
+      <tr><td><code>disallowedTools</code> 裸名（<code>"Bash"</code>）</td><td>两层</td><td>从 context <strong>移除</strong>（Claude 看不见）</td></tr>
+      <tr><td><code>disallowedTools</code> 带范围（<code>"Bash(rm *)"</code>）</td><td>两层</td><td>留在 context 但<strong>拒绝匹配调用</strong>（Claude 可能浪费一轮试）</td></tr>
+    </tbody>
+  </table>
+  <div class="callout warn">
+    <span class="callout-title">关键区分</span>
+    <p><strong>可用性</strong>（<code>tools</code> / 裸名 <code>disallowedTools</code>）= Claude <em>看得见</em>什么工具。<strong>权限</strong>（<code>allowedTools</code> / scoped <code>disallowedTools</code>）= Claude <em>调了让不让跑</em>。想让 Claude 完全不知道有 Bash？用 <code>tools</code> 不列它，或 <code>disallowedTools:["Bash"]</code>。只想拦 <code>rm</code> 但留 Bash 可用？<code>disallowedTools:["Bash(rm *)"]</code>。这层区分是 L12 权限层的伏笔。</p>
+  </div>
+
+  <h2>七、错误处理：不中断 loop（验证 L07）</h2>
+  <p>L07 讲了"错误作为 tool_result 喂回，不中断 loop"。看 SDK 官方怎么实现——原文："A handler error doesn't stop the agent loop."。两种出错路径：</p>
+  <table>
+    <thead><tr><th>情况</th><th>Claude 看到什么</th></tr></thead>
+    <tbody>
+      <tr><td>handler 抛<strong>未捕获异常</strong></td><td>MCP server 转成 error result，带<strong>原始异常消息</strong>，loop 继续</td></tr>
+      <tr><td>handler <strong>捕获</strong>并返回 <code>isError: true</code></td><td>你<strong>组装的消息</strong>（可加上下文/建议），loop 继续</td></tr>
+    </tbody>
+  </table>
+  <p>两种情况 Claude 都能<strong>重试 / 换工具 / 解释失败</strong>。官方 fetch_data 示例（捕获后组装可操作错误）：</p>
+<pre><code>async (args) => {
+  try {
+    const response = await fetch(args.endpoint);
+    if (!response.ok) {
+      return {                              <span class="anno">// 失败也作为 tool_result 返回</span>
+        content: [{ type: "text", text: `API error: ${response.status} ${response.statusText}` }],
+        isError: true                        <span class="anno">// 标记失败，Claude 知道这不是数据</span>
+      };
+    }
+    const data = await response.json();
+    return { content: [{ type: "text", text: JSON.stringify(data, null, 2) }] };
+  } catch (error) {
+    return {                                  <span class="anno">// 网络错误也组装成可操作消息</span>
+      content: [{ type: "text", text: `Failed to fetch data: ${error instanceof Error ? error.message : String(error)}` }],
+      isError: true
+    };
+  }
+}</code></pre>
+  <div class="callout key">
+    <span class="callout-title">L07 原则在 SDK 层的实证</span>
+    <p>L07 说"错误要可操作，别给 opaque code"。SDK 官方示例正是这么做的：<strong>不抛 <code>ERROR 500</code>，返回 <code>isError:true</code> + 人话消息</strong>。原始异常消息往往不够 Claude 行动（"EINVAL"），你自己 catch 就能加上"哪个请求失败、该试什么"。这就是 L07 原则 4"错误要可操作"在实现层的标准做法。</p>
+  </div>
+
+  <h2>八、返回内容：不止 text</h2>
+  <p>handler 的 <code>content</code> 数组每项有 <code>type</code>，可混合：</p>
+  <ul>
+    <li><strong><code>text</code></strong>：文本（最常用）</li>
+    <li><strong><code>image</code></strong>：base64 内联图片（无 URL 字段，要 fetch 后编码）——Claude 当视觉输入</li>
+    <li><strong><code>resource</code></strong>：带 URI 的内容块（URI 是标签，SDK 不真读那个路径，内容在 text/blob 字段）</li>
+    <li><strong><code>structuredContent</code></strong>（可选，和 content 平级）：机器可读 JSON，Claude 读精确字段而非解析文本</li>
+  </ul>
+  <p><code>structuredContent</code> 适合"既要给人看（图）又要给模型读（数据）"：同一 handler 返回图表 image + 数据点 JSON，Claude 能精确引用 <code>points</code> 字段。</p>
+
+  <h2>本课小结</h2>
+  <ul>
+    <li><strong>SDK 是 wrapper</strong>：loop 实现在 CLI subprocess，仓库无 src；工具接口在官方文档，比源码更准。</li>
+    <li><strong>四部分定义</strong>：name / description / schema / handler（+ 可选 annotations）。比 API 三要素多 handler 和注解——声明+执行打包。</li>
+    <li><strong>tool()</strong>：TS 用 Zod schema 自动类型推断；<code>.describe()</code> 字段说明进 prompt，<code>.default()</code> 可选，<code>z.enum()</code> 约束。</li>
+    <li><strong>注册三步</strong>：<code>tool()</code> → <code>createSdkMcpServer</code> → <code>query(mcpServers)</code>；全名 <code>mcp__{server}__{tool}</code>（server 名 = 强制 namespacing）。</li>
+    <li><strong>tool search</strong>：默认延迟加载 MCP 工具 schema 省 context；<code>alwaysLoad:true</code> 强制全载。</li>
+    <li><strong>并行控制</strong>：只读并行、写串行；自定义默认串行，<code>readOnlyHint:true</code> 开并行。注解是元数据不是强制，要和 handler 一致。</li>
+    <li><strong>可用性 vs 权限两层</strong>：<code>tools</code>/裸名 disallow 控可见性；<code>allowedTools</code>/scoped disallow 控执行权。</li>
+    <li><strong>错误不中断 loop</strong>：未捕获→原始异常消息；捕获→<code>isError:true</code>+你组装的可操作消息。L07 原则的实证。</li>
+  </ul>
+  <div class="callout key">
+    <span class="callout-title">小胜利</span>
+    <p>你现在能<strong>用 Agent SDK 给 agent 加自定义工具</strong>了：写 <code>tool()</code> 定义 schema+handler，<code>createSdkMcpServer</code> 包好，<code>query(mcpServers, allowedTools)</code> 跑起来。而且知道每个旋钮调的是哪层：注解调调度、<code>tools</code> 调可见性、<code>allowedTools</code> 调权限、<code>isError</code> 调错误反馈。这是 L20 CC 定制实战的核心技能——给客户搭 agent 就是这套。</p>
+  </div>
+
+  <!-- 随堂题 4 道，角度错开去重池：定义/命名格式/注解机制/错误实际行为 -->
+  <div class="quiz">
+    <p class="quiz-q"><span class="qnum">1</span>用 Claude Agent SDK (TypeScript) 定义工具时，<code>tool()</code> 接收几部分？比 L06 讲的"API 三要素"多了什么？<span class="tag">定义</span></p>
+    <div class="quiz-options">
+      <div class="quiz-opt"><span class="mark">✓</span>三部分：name / description / input_schema（和 API 层一样）</div>
+      <div class="quiz-opt" data-correct="true"><span class="mark">✓</span>四部分 + 可选注解：name / description / schema / handler（+ annotations）</div>
+      <div class="quiz-opt"><span class="mark">✓</span>两部分：name 和 handler，schema 自动生成</div>
+      <div class="quiz-opt"><span class="mark">✓</span>五部分都是必填：name / description / schema / handler / annotations</div>
+    </div>
+    <div class="quiz-explain">
+      <span class="verdict">答案：四部分 + 可选注解。</span>
+      <ul>
+        <li><strong>三部分 ✗</strong>：这是 L06 讲的 <strong>API 层</strong>模型看到的（name/description/input_schema）。SDK 层多了 handler——真正执行的 async 函数。API 层你只声明工具，执行靠手写 run_tool；SDK 把声明+执行打包。</li>
+        <li><strong>四部分 + 可选注解 ✓</strong>：官方原文"A tool is defined by four parts"——name / description / input schema / handler。annotations 是第五个可选参数（如 readOnlyHint）。</li>
+        <li><strong>两部分 ✗</strong>：schema 不会自动生成，要你用 Zod 写（TS）或 dict/JSON Schema（Py）。handler 也绑不了 schema。</li>
+        <li><strong>五部分都必填 ✗</strong>：annotations 是<strong>可选</strong>的（官方原话"optional metadata"），不设也有默认值（readOnlyHint=false 等）。</li>
+      </ul>
+      <div class="mnemonic">口诀:「API 三要素，SDK 四部分」——多了 handler（执行）+ 可选 annotations（行为注解）。</div>
+    </div>
+  </div>
+
+  <div class="quiz">
+    <p class="quiz-q"><span class="qnum">2</span>你在 weather server 里定义了 <code>get_temperature</code> 工具，要让它免权限提示运行，<code>allowedTools</code> 里该写什么？<span class="tag">应用 · 命名</span></p>
+    <div class="quiz-options">
+      <div class="quiz-opt"><span class="mark">✓</span><code>"get_temperature"</code></div>
+      <div class="quiz-opt" data-correct="true"><span class="mark">✓</span><code>"mcp__weather__get_temperature"</code></div>
+      <div class="quiz-opt"><span class="mark">✓</span><code>"weather.get_temperature"</code></div>
+      <div class="quiz-opt"><span class="mark">✓</span><code>"weather/get_temperature"</code></div>
+    </div>
+    <div class="quiz-explain">
+      <span class="verdict">答案：mcp__weather__get_temperature。</span>
+      <ul>
+        <li><strong>get_temperature ✗</strong>：漏了 server 名前缀。MCP 工具暴露给 Claude 时用全名 <code>mcp__{server}__{tool}</code>，bare name 只对内置工具（Read/Bash）有效。</li>
+        <li><strong>mcp__weather__get_temperature ✓</strong>：官方规定的全名格式——<code>mcp__</code> 前缀 + server 名 <code>weather</code> + 工具名 <code>get_temperature</code>，双下划线分隔。allowedTools 要写全名才匹配。</li>
+        <li><strong>weather.get_temperature ✗</strong>：点分格式不是 SDK 命名规范。也可用通配 <code>mcp__weather__*</code> 批量批准整个 server。</li>
+        <li><strong>weather/get_temperature ✗</strong>：斜杠格式同样不对。记住是双下划线 <code>__</code> 不是别的分隔符。</li>
+      </ul>
+      <div class="mnemonic">口诀:「MCP 工具全名三段：mcp__server__tool」——server 名就是 L07 的 namespacing，SDK 强制做前缀分组。</div>
+    </div>
+  </div>
+
+  <div class="quiz">
+    <p class="quiz-q"><span class="qnum">3</span>你写了两个自定义只读工具（查库存、查价格），希望 Claude 一轮里并行调用它们省时间。该怎么做？<span class="tag">机制</span></p>
+    <div class="quiz-options">
+      <div class="quiz-opt"><span class="mark">✓</span>什么都不用做，自定义工具默认并行</div>
+      <div class="quiz-opt" data-correct="true"><span class="mark">✓</span>给两个工具都设 <code>annotations: { readOnlyHint: true }</code></div>
+      <div class="quiz-opt"><span class="mark">✓</span>在 <code>query()</code> 里加 <code>parallel: true</code> 选项</div>
+      <div class="quiz-opt"><span class="mark">✓</span>把两个工具放进不同的 MCP server</div>
+    </div>
+    <div class="quiz-explain">
+      <span class="verdict">答案：设 readOnlyHint: true。</span>
+      <ul>
+        <li><strong>默认并行 ✗</strong>：<strong>自定义工具默认串行</strong>（官方原文"Custom tools default to sequential execution"）。只有标了 readOnlyHint 的才并行。</li>
+        <li><strong>readOnlyHint: true ✓</strong>：第五参数 annotations 里设 readOnlyHint:true，SDK 知道这工具不改状态，可和其他只读工具并行调。内置 Read/Glob/Grep 也靠这个机制并行。</li>
+        <li><strong>parallel 选项 ✗</strong>：<code>query()</code> 没有 <code>parallel</code> 这个选项。并行性由工具自身的注解决定，不是全局开关。</li>
+        <li><strong>分不同 server ✗</strong>：server 分组和并行无关，只影响命名空间（mcp__A__x vs mcp__B__y）。同 server 的两个只读工具也能并行，关键看 readOnlyHint。</li>
+      </ul>
+      <div class="mnemonic">口诀:「自定义默认串行，readOnlyHint 开并行」——注解要诚实，标了只读就别在 handler 里写盘。</div>
+    </div>
+  </div>
+
+  <div class="quiz">
+    <p class="quiz-q"><span class="qnum">4</span>handler 里调外部 API 抛了未捕获异常（比如网络断了）。agent loop 会怎样？<span class="tag">机制 · 排错</span></p>
+    <div class="quiz-options">
+      <div class="quiz-opt"><span class="mark">✓</span>整个 query() 立即崩溃，抛异常给调用方，agent 停止</div>
+      <div class="quiz-opt" data-correct="true"><span class="mark">✓</span>MCP server 把异常转成 error result，Claude 看到原始异常消息，loop 继续转</div>
+      <div class="quiz-opt"><span class="mark">✓</span>SDK 自动重试该工具 3 次，全失败才停</div>
+      <div class="quiz-opt"><span class="mark">✓</span>静默吞掉异常，返回空结果给 Claude</div>
+    </div>
+    <div class="quiz-explain">
+      <span class="verdict">答案：转成 error result，loop 继续。</span>
+      <ul>
+        <li><strong>立即崩溃 ✗</strong>：官方原文明确"A handler error doesn't stop the agent loop"。SDK 的 in-process MCP server <strong>捕获</strong>未捕获异常，转成 error result，不向上抛。</li>
+        <li><strong>转 error result 继续 ✓</strong>：MCP server 把异常转成带原始异常消息的 error result 喂回 Claude。Claude 能重试/换工具/告诉用户办不到。<strong>但原始异常消息往往不够行动</strong>（如"EINVAL"），所以最好自己 catch 返回 isError:true + 可操作消息（L07 原则 4）。</li>
+        <li><strong>自动重试 3 次 ✗</strong>：SDK 不会盲目重试工具。网络错误是瞬态的，但重试决策<strong>交给 Claude</strong>（它看到 error 后自己决定要不要再试），不是 SDK 层自动重试。</li>
+        <li><strong>静默吞掉 ✗</strong>：那 Claude 会以为成功、基于空结果继续，必出错。错误必须让 Claude 看见——SDK 这点设计正确，转成 error result 而非吞掉。</li>
+      </ul>
+      <div class="mnemonic">口诀:「handler 错不崩 loop，转 error result 喂回」——但原始消息不够行动，最好自己 catch 组装 isError。</div>
+    </div>
+  </div>
+
+  <div class="followup">
+    <span class="label">模块 2 收口</span>
+    L06-L08 工具层讲完：机制定义 → 5 设计原则 → SDK 实现。模块 2 + 模块 3（上下文层）学完做 <strong>模块测验 02</strong>（覆盖 L06-L11，8 题综合诊断，文件 <code>quizzes/02-tools-context.html</code>，待学 L09-L11 后开启）。<br>
+    下一课 <strong>L09 上下文管理：窗口、压缩、原则</strong>——进入模块 3。tool search 已经埋了伏笔（工具 schema 吃 context），L09 讲 context window、CC 压缩机制、<em>Effective context engineering</em> 原则。
+  </div>
+
+  <div class="source-box">
+    <span class="label">本课主要来源（建议读）</span>
+    <a href="https://code.claude.com/docs/en/agent-sdk/custom-tools">Give Claude custom tools — Claude Code Docs</a>　本课核心：tool() 四部分、createSdkMcpServer、全名格式、readOnlyHint 注解、可用性 vs 权限两层、错误处理 isError、structuredContent。所有代码示例原文可查。<br>
+    <a href="https://code.claude.com/docs/en/agent-sdk/agent-loop">How the agent loop works — Claude Code Docs</a>　内置工具=CC 同款、并行/串行调度规则、tool search 延迟加载、工具被拒作为 tool_result。<br>
+    <a href="https://github.com/anthropics/claude-agent-sdk-typescript">claude-agent-sdk-typescript 仓库</a>　核实"仓库无 src/"——SDK 是 wrapper，loop 实现在 CLI subprocess。
+  </div>
+
+  <nav class="lesson-nav" style="margin-top:48px">
+    <a href="0007-writing-effective-tools.html">← L07 写好工具</a>
+    <a href="../quizzes/02-tools-context.html">模块测验 02 →</a>
+  </nav>
+</article>
+
+<script>
+document.querySelectorAll('.quiz-opt').forEach(opt=>{
+  opt.addEventListener('click',()=>{
+    const box=opt.closest('.quiz');
+    box.querySelectorAll('.quiz-opt').forEach(o=>o.classList.remove('reveal','correct','wrong'));
+    const isCorrect=opt.dataset.correct==='true';
+    opt.classList.add('reveal',isCorrect?'correct':'wrong');
+    box.querySelector('.quiz-explain').classList.add('show');
+  });
+});
+</script>
+</body>
+</html>

@@ -39,6 +39,7 @@
 
 ### Module 5：实战与面试（售前收口）
 - [x] L10 动手：Dify 搭运维知识库 RAG demo — 概念→Dify 配置映射 / 5步搭demo / 混合检索+rerank / 召回测试 / 引用归属 / Dify边界
+- [ ] L10b 扩展：n8n 搭 RAG demo（云端托管）— 4827模板 / n8n Cloud+MongoDB Atlas / 4处改造 / 与Dify路线对比 / 选型口诀
 - [ ] L11 企业落地痛点与 POC 设计 — 10 万文档踩坑；选型/数据治理/成本/评估
 - [ ] L12 面试聚焦：28 个高频 RAG 问题深度问答
 

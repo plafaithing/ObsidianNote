@@ -663,3 +663,43 @@ for s in scenarios:
 **关联课程**：[L05 Embedding 选型](lessons/0005-embedding-selection.html)·[L06 混合检索](lessons/0006-hybrid-retrieval.html)·[L07 Rerank](lessons/0007-rerank.html)·[L10 Dify demo](lessons/0010-dify-demo.html)· Q&A 0016（CSS 能力）
 
 ---
+
+## 0018 · GaussDB 的"向量能力"是不是只有 dense？有没有 BM25？（向量能力 = 检索能力）
+
+**结论**：GaussDB 的向量能力**不止 dense**，同时原生具备 BM25 稀疏检索。**"向量能力"本质就是一套完整的检索能力（dense + sparse 两路）**，单库就能撑起 RAG 检索环节。此前曾误判"只有 dense、稀疏要靠 tsvector 补"——已修正。
+
+**两路检索能力对照（GaussDB 文档证据）**：
+
+| 检索路 | 能力 | 索引类型 | 操作符/函数 | 文档依据 |
+|---|---|---|---|---|
+| **dense（语义）** | `floatvector(dim)` | `GsIVFFLAT`(1万~200万) / `GsDiskANN`(千万~亿) | `<+>`(余弦距离) `<->`(L2) | 改造方案 2.1/4.2 |
+| **sparse（字面精确）** | BM25 倒排 | `USING bm25`（access method `gs_bm25`） | `###` 匹配操作符 / `gs_bm25_distance_text` / `gs_bm25_distance_textarr` | chm 2620616651 / 2647978732 / 2678058441 |
+
+**BM25 索引语法（文档原文）**：
+```sql
+-- 建索引（支持并行 num_parallels、分区 LOCAL）
+CREATE INDEX bm25_idx ON t1 USING bm25(texts);
+CREATE INDEX idx ON t01 USING bm25(c2) WITH(num_parallels=16);
+
+-- 检索（### 返回 BM25 相关性分数，DESC 取最相关）
+SELECT /*+ indexscan(t1 bm25_idx1) */ _id, texts ### 'drop table t1;' AS score
+FROM t1 ORDER BY score DESC LIMIT 10;
+
+-- GUC 调优（选打分算法）
+SET bm25_ranking_metric = 0;
+```
+文档定义：「Best Match 25，一种经典的文档评分函数……通过动态权重计算（词项在文档频率、文档长度等）实现精准匹配，被广泛用于各类数据库全文检索中。」——正是 L06 讲的 BM25 算法本身，不是 tsvector 的 ts_rank 近似。
+
+**修正前的错误判断**：曾以为 GaussDB 稀疏检索只有 `to_tsvector/ts_rank`（opengauss 模板那套），据此推断"单靠 GaussDB 向量能力做 RAG 只有 dense 一路、缺 sparse"。实际 GaussDB 有独立 `gs_bm25` 索引，sparse 路比 tsvector 更标准。
+
+**对 Dify 适配改造方案的影响**：方案 4.2 表格 `全文检索` 行原写 `ts_rank(to_tsvector(...))`（照搬 opengauss 模板）。GaussDB 路线建议优先用 `USING bm25` + `###` 操作符实现 `search_by_full_text`——比 tsvector 更贴合 RAG 稀疏检索标准做法（BM25 是 Elasticsearch/L06 默认 sparse 算法），稀疏检索质量可能更好。tsvector 作兜底。
+
+**一个限制（实测需确认）**：文档 `GAUSS-29885` 明确「Create distributed BM25 index」不支持——**分布式形态不能建 BM25 索引**。集中式形态没问题；若目标为分布式，sparse 路只能退回 tsvector。改造方案目标为集中式+分布式统一处理，此处是客观差异点。
+
+**DBA 类比**：GaussDB 的向量能力，就像 PG 的 B-Tree / GIN——都是「索引 + 检索」，区别只是"相似"的定义不同：B-Tree 比精确值，GIN 比包含，`GsIVFFLAT` 比语义距离，`gs_bm25` 比词项相关性。四种都是检索能力的不同实现，不是独立于检索的别的东西。这也解释了 Dify 把向量库后端叫 **Vector Store** 而非 "Vector Database"——关心的不是存储，是 `search_by_vector` 这个检索能力。
+
+**与华为云 CSS 方案对比**：GaussDB（floatvector+GsIVFFLAT + gs_bm25）与华为云 CSS（kNN dense + BM25 sparse）架构对等，都是单引擎两路混合（L06 一站式思路）。唯一差距：CSS 方案自带 bge-reranker-v2-m3（L07），GaussDB 无内置 rerank 模型——rerank 得在应用层另接（Dify 的 rerank 模型配置指向外部 bge-reranker 服务）。
+
+**关联课程**：[L05 Embedding 选型](lessons/0005-embedding-selection.html)·[L06 混合检索](lessons/0006-hybrid-retrieval.html)·[L07 Rerank](lessons/0007-rerank.html)· Q&A 0016/0017（华为云 CSS 对比）
+
+---

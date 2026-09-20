@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>L10b · n8n 搭运维知识库 RAG demo（云端托管）</title>
+  <style>
+  :root {
+    --bg: #fafaf7; --ink: #1a1a1a; --ink-soft: #444; --ink-mute: #777;
+    --rule: #e4e3dc; --accent: #2b5a8c; --accent-soft: #e8f0f7;
+    --warn: #b06a00; --warn-soft: #fdf3e3; --key: #2f7d52; --key-soft: #e8f5ee;
+    --pit: #a23a3a; --pit-soft: #fbecec; --code-bg: #f3f3ee;
+    --serif: 'Source Serif Pro','Noto Serif SC',Georgia,'Songti SC',serif;
+    --sans: -apple-system,BlinkMacSystemFont,'Segoe UI','PingFang SC','Microsoft YaHei',sans-serif;
+    --mono: 'SF Mono','JetBrains Mono',Consolas,monospace;
+  }
+  *{box-sizing:border-box} html{scroll-behavior:smooth}
+  body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--sans);font-size:16px;line-height:1.78;-webkit-font-smoothing:antialiased}
+  .lesson{max-width:780px;margin:0 auto;padding:48px 28px 96px}
+  .lesson-header{margin-bottom:36px;border-bottom:1px solid var(--rule);padding-bottom:22px}
+  .course-label{font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--accent);font-weight:700}
+  .lesson-num{font-size:13px;color:var(--ink-mute);margin:8px 0 2px}
+  .lesson-title{font-family:var(--serif);font-size:34px;line-height:1.22;margin:2px 0 8px;font-weight:700}
+  .lesson-sub{color:var(--ink-soft);font-size:15px;margin:0}
+  .lesson-nav{display:flex;justify-content:space-between;margin:0 0 40px;font-size:14px}
+  .lesson-nav a{color:var(--accent);text-decoration:none} .lesson-nav a:hover{text-decoration:underline}
+  h2{font-family:var(--serif);font-size:24px;margin:44px 0 12px;font-weight:700}
+  h3{font-size:17px;margin:26px 0 8px;font-weight:600}
+  p{margin:12px 0} ul,ol{margin:12px 0;padding-left:24px} li{margin:6px 0}
+  strong{color:var(--ink);font-weight:600} em{color:var(--ink-soft)} a{color:var(--accent)}
+  code{font-family:var(--mono);background:var(--code-bg);padding:2px 6px;border-radius:4px;font-size:.9em}
+  pre{background:var(--code-bg);padding:16px;border-radius:8px;overflow-x:auto} pre code{background:none;padding:0}
+  .callout{margin:22px 0;padding:14px 18px;border-left:3px solid;border-radius:0 6px 6px 0}
+  .callout p:first-child{margin-top:0} .callout p:last-child{margin-bottom:0}
+  .callout-title{font-weight:700;font-size:13px;letter-spacing:.03em;margin-bottom:6px;display:block}
+  .callout.info{background:var(--accent-soft);border-color:var(--accent)}
+  .callout.warn{background:var(--warn-soft);border-color:var(--warn)}
+  .callout.key{background:var(--key-soft);border-color:var(--key)}
+  .callout.pit{background:var(--pit-soft);border-color:var(--pit)}
+  .callout.interview{background:var(--accent-soft);border-color:var(--accent)}
+  .callout.interview .callout-title::before{content:"🎤 "}
+  table{width:100%;border-collapse:collapse;margin:18px 0;font-size:14px}
+  th,td{text-align:left;padding:10px 12px;border-bottom:1px solid var(--rule);vertical-align:top}
+  th{font-weight:600;color:var(--ink-soft);background:var(--code-bg)}
+  .quiz{margin:30px 0;border:1px solid var(--rule);border-radius:12px;padding:24px 26px;background:#fff}
+  .quiz-q{font-weight:600;margin:0 0 6px;font-size:16px}
+  .quiz-scene{color:var(--ink-soft);font-size:14px;margin:0 0 16px;line-height:1.7}
+  .quiz-options{display:flex;flex-direction:column;gap:10px}
+  .quiz-opt{display:flex;align-items:center;gap:12px;padding:12px 16px;border:1.5px solid var(--rule);border-radius:10px;cursor:pointer;transition:all .15s;user-select:none}
+  .quiz-opt:hover{border-color:var(--accent);background:var(--accent-soft)}
+  .quiz-opt .mark{width:24px;height:24px;border-radius:50%;border:1.5px solid var(--ink-mute);display:inline-flex;align-items:center;justify-content:center;font-size:13px;color:transparent;flex-shrink:0}
+  .quiz-opt.reveal.correct{border-color:var(--key);background:var(--key-soft)}
+  .quiz-opt.reveal.correct .mark{background:var(--key);color:#fff;border-color:var(--key)}
+  .quiz-opt.reveal.wrong{border-color:var(--pit);background:var(--pit-soft)}
+  .quiz-opt.reveal.wrong .mark{background:var(--pit);color:#fff;border-color:var(--pit)}
+  .quiz-feedback{margin-top:16px;font-size:14px;line-height:1.72;display:none;padding:14px 16px;background:var(--code-bg);border-radius:8px}
+  .quiz-feedback.show{display:block}
+  .win{margin:36px 0 24px;padding:22px 24px;background:var(--key-soft);border-radius:12px;border:1px solid var(--key)}
+  .win h3{margin-top:0;color:var(--key)}
+  .sources{margin-top:32px;padding-top:22px;border-top:1px solid var(--rule);font-size:14px}
+  .sources h3{margin-top:0} .sources ul{padding-left:20px}
+  .ask-reminder{margin-top:20px;padding:16px 18px;background:var(--accent-soft);border-radius:10px;font-size:14px}
+  .cite{font-size:13px;color:var(--ink-mute)}
+  @media print{body{background:#fff}.lesson-nav,.quiz-opt{break-inside:avoid}a{color:var(--ink)}}
+  @media (max-width:600px){.lesson{padding:28px 18px 64px}.lesson-title{font-size:26px}}
+  </style>
+</head>
+<body>
+<article class="lesson">
+
+  <header class="lesson-header">
+    <div class="course-label">RAG 课程 · M5 实战扩展</div>
+    <div class="lesson-num">第 10b 节 / L10 的 n8n 路线</div>
+    <h1 class="lesson-title">动手：用 n8n 搭 DBA Copilot RAG demo（云端托管）</h1>
+    <p class="lesson-sub">和 L10 Dify 路线平行的另一条——n8n Cloud + 4827 模板，工作流编排式搭 RAG，对比理解两种路线</p>
+  </header>
+
+  <nav class="lesson-nav">
+    <a href="0010-dify-demo.html">← L10 Dify demo</a>
+    <a href="index.html">课程目录 ↑</a>
+  </nav>
+
+  <h2>为什么有这一节</h2>
+  <p>L10 用 Dify 搭了运维知识库 RAG demo——那是<strong>平台封装式</strong>：建库/分段/检索都配成表单。这节换 <strong>n8n</strong>，它是<strong>工作流编排式</strong>：RAG 不是开箱功能，要用「Advanced AI」节点拖拽连线拼一条 pipeline。</p>
+  <p>两条路线概念完全对应（L03 分段 / L05 embedding / L04 向量库 / L06 检索 / L08 生成），只是拼装界面不同。学完这节你能讲清：<strong>同一个 RAG，Dify 和 n8n 各自怎么落地、差在哪、什么场景选哪个</strong>——售前常见问题。</p>
+
+  <div class="callout info">
+    <span class="callout-title">本节定位</span>
+    <p>云端测试为主，<strong>不碰 GaussDB 适配</strong>（那是另一条线）。用 n8n 官方托管 + 云端向量库（MongoDB Atlas）+ OpenAI API，最快跑通一个可聊天的运维 RAG。跑通后再考虑换组件（如 OpenAI 换 bge-m3、MongoDB 换 GaussDB）。</p>
+  </div>
+
+  <h2>选模板：4827 vs 5148</h2>
+  <p>n8n 官方模板库有多个 RAG workflow。两个典型候选：</p>
+  <table>
+    <tr><th>维度</th><th>4827 WhatsApp RAG</th><th>5148 Local RAG</th></tr>
+    <tr><td>触发</td><td>WhatsApp 消息</td><td>Chat Trigger（网页）</td></tr>
+    <tr><td>LLM</td><td>OpenAI GPT-4o-mini（云）</td><td>Ollama Llama 3.2（本地）</td></tr>
+    <tr><td>Embedding</td><td>OpenAI 1536 维（云）</td><td>mxbai-embed-large（本地）</td></tr>
+    <tr><td>向量库</td><td>MongoDB Atlas（云托管）</td><td>Qdrant（本地）</td></tr>
+    <tr><td>外部依赖</td><td>OpenAI key + MongoDB + 文档源</td><td>Ollama + Qdrant（都本地）</td></tr>
+    <tr><td>数据出境</td><td>是</td><td>否，100% 本地</td></tr>
+  </table>
+  <div class="callout key">
+    <span class="callout-title">云端测试 → 选 4827</span>
+    <p>5148 是"100% local"设计（卖点是数据不出本地、免 API key），搬到云端要自部署 Ollama（吃 GPU/内存，云上贵）+ Qdrant，<strong>用错了它的优势场景</strong>。4827 天生云架构：LLM 调 OpenAI API、向量库用 MongoDB Atlas 云托管、n8n 只需联网调 API，云端起 n8n 实例 + 配几个云凭证就能跑，<strong>不用在云上部署模型/向量库</strong>。</p>
+  </div>
+  <p class="cite">模板来源：<a href="https://n8n.io/workflows/4827-ai-powered-whatsapp-chatbot-for-text-voice-images-and-pdf-with-rag/" target="_blank">n8n 4827</a> · <a href="https://n8n.io/workflows/5148-local-chatbot-with-retrieval-augmented-generation-rag/" target="_blank">n8n 5148</a></p>
+
+  <h2>4827 模板的 RAG 架构（拆给你看）</h2>
+  <p>模板实际是<strong>两个 workflow</strong>（摄入 + 问答），概念你全学过，只是换了实现：</p>
+
+  <h3>Workflow 1：文档摄入（ingestion）</h3>
+  <pre><code>Google Docs(文档源) → Text Splitter(分块) → OpenAI Embeddings(向量化)
+  → MongoDB Atlas Vector Store(存向量+元数据)</code></pre>
+
+  <h3>Workflow 2：聊天问答（query）</h3>
+  <pre><code>WhatsApp(用户消息) → OpenAI Embeddings(查询向量化)
+  → MongoDB Vector Search(相似度检索)
+  → Knowledge Base Agent(检索结果+system prompt → GPT-4o-mini)
+  → Memory Buffer(多轮记忆) → WhatsApp(回消息)</code></pre>
+
+  <h3>每个环节对应课程哪一节</h3>
+  <table>
+    <tr><th>环节</th><th>4827 用的</th><th>L10 Dify 用的</th><th>对应课</th></tr>
+    <tr><td>文档源</td><td>Google Docs</td><td>上传 4 篇运维 md</td><td>L03</td></tr>
+    <tr><td>分块</td><td>Text Splitter 节点</td><td>分段设置表单</td><td>L03</td></tr>
+    <tr><td>Embedding</td><td>OpenAI 1536 维</td><td>bge-m3</td><td>L05</td></tr>
+    <tr><td>向量库</td><td>MongoDB Atlas（knnVector, cosine）</td><td>Dify 内置/CSS</td><td>L04</td></tr>
+    <tr><td>检索</td><td>MongoDB Vector Search</td><td>混合检索</td><td>L06</td></tr>
+    <tr><td>生成</td><td>GPT-4o-mini + system prompt</td><td>DBA Copilot prompt</td><td>L08</td></tr>
+    <tr><td>记忆</td><td>Memory Buffer 节点</td><td>应用多轮设置</td><td>—</td></tr>
+  </table>
+  <div class="callout info">
+    <span class="callout-title">关键洞察</span>
+    <p>骨架和 L10 Dify demo <strong>完全一样</strong>，只是每个环节换了实现。n8n 把 Dify 藏在表单背后的环节<strong>显式暴露成节点</strong>——你能看见 Text Splitter、Embeddings、Vector Store 是分开的节点各自可换，这是 n8n 比 Dify 灵活的代价（要懂概念）也是收益（每环节可换）。</p>
+  </div>
+
+  <h2>改造路线：4 处替换</h2>
+  <p>直接照搬 4827 跑不了运维 demo，要改 4 处：</p>
+
+  <h3>① WhatsApp → Chat Trigger（最省事）</h3>
+  <p>WhatsApp 要 Meta 企业认证 + 绑手机号 + 审核几天，<strong>测试阶段不值得</strong>。删掉 WhatsApp 节点，换成 n8n 自带 <strong>Chat Trigger</strong>（网页聊天框，点开就能聊，零认证）。功能等价。</p>
+
+  <h3>② Google Docs → 上传 4 篇运维 md</h3>
+  <p>把文档源从 Google Docs 换成 L10 用的那 4 篇运维文档（慢SQL/会话锁/连接管理/参数调优）。用 <strong>Document Loader 节点</strong>上传本地文件，或先读文件内容塞进节点。</p>
+
+  <h3>③ 模型换国内云 API（智谱，替代 OpenAI）</h3>
+  <p>4827 原配 OpenAI（GPT-4o-mini + text-embedding-ada-002 1536 维）。<strong>没有 OpenAI key 可换国内厂商</strong>——n8n 的 LLM/Embeddings 节点提供商无关，能换后端。本节用<strong>智谱</strong>（一个平台一个 key 搞定 LLM + Embedding，且 GLM-4-Flash 免费）：</p>
+  <table>
+    <tr><th>组件</th><th>4827 原配</th><th>本节换成</th><th>维度</th></tr>
+    <tr><td>LLM</td><td>OpenAI GPT-4o-mini</td><td>智谱 GLM-4-Flash（免费）/ GLM-4</td><td>—</td></tr>
+    <tr><td>Embedding</td><td>OpenAI ada-002</td><td>智谱 embedding-2</td><td><strong>1024</strong></td></tr>
+  </table>
+  <p>换法：n8n 里把 <code>OpenAI Chat Model</code> 节点换成 <code>OpenAI</code> 兼容节点指向智谱 API（智谱 API 兼容 OpenAI 格式，base_url 填 <code>https://open.bigmodel.cn/api/paas/v4</code>），或直接用支持智谱的节点；Embeddings 节点同理。凭证在 n8n Credentials 里加智谱 API key。</p>
+  <div class="callout warn">
+    <span class="callout-title">维度变了 → MongoDB 索引必须跟着改</span>
+    <p>OpenAI 1536 维换成智谱 1024 维，<strong>MongoDB Atlas 向量索引 numDimensions 必须从 1536 改成 1024</strong>，否则检索报错。这是换 Embedding 模型最容易踩的坑——<strong>Embedding 模型决定索引维度</strong>。</p>
+  </div>
+  <p class="cite">Embedding 按字符量计费（智谱约 0.5 元/百万 token），4 篇运维文档向量化成本几分钱，查询每月几毛钱，<strong>非成本顾虑点</strong>。GLM-4-Flash 有免费额度。</p>
+
+  <h3>④ system prompt → DBA Copilot prompt</h3>
+  <p>在 Knowledge Base Agent 节点的 system prompt 里，换成 L10 那个 DBA Copilot prompt：</p>
+  <pre><code>你是 GaussDB 资深 DBA，基于知识库回答故障诊断问题。
+规则：①只依据上下文 ②不足就说"无法诊断，建议联系..." ③标注引用 ④步骤具体可执行。</code></pre>
+  <p>温度设 0.2。</p>
+
+  <div class="callout warn">
+    <span class="callout-title">一个要记住的约束（后续换 GaussDB 时）</span>
+    <p>4827 用 OpenAI 1536 维存 MongoDB，<strong>MongoDB 没维度上限</strong>所以能跑。但你要后续把这个 RAG <strong>搬到 GaussDB</strong>（你的适配目标），GaussDB 向量维度硬上限 1024（见 GaussDB 改造方案 2.2）——届时 OpenAI 1536 维<strong>不可用</strong>，要换 ≤1024 维模型（bge-large-zh 1024 / bge-base 768）。云端测试阶段先用 OpenAI 跑通，换库时再换模型。</p>
+  </div>
+
+  <h2>云端部署：n8n Cloud + MongoDB Atlas</h2>
+  <p>三样东西，都有免费档够测试：</p>
+
+  <h3>1. n8n Cloud（官方托管 n8n）</h3>
+  <ul>
+    <li>注册 <a href="https://n8n.io/cloud/" target="_blank">n8n Cloud</a>，选 Starter 档（有免费试用）</li>
+    <li>不用自己部署 n8n，登进网页就能拖节点</li>
+    <li>这是<strong>最省事</strong>的云端 n8n 方案</li>
+  </ul>
+
+  <h3>2. MongoDB Atlas（云托管向量库）</h3>
+  <ul>
+    <li>注册 <a href="https://www.mongodb.com/atlas" target="_blank">MongoDB Atlas</a>，免费档 M0 够测试</li>
+    <li>建一个 database + collection（存 embedding 和元数据）</li>
+    <li><strong>建向量搜索索引</strong>（关键）：索引名 <code>data_index</code>，类型 <code>knnVector</code>，维度 <code>1024</code>（对齐智谱 embedding-2），相似度 <code>cosine</code></li>
+  </ul>
+  <pre><code>// MongoDB Atlas 向量索引定义（JSON）—— 维度对齐智谱 embedding-2 = 1024
+{
+  "fields": [{
+    "type": "vector",
+    "path": "embedding",
+    "numDimensions": 1024,
+    "similarity": "cosine"
+  }]
+}</code></pre>
+  <div class="callout pit">
+    <span class="callout-title">易踩坑：索引名 + 维度都要对齐</span>
+    <p>① <strong>索引名</strong>：4827 模板里 MongoDB Vector Search 节点写死了 <code>data_index</code>，你在 Atlas 建的必须叫这个名，否则检索报错。两个 workflow（摄入+问答）的 MongoDB 节点要连<strong>同一个 collection</strong>、同一个索引名。</p>
+    <p>② <strong>维度</strong>：索引 <code>numDimensions</code> 必须等于你 Embedding 模型输出维度。本节用智谱 embedding-2 = 1024（<strong>不是</strong> 4827 原配 OpenAI 的 1536）。换模型必查维度，索引和模型不一致必报错。</p>
+  </div>
+
+  <h3>3. 智谱 API key（LLM + Embedding）</h3>
+  <ul>
+    <li>注册 <a href="https://open.bigmodel.cn/" target="_blank">智谱开放平台</a>，拿 API key</li>
+    <li>GLM-4-Flash 免费（有额度），Embedding 也有免费额度</li>
+    <li>在 n8n 的 Credentials 里加智谱凭证；智谱 API 兼容 OpenAI 格式，可用 OpenAI 兼容节点配 base_url <code>https://open.bigmodel.cn/api/paas/v4</code></li>
+  </ul>
+
+  <h2>5 步跑通</h2>
+  <ol>
+    <li><strong>开 n8n Cloud + 导入模板</strong>：登 n8n Cloud → 点 <a href="https://n8n.io/workflows/4827-ai-powered-whatsapp-chatbot-for-text-voice-images-and-pdf-with-rag/" target="_blank">4827 页面</a>的 "Use for free" → 导入到你 n8n</li>
+    <li><strong>配 3 个凭证</strong>：在 n8n Credentials 加 智谱 API key + MongoDB Atlas 连接 + （Google Docs 如保留则加，否则换成 Document Loader 上传 md）</li>
+    <li><strong>改 4 处</strong>：WhatsApp→Chat Trigger / Google Docs→4篇运维md / OpenAI 节点换智谱（LLM + Embedding）/ system prompt→DBA prompt</li>
+    <li><strong>跑 Data Ingestion</strong>：先执行摄入 workflow，4 篇文档向量化写入 MongoDB（检查 collection 里有没有数据、embedding 字段在不在）</li>
+    <li><strong>跑 Chatbot 测试</strong>：用 L10 那 4 个召回测试问题问，验证检索准不准 + 答案有没有标引用</li>
+  </ol>
+
+  <div class="callout info">
+    <span class="callout-title">召回测试题（复用 L10）</span>
+    <p>用这 4 个问题各问一遍，看检索命中和生成质量：</p>
+    <ul>
+      <li>「数据库突然变慢，怎么定位慢SQL？」→ 应命中文档1</li>
+      <li>「应用卡住报超时，怎么查锁等待？」→ 应命中文档2</li>
+      <li>「报 too many connections 怎么办？」→ 应命中文档3</li>
+      <li>「shared_buffers 应该设多大？」→ 应命中文档4</li>
+    </ul>
+    <p>这把 L09 评估（召回准不准）和本节 demo 串起来。</p>
+  </div>
+
+  <h2>n8n vs Dify：售前怎么选</h2>
+  <table>
+    <tr><th>维度</th><th>Dify（L10）</th><th>n8n（本节）</th></tr>
+    <tr><td>定位</td><td>AI 应用平台，RAG 内置</td><td>工作流引擎，RAG 拼装</td></tr>
+    <tr><td>搭 RAG</td><td>5 步配置表单</td><td>拖节点连线</td></tr>
+    <tr><td>灵活度</td><td>低（平台封装）</td><td>高（每环节可换节点）</td></tr>
+    <tr><td>上手</td><td>快，不懂 LangChain 也能用</td><td>要懂 LangChain 概念</td></tr>
+    <tr><td>向量库选项</td><td>内置 + 几种后端</td><td>Vector Store 节点支持 Pinecone/Qdrant/pgvector/MongoDB 等</td></tr>
+    <tr><td>多系统编排</td><td>弱（专注 AI 应用）</td><td><strong>强（n8n 老本行）</strong></td></tr>
+    <tr><td>适合场景</td><td>纯 RAG 应用 / 快出 demo</td><td>RAG + 外部系统联动（如 WhatsApp/Slack/CRM）</td></tr>
+  </table>
+  <div class="callout key">
+    <span class="callout-title">选型口诀</span>
+    <p><strong>纯 RAG 出 demo → Dify</strong>（快、封装好）；<strong>RAG 要和外部系统编排（消息/工单/CRM 联动）→ n8n</strong>（编排是老本行）。4827 模板就是个例子——它把 RAG 和 WhatsApp 编排在一起，这种"RAG + 消息渠道"的场景 Dify 做起来费劲，n8n 天然合适。</p>
+  </div>
+
+  <h2>n8n 能做什么 / 不能做什么（边界，售前要讲清）</h2>
+  <ul>
+    <li><strong>能</strong>：拖拽拼 RAG pipeline / 每环节换节点（换向量库/换模型/换 LLM）/ 编排外部系统（WhatsApp/Slack/HTTP）/ 多轮记忆（Memory 节点）/ 引用展示（Agent 节点配 prompt）</li>
+    <li><strong>不能（或不便）</strong>：不内置 RAGAS 评估（要外接，同 Dify）/ 不内置 reranker 模型（rerank 要应用层另接或靠向量库自带）/ 不像 Dify 有"召回测试"可视化面板（n8n 要手动跑节点看检索结果）/ 混合检索要自己拼两路节点（Dify 一键开关）</li>
+  </ul>
+
+  <h2>从 demo 到 POC：后续可换的组件</h2>
+  <p>跑通云端 demo 后，每个节点都能换，对应你的真实落地需求：</p>
+  <ul>
+    <li><strong>OpenAI → bge-m3</strong>：Embeddings 节点换 Ollama 或自部署的 bge-m3，维度 ≤1024，为搬 GaussDB 做准备</li>
+    <li><strong>MongoDB Atlas → GaussDB</strong>：Vector Store 节点换 pgvector 适配器指向 GaussDB（见 GaussDB 改造方案）</li>
+    <li><strong>加 reranker</strong>：在检索和生成之间插一个 HTTP Request 节点调 bge-reranker（L07）</li>
+    <li><strong>加评估</strong>：外接 Langfuse/LangSmith 记录检索和生成，跑 RAGAS（L09）</li>
+  </ul>
+  <div class="callout info">
+    <span class="callout-title">和 GaussDB 适配工作的关系</span>
+    <p>本节云端 demo 用 MongoDB Atlas，<strong>不碰 GaussDB</strong>。但跑通后你会对"RAG 每环节怎么换组件"有手感——这正是你做 GaussDB adapter（search_by_vector / search_by_full_text）时要的理解：每个节点对应一个可替换的接口契约。4827 的 Vector Store 节点 = 你在写的 vdb-gaussdb adapter 要实现的能力。</p>
+  </div>
+
+  <div class="win">
+    <h3>本节胜利</h3>
+    <p>跑通后你掌握：</p>
+    <ul>
+      <li>n8n 用 Advanced AI 节点拼 RAG pipeline 的完整流程</li>
+      <li>同一个 RAG，Dify（平台式）和 n8n（编排式）各自怎么落地、差在哪、怎么选</li>
+      <li>云端测试最小路径（n8n Cloud + MongoDB Atlas + OpenAI，都有免费档）</li>
+      <li>每个环节可换组件的手感——为 GaussDB 适配打基础</li>
+    </ul>
+  </div>
+
+  <div class="ask-reminder">
+    💡 <strong>下一步</strong>：你先去 n8n Cloud + MongoDB Atlas 注册开通，导入 4827 模板。卡在哪步（凭证配置 / Chat Trigger 替换 / MongoDB 索引建不出 / 摄入跑不通）贴报错给我。跑通后我们回 L11 企业落地痛点。
+  </div>
+
+  <div class="sources">
+    <h3>来源</h3>
+    <ul>
+      <li><a href="https://n8n.io/workflows/4827-ai-powered-whatsapp-chatbot-for-text-voice-images-and-pdf-with-rag/" target="_blank">n8n 4827 WhatsApp RAG 模板</a></li>
+      <li><a href="https://n8n.io/workflows/5148-local-chatbot-with-retrieval-augmented-generation-rag/" target="_blank">n8n 5148 Local RAG 模板（对比用）</a></li>
+      <li><a href="https://docs.n8n.io/integrations/builtin/cluster-nodes/" target="_blank">n8n Advanced AI 节点文档</a></li>
+      <li><a href="https://docs.n8n.io/integrations/builtin/cluster-nodes/root-nodes/n8n-nodes-langchain.vectorstore/" target="_blank">n8n Vector Store 节点</a></li>
+      <li><a href="https://www.mongodb.com/atlas" target="_blank">MongoDB Atlas（向量库云托管）</a></li>
+      <li><a href="https://n8n.io/cloud/" target="_blank">n8n Cloud（官方托管）</a></li>
+    </ul>
+  </div>
+
+  <nav class="lesson-nav" style="margin-top:36px;">
+    <a href="0010-dify-demo.html">← L10 Dify demo</a>
+    <a href="index.html">课程目录 ↑</a>
+  </nav>
+
+</article>
+</body>
+</html>

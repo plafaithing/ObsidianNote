@@ -23,6 +23,10 @@
    https://github.com/anthropics/claude-agent-sdk-demos
 7. `[主样本]` **anthropic-sdk-python** — 底层 SDK（Agent SDK Python 版基座）。
    https://github.com/anthropics/anthropic-sdk-python
+7b. `[主样本]` **Agent SDK custom-tools 文档** — tool() 四部分、Zod schema、createSdkMcpServer、全名 mcp__server__tool、readOnlyHint 注解、可用性 vs 权限两层、isError 错误处理、structuredContent。**L08 工具实现核心来源**。
+    https://code.claude.com/docs/en/agent-sdk/custom-tools
+7c. `[主样本]` **Agent SDK agent-loop 文档** — loop 五步、turns/messages、内置工具=CC 同款、并行/串行调度、tool search 延迟加载、工具被拒作为 tool_result、context 窗口与压缩。**L08 + L09 共用**。
+    https://code.claude.com/docs/en/agent-sdk/agent-loop
 
 ## 主样本：Claude Code 运行时 / 配置面
 8. `[主样本]` **Claude Code system prompts 仓库（Piebald-AI）** — 各版本 system prompt + token 计数，**读系统提示词层**。
